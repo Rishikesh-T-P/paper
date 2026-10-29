@@ -29,6 +29,8 @@ p{margin:0 0 .55em; text-align:justify; orphans:2; widows:2}
 .cover h1{font:800 44pt/1.02 var(--sans); letter-spacing:-.02em; margin:6mm 0 4mm; color:var(--ink); border:0}
 .cover .sub{font:400 13pt/1.4 var(--serif); color:var(--muted); max-width:120mm}
 .cover .bar{height:2px; width:40mm; background:var(--ink); margin:10mm 0}
+.cover .author{font:700 14pt var(--sans); color:var(--ink)}
+.cover .affil{font:400 9pt var(--sans); color:var(--muted); margin-top:1.5mm}
 .cover .foot{font:500 8pt var(--sans); color:var(--muted)}
 
 /* Chapter opener */

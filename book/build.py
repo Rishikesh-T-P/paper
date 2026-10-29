@@ -36,12 +36,12 @@ today = datetime.date.today().strftime("%d %B %Y")
 cover = f"""<div class="cover p0"><div><div class="k">Placement edition · 2027</div>
 <h1>Network Engineer<br>Placements 2027</h1>
 <div class="sub">From first principles to the offer: networks, routing, systems, code and interviews for Cisco, Qualcomm, Google, Microsoft, Amazon, Juniper, Arista, Nokia and Broadcom.</div>
-<div class="bar"></div></div><div class="foot">Working edition · built {today} · information correct as of this date</div></div>"""
+<div class="bar"></div><div class="author">Rishikesh T P</div><div class="affil">NSRG, IIT Mandi · s25020@students.iitmandi.ac.in</div></div><div class="foot">Working edition · built {today} · information correct as of this date</div></div>"""
 toc_html = '<section class="p0"><div class="part-label">Contents</div><h1>Contents</h1><div class="toc-book"><ol>' + "".join(
     f'<li><a href="#{i}"><span style="display:inline-block;width:10mm;color:#5F6670">{html.escape(n)}</span>{html.escape(t)}</a></li>'
     for n, t, i in toc) + "</ol></div></section>"
 
-page = f"""<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Network Engineer Placements 2027</title>
+page = f"""<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="author" content="Rishikesh T P"><title>Network Engineer Placements 2027</title>
 <style>{(ROOT/"css/book.css").read_text()}</style><script>window.PagedConfig={{auto:true}};</script>
 <script src="../vendor/paged.polyfill.min.js"></script></head><body>{cover}{toc_html}{''.join(body)}</body></html>"""
 (DIST / f"{OUT}.html").write_text(page)

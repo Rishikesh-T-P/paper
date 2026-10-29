@@ -147,11 +147,11 @@ PMTUD fails when something blocks the ICMP message. The symptom is characteristi
 <text class="lbl" x="440" y="12" text-anchor="middle" >Server</text>
 <line class="lg" x1="440" y1="18" x2="440" y2="152" stroke-dasharray="2 2"/>
 <line class="ln" x1="50" y1="52" x2="300" y2="72" marker-end="url(#pma)"/>
-<text class="lbl" x="175.0" y="58.5" text-anchor="middle" style="font-size:7.6px">1500 B, DF=1</text>
+<text class="lbl" x="175.0" y="56.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">1500 B, DF=1</text>
 <line class="lg" x1="300" y1="72" x2="170" y2="92" marker-end="url(#pma)"/>
-<text class="sm" x="235.0" y="78.5" text-anchor="middle" style="font-size:7.6px">ICMP 3/4: MTU 1400</text>
+<text class="sm" x="235.0" y="76.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ICMP 3/4: MTU 1400</text>
 <text class="sm" x="14" y="34" text-anchor="start" >Handshake of small packets succeeds. The first full-size segment then goes out:</text>
-<text class="acct" x="170" y="108" text-anchor="middle" >firewall drops the ICMP</text>
+<text class="acct" x="170" y="108" text-anchor="middle"  style="font-size:8px;font-weight:600">firewall drops the ICMP</text>
 <text class="sm" x="14" y="150" text-anchor="start" >The client times out and resends 1500 B with DF=1: the transfer hangs.</text>
 <path class="acc" d="M168,88 l8,8 m0,-8 l-8,8"/><line class="acc" x1="50" y1="124" x2="300" y2="136" marker-end="url(#pmb)"/>
 </svg>
@@ -178,21 +178,21 @@ The *Internet Control Message Protocol* (ICMP) carries errors and diagnostics, i
 <text class="lbl" x="450" y="12" text-anchor="middle" >Dest</text>
 <line class="lg" x1="450" y1="18" x2="450" y2="176" stroke-dasharray="2 2"/>
 <line class="ln" x1="40" y1="34" x2="145" y2="40" marker-end="url(#tra)"/>
-<text class="lbl" x="92.5" y="33.5" text-anchor="middle" style="font-size:7.6px">TTL 1</text>
+<text class="lbl" x="92.5" y="31.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">TTL 1</text>
 <line class="lg" x1="145" y1="40" x2="40" y2="46" marker-end="url(#tra)"/>
-<text class="sm" x="92.5" y="39.5" text-anchor="middle" style="font-size:7.6px">ICMP 11 from R1</text>
+<text class="sm" x="92.5" y="37.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ICMP 11 from R1</text>
 <line class="ln" x1="40" y1="66" x2="250" y2="76" marker-end="url(#tra)"/>
-<text class="lbl" x="145.0" y="67.5" text-anchor="middle" style="font-size:7.6px">TTL 2</text>
+<text class="lbl" x="145.0" y="65.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">TTL 2</text>
 <line class="lg" x1="250" y1="76" x2="40" y2="86" marker-end="url(#tra)"/>
-<text class="sm" x="145.0" y="77.5" text-anchor="middle" style="font-size:7.6px">ICMP 11 from R2</text>
+<text class="sm" x="145.0" y="75.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ICMP 11 from R2</text>
 <line class="ln" x1="40" y1="98" x2="355" y2="110" marker-end="url(#tra)"/>
-<text class="lbl" x="197.5" y="100.5" text-anchor="middle" style="font-size:7.6px">TTL 3</text>
+<text class="lbl" x="197.5" y="98.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">TTL 3</text>
 <line class="lg" x1="355" y1="110" x2="40" y2="122" marker-end="url(#tra)"/>
-<text class="sm" x="197.5" y="112.5" text-anchor="middle" style="font-size:7.6px">ICMP 11 from R3</text>
+<text class="sm" x="197.5" y="110.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ICMP 11 from R3</text>
 <line class="ln" x1="40" y1="134" x2="450" y2="148" marker-end="url(#tra)"/>
-<text class="lbl" x="245.0" y="137.5" text-anchor="middle" style="font-size:7.6px">TTL 4</text>
+<text class="lbl" x="245.0" y="135.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">TTL 4</text>
 <line class="acc" x1="450" y1="148" x2="40" y2="162" marker-end="url(#trb)"/>
-<text class="lbl" x="245.0" y="151.5" text-anchor="middle" style="font-size:7.6px">Port unreach. / Echo reply</text>
+<text class="lbl" x="245.0" y="149.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">Port unreach. / Echo reply</text>
 <text class="sm" x="14" y="175" text-anchor="start" >ICMP 11 = Time Exceeded (TTL reached 0). Each probe has TTL one higher; the sender learns one router per probe.</text>
 </svg>
 <figcaption><b>Figure 3.15</b> How traceroute works. A router that decrements TTL to zero discards the packet and returns an ICMP Time Exceeded message, revealing its own address. The last hop answers with a different message, because the probe finally arrives.</figcaption>
@@ -256,10 +256,10 @@ IP addresses say where a packet is going, MAC addresses say who gets it on the n
 <text class="lbl" x="410" y="12" text-anchor="middle" >Host C</text>
 <line class="lg" x1="410" y1="18" x2="410" y2="144" stroke-dasharray="2 2"/>
 <line class="ln" x1="70" y1="40" x2="250" y2="52" marker-end="url(#ara)"/>
-<text class="lbl" x="160.0" y="42.5" text-anchor="middle" style="font-size:7.6px">ARP request (broadcast)</text>
+<text class="lbl" x="160.0" y="40.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ARP request (broadcast)</text>
 <line class="ln" x1="70" y1="44" x2="410" y2="56" marker-end="url(#ara)"/>
 <line class="acc" x1="250" y1="92" x2="70" y2="104" marker-end="url(#arb)"/>
-<text class="lbl" x="160.0" y="94.5" text-anchor="middle" style="font-size:7.6px">ARP reply (unicast)</text>
+<text class="lbl" x="160.0" y="92.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">ARP reply (unicast)</text>
 <text class="sm" x="70" y="26" text-anchor="middle" >192.168.1.10 / AA:AA</text>
 <text class="sm" x="250" y="26" text-anchor="middle" >192.168.1.1 / 11:11</text>
 <text class="sm" x="410" y="26" text-anchor="middle" >192.168.1.77 / CC:CC</text>
@@ -268,7 +268,7 @@ IP addresses say where a packet is going, MAC addresses say who gets it on the n
 <text class="sm" x="410" y="70" text-anchor="middle" >C ignores it</text>
 <text class="sm" x="254" y="114" text-anchor="start" >Dst MAC AA:AA, opcode 2</text>
 <text class="sm" x="254" y="124" text-anchor="start" >"192.168.1.1 is at 11:11"</text>
-<text class="acct" x="8" y="140" text-anchor="start" >A caches 192.168.1.1 → 11:11</text>
+<text class="acct" x="8" y="140" text-anchor="start"  style="font-size:8px;font-weight:600">A caches 192.168.1.1 → 11:11</text>
 <text class="sm" x="300" y="140" text-anchor="start" >B caches 192.168.1.10 → AA:AA (from the request)</text>
 </svg>
 <figcaption><b>Figure 3.16</b> ARP resolves a next-hop IP address to a MAC address. The request is broadcast; only the owner of the target address replies, by unicast. MAC addresses are abbreviated to two bytes.</figcaption>

@@ -284,7 +284,7 @@ Every address has two parts: the *network* part, shared by all devices in the sa
 <text class="mono" x="463.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
 <text class="lbl" x="477.0" y="111" text-anchor="start" >172.16.47.255</text>
 <line class="acc" x1="348.0" y1="16" x2="348.0" y2="124"/>
-<text class="acct" x="348.0" y="135" text-anchor="middle" >21 network bits | 11 host bits</text>
+<text class="acct" x="348.0" y="135" text-anchor="middle"  style="font-size:8px;font-weight:600">21 network bits | 11 host bits</text>
 <text class="sm" x="14" y="135" text-anchor="start" >shaded = network bits</text>
 </svg>
 <figcaption><b>Figure 3.10</b> The 32-bit ruler for 172.16.45.200/21. The mask line falls inside the third octet, between bit 21 and bit 22; everything left of it is the network, everything right of it is the host.</figcaption>
@@ -403,7 +403,7 @@ Equal subnets waste addresses when the needs differ. *Variable-length subnet mas
 <text class="sm" x="387.4" y="96" text-anchor="middle" >.224</text>
 <text class="sm" x="413.6" y="96" text-anchor="middle" >.240</text>
 <text class="sm" x="439.8" y="96" text-anchor="middle" >.255</text>
-<text class="acct" x="390.64" y="44" text-anchor="middle" >two /30 WANs</text>
+<text class="acct" x="390.64" y="44" text-anchor="middle"  style="font-size:8px;font-weight:600">two /30 WANs</text>
 <line class="acc" x1="390.6" y1="48" x2="390.6" y2="50" />
 <text class="sm" x="407.03999999999996" y="112" text-anchor="middle" >.232/29 + .240/28 spare</text>
 <text class="sm" x="20" y="14" text-anchor="start" >Last octet 0 to 255, one cell = 1.64 px per address</text>

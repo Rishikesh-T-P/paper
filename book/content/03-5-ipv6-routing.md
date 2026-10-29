@@ -164,9 +164,9 @@ Because EUI-64 exposes the hardware address and lets one be tracked between netw
 <line class="lg" x1="370" y1="18" x2="370" y2="152" stroke-dasharray="2 2"/>
 <line class="lg" x1="110" y1="48" x2="370" y2="56" marker-end="url(#sla)"/>
 <line class="ln" x1="110" y1="84" x2="370" y2="92" marker-end="url(#sla)"/>
-<text class="lbl" x="240.0" y="84.5" text-anchor="middle" style="font-size:7.6px">RS</text>
+<text class="lbl" x="240.0" y="82.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">RS</text>
 <line class="acc" x1="370" y1="112" x2="110" y2="120" marker-end="url(#slb)"/>
-<text class="lbl" x="240.0" y="112.5" text-anchor="middle" style="font-size:7.6px">RA</text>
+<text class="lbl" x="240.0" y="110.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">RA</text>
 <text class="sm" x="8" y="28" text-anchor="start" >1  link-local fe80::21a:2bff:fe3c:4d5e</text>
 <text class="sm" x="8" y="40" text-anchor="start" >   DAD: NS from :: to ff02::1:ff3c:4d5e (silence = unique)</text>
 <text class="sm" x="112" y="70" text-anchor="start" >2  Router Solicitation to ff02::2</text>

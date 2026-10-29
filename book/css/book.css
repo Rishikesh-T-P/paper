@@ -1,0 +1,132 @@
+/* Network Engineer Placements 2027 — book stylesheet (minimalist, professional) */
+:root{
+  --ink:#1A1D23; --muted:#5F6670; --rule:#D8DADD; --code:#F6F6F4; --hl:#FFF4C2; --trap:#A61B1B;
+  --accent:#2F4A8A;
+  --serif:"Bitstream Charter","Charter",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --mono:"JetBrains Mono",monospace;
+}
+.p1{--accent:#3D55A8}.p2{--accent:#5C46A8}.p3{--accent:#1F6C79}.p4{--accent:#21705A}
+.p5{--accent:#2A5E93}.p6{--accent:#A33A62}.p7{--accent:#A8512A}.p8{--accent:#566F2A}
+.p9{--accent:#9A2E2E}.p10{--accent:#83469A}.p11{--accent:#8C6420}.p12{--accent:#50565C}
+.p0{--accent:#1A1D23}
+
+@page{ size:A4; margin:20mm 52mm 22mm 20mm;
+  @top-left{content:string(part); font:600 7pt var(--sans); letter-spacing:.08em; text-transform:uppercase; color:#5F6670}
+  @top-right{content:string(chap); font:400 7.5pt var(--sans); color:#5F6670}
+  @bottom-right{content:counter(page); font:500 8pt var(--sans); color:#1A1D23}
+}
+@page :left{ margin:20mm 20mm 22mm 52mm;
+  @bottom-left{content:counter(page); font:500 8pt var(--sans)} @bottom-right{content:none}}
+@page opener{ @top-left{content:none} @top-right{content:none} }
+@page cover{ margin:0; @top-left{content:none} @top-right{content:none} @bottom-right{content:none} @bottom-left{content:none}}
+
+html{font-family:var(--serif); font-size:10pt; line-height:1.45; color:var(--ink); hyphens:auto}
+body{margin:0}
+p{margin:0 0 .55em; text-align:justify; orphans:2; widows:2}
+
+/* Cover */
+.cover{page:cover; height:297mm; padding:38mm 24mm; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; break-after:page}
+.cover .k{font:600 8pt var(--sans); letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.cover h1{font:800 44pt/1.02 var(--sans); letter-spacing:-.02em; margin:6mm 0 4mm; color:var(--ink); border:0}
+.cover .sub{font:400 13pt/1.4 var(--serif); color:var(--muted); max-width:120mm}
+.cover .bar{height:2px; width:40mm; background:var(--ink); margin:10mm 0}
+.cover .foot{font:500 8pt var(--sans); color:var(--muted)}
+
+/* Chapter opener */
+section.chapter{break-before:right}
+.opener{page:opener; break-after:page; padding-top:30mm}
+.opener .num{font:300 72pt/1 var(--sans); color:var(--accent); letter-spacing:-.03em}
+.opener h1{string-set:chap content(text)}
+.opener .promise{font:italic 12pt/1.45 var(--serif); color:var(--muted); margin:4mm 0 10mm; max-width:115mm; text-align:left}
+.opener ol.toc{list-style:none; padding:0; margin:0; border-top:.5pt solid var(--rule); font:400 8.5pt/1.3 var(--sans)}
+.opener ol.toc li{padding:2.2mm 0; border-bottom:.5pt solid var(--rule); display:flex; justify-content:space-between}
+.part-label{string-set:part content(text); font:600 7.5pt var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+
+h1{font:700 24pt/1.1 var(--sans); letter-spacing:-.015em; margin:2mm 0 0}
+h2{font:700 13.5pt/1.25 var(--sans); margin:9mm 0 2.5mm; break-after:avoid; color:var(--ink)}
+h2 .sec{color:var(--accent); margin-right:2.5mm; font-weight:600}
+h3{font:600 10.5pt/1.3 var(--sans); margin:5.5mm 0 1.5mm; break-after:avoid}
+h4{font:600 8pt var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:4mm 0 1mm; break-after:avoid}
+.tag{font:600 6.5pt var(--sans); letter-spacing:.1em; color:var(--muted); margin-left:2.5mm; vertical-align:2px; text-transform:uppercase}
+
+/* Margin column */
+.margin, aside{float:right; clear:right; width:36mm; margin-right:-44mm; margin-top:.3em; font:400 7.3pt/1.4 var(--sans); color:var(--muted); text-align:left}
+.margin strong, aside strong{color:var(--ink)}
+:left .margin{}
+
+/* Six learning elements */
+.bigidea,.example,.trap,.lens,.lab,.check{margin:4mm 0; padding:0 0 0 4mm; border-left:1.6pt solid var(--accent); break-inside:avoid-page}
+.bigidea::before,.example::before,.trap::before,.lens::before,.lab::before,.check::before{display:block; font:600 6.8pt var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:1.2mm}
+.bigidea::before{content:"Big idea"} .bigidea p{font-size:11pt; line-height:1.4; text-align:left}
+.example::before{content:"Worked example"} .example{border-left-width:.6pt}
+.example ol{padding-left:5mm} .example .result{font-weight:700}
+.trap{border-left-color:var(--trap)} .trap::before{content:"Trap"; color:var(--trap)}
+.lens::before{content:"Interview lens"} .lens{border-left-color:var(--ink); border-left-width:.6pt}
+.lens .co{font:600 6.5pt var(--sans); letter-spacing:.12em; color:var(--muted)}
+.lab::before{content:"Lab"} .lab{border-left-color:var(--muted); border-left-width:.6pt}
+.check::before{content:"Check yourself"} .check{border-left-color:var(--rule)}
+.check ol{padding-left:5mm; margin:0}
+.deep{margin:3mm 0 3mm 6mm; font-size:9pt; color:#333}
+.deep::before{content:"Deep dive · may be skipped"; display:block; font:600 6.5pt var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:1mm}
+.where{font:400 7.5pt var(--sans); color:var(--muted); margin-top:-1mm}
+
+/* Lists */
+ul,ol{margin:0 0 .6em; padding-left:5mm} li{margin:.15em 0}
+
+/* Tables: three rules */
+table{border-collapse:collapse; width:100%; margin:3mm 0 4mm; font:400 8pt/1.35 var(--sans); break-inside:auto}
+thead th{font-weight:600; text-align:left; border-top:.9pt solid var(--ink); border-bottom:.5pt solid var(--ink); padding:1.6mm 2mm 1.4mm 0}
+tbody td{padding:1.3mm 2mm 1.3mm 0; vertical-align:top; border-bottom:.3pt solid #ECEDEF}
+tbody tr:last-child td{border-bottom:.9pt solid var(--ink)}
+td code, th code{font-size:7.3pt}
+caption,.caption{caption-side:bottom; font:400 7.5pt var(--sans); color:var(--muted); text-align:left; padding-top:1.5mm}
+
+/* Code */
+code{font:400 8.2pt var(--mono); font-variant-ligatures:none}
+p code, li code{background:var(--code); padding:0 .25em; border-radius:1.5px}
+pre{background:var(--code); padding:2.5mm 3mm; margin:2.5mm 0 3.5mm; font:400 7.8pt/1.45 var(--mono); white-space:pre-wrap; break-inside:avoid; border-radius:0}
+pre code{font-size:inherit; background:none; padding:0}
+.sourceCode .kw,.sourceCode .cf,.sourceCode .dt{color:#2F4A8A; font-weight:500} .sourceCode .co{color:#7A8088; font-style:italic}
+.sourceCode .st,.sourceCode .ch{color:#7A4A1A} .sourceCode .dv,.sourceCode .fl{color:#1F6C79}
+div.sourceCode{margin:2.5mm 0 3.5mm}
+
+/* Figures */
+figure{margin:5mm 0; break-inside:avoid; text-align:center}
+figure svg{max-width:100%; height:auto}
+figcaption{font:400 7.5pt/1.4 var(--sans); color:var(--muted); text-align:left; margin-top:2mm}
+figcaption b{color:var(--ink); font-weight:600}
+svg text{font-family:var(--sans)}
+svg .lbl{font:500 9px var(--sans); fill:#1A1D23} svg .sm{font:400 7.5px var(--sans); fill:#5F6670}
+svg .mono{font:400 8px var(--mono); fill:#1A1D23}
+svg .ln{stroke:#1A1D23; stroke-width:1; fill:none} svg .lg{stroke:#9AA0A6; stroke-width:.8; fill:none}
+svg .box{fill:#FFFFFF; stroke:#1A1D23; stroke-width:.9} svg .fill{fill:#F1F2F3; stroke:#9AA0A6; stroke-width:.7}
+svg .acc{stroke:var(--accent); fill:none; stroke-width:1.4} svg .accf{fill:var(--accent)} svg .acct{fill:var(--accent)}
+svg .hl{fill:#FFF4C2; stroke:none} svg .dash{stroke-dasharray:3 2}
+
+/* Problem set & revision spread: two columns */
+.problems{columns:2; column-gap:7mm; column-rule:.3pt solid var(--rule)}
+.problems .q{break-inside:avoid-column; margin-bottom:4mm}
+.q h3{font-size:9pt; margin:0 0 1mm}
+.q .meta{font:600 6.3pt var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:1mm}
+.q .short{font-weight:700}
+.q p,.q li{font-size:9pt; text-align:left}
+.q pre{font-size:7pt}
+.revision{columns:2; column-gap:7mm; font-size:8.6pt}
+.revision .top{column-span:all; border:.6pt solid var(--ink); padding:3mm 4mm; margin-bottom:4mm}
+.revision .top::before{content:"The 15-minute version"; display:block; font:600 6.8pt var(--sans); letter-spacing:.14em; text-transform:uppercase; margin-bottom:1.5mm}
+.revision p,.revision li{text-align:left}
+.flash table{font-size:7.3pt}
+
+/* Section breaks for packs */
+.pack{break-before:page}
+.pack > h2:first-child{margin-top:0}
+
+/* Contents */
+.toc-book ol{list-style:none; padding:0; font:400 9pt/1.5 var(--sans)}
+.toc-book a{color:var(--ink); text-decoration:none}
+.toc-book a::after{content:leader('.') target-counter(attr(href), page); color:var(--muted)}
+a{color:inherit; text-decoration:none}
+a.ref::after{content:" (p. " target-counter(attr(href), page) ")"; color:var(--muted); font:400 .85em var(--sans)}
+hr{border:0; border-top:.5pt solid var(--rule); margin:6mm 0}
+.break{break-before:page}

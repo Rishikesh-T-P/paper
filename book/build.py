@@ -21,8 +21,17 @@ for f in CONTENT:
     for m in re.finditer(r"^# (.+?) \{#([\w-]+)\}", md, re.M):
         num = re.search(r"\[(\w+)\]\{\.num\}", md)
         toc.append((num.group(1) if num else "", m.group(1), m.group(2)))
-    body.append(pandoc(md))
+    h = pandoc(md)
+    k = f.stem.replace('-', '')
+    h = re.sub(r'(id="|href="#)(fn(?:ref)?\d+)', lambda m: m.group(1) + k + m.group(2), h)
+    body.append(h)
 
+joined = ''.join(body)
+ids = set(re.findall(r'id="([^"]+)"', joined))
+def _fix(m):
+    return m.group(0) if m.group(2) in ids else m.group(0).replace('class="ref"', '')
+joined = re.sub(r'<a href="#([^"]*)"[^>]*>', lambda m: m.group(0) if m.group(1) in ids else re.sub(r'\s*class="ref"', '', m.group(0)), joined)
+body = [joined]
 today = datetime.date.today().strftime("%d %B %Y")
 cover = f"""<div class="cover p0"><div><div class="k">Placement edition · 2027</div>
 <h1>Network Engineer<br>Placements 2027</h1>

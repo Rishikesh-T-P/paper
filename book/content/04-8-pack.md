@@ -119,7 +119,7 @@
 
 [30-second answer: outbound, set local preference 200 on routes from ISP-A; inbound, prepend our AS two or three times on advertisements to ISP-B (and tag with the provider's low-preference community if offered).]{.short}
 
-**Answer.** The configuration and the `show ip bgp` output are in the dual-homing example of §4.7 ([Figure 4.13](#s4-7){.ref}). **Follow-ups.** Prepending is a hint, because a remote AS with higher local preference ignores it; communities to the provider are stronger. More-specific prefixes (/25s) attract traffic strongly but are filtered by many networks beyond /24. Verify from a looking glass.
+**Answer.** The configuration and the `show ip bgp` output are in the dual-homing example of §4.7 ([Figure 4.26](#s4-7){.ref}). **Follow-ups.** Prepending is a hint, because a remote AS with higher local preference ignores it; communities to the provider are stronger. More-specific prefixes (/25s) attract traffic strongly but are filtered by many networks beyond /24. Verify from a looking glass.
 :::
 
 ::: q
@@ -239,7 +239,7 @@ def best_path(paths, always_med=False):
 
 [30-second answer: a route redistributed from protocol A into B at one router is seen as native B by the second router, which redistributes it back into A; tags mark routes at the first redistribution, and the reverse route map denies that tag.]{.short}
 
-**Answer.** Configuration in §4.9 ([Figure 4.15](#s4-9){.ref}). Alternatives: filter by prefix list, or raise the AD of the redistributed routes.
+**Answer.** Configuration in §4.9 ([Figure 4.30](#s4-9){.ref}). Alternatives: filter by prefix list, or raise the AD of the redistributed routes.
 :::
 
 ::: q
@@ -257,7 +257,7 @@ def best_path(paths, always_med=False):
 
 [30-second answer: the ingress PE looks up the customer's VRF and pushes a VPN label (inner) and a transport label (outer); P routers swap the transport label; the penultimate router pops it; the egress PE uses the VPN label to select the VRF and forwards by IP. RD makes prefixes unique; RT selects which VRFs import them.]{.short}
 
-**Answer.** Walk and figure in §4.10 ([Figure 4.17](#s4-10){.ref}). Control plane: LDP for transport labels, MP-BGP VPNv4 for VPN labels.
+**Answer.** Walk and figure in §4.10 ([Figure 4.34](#s4-10){.ref}). Control plane: LDP for transport labels, MP-BGP VPNv4 for VPN labels.
 :::
 
 ::: q
@@ -294,6 +294,82 @@ def best_path(paths, always_med=False):
 [30-second answer: receivers first join a tree rooted at the RP, (\*,G); the last-hop router then switches to a tree rooted at the source, (S,G), which is shorter; the RPF check accepts a packet only on the interface the unicast table would use to reach the source.]{.short}
 
 **Answer.** With asymmetric routing the interface that carries the stream differs from the RPF interface, so the stream is dropped. Fix with a static `ip mroute`, a multicast-specific routing table (MP-BGP), or by making the routing symmetric.
+:::
+
+::: q
+### Q4.56 Long-form: PVST+ on a four-switch square with a diagonal, VLANs 10 and 20 with different roots.
+[CISCO · TECH-2 · ■■■ · T]{.meta}
+
+[30-second answer: each VLAN runs its own election; with the root at SW1 for VLAN 10 and at SW4 for VLAN 20, SW4 blocks both square links for VLAN 10 and SW2 and SW3 block their links to SW1 for VLAN 20.]{.short}
+
+**Approach.** SW1 to SW4 have MACs ending 0001 to 0004. Links: SW1-SW2, SW2-SW4, SW4-SW3, SW3-SW1 and the diagonal SW1-SW4, all 1 Gb/s (cost 4). VLAN 10 keeps the default priority; VLAN 20 has priority 4096 on SW4.
+
+**Answer.** *VLAN 10* (root SW1, lowest MAC): SW2 and SW3 use their direct links to SW1; SW4 uses the diagonal (cost 4). On SW2-SW4 both offer cost 4, so the lower BID (SW2) is designated and SW4's port blocks; on SW3-SW4 likewise SW3 is designated and SW4 blocks. *VLAN 20* (root SW4): SW2 and SW3 use their links to SW4; SW1 uses the diagonal. On SW1-SW2 and SW1-SW3 SW1 has the lower BID, so it is designated and SW2 and SW3 block. Hence the diagonal forwards both VLANs, and each square link carries one VLAN only.
+
+**Mistakes.** Using one tree for both VLANs; forgetting that the root has no root port.
+:::
+
+::: q
+### Q4.57 Long-form: EIGRP topology table, feasible successors and variance.
+[CISCO · TECH-2 · ■■■ · T]{.meta}
+
+[30-second answer: the successor is the lowest-FD neighbour; every neighbour with RD below that FD is a feasible successor; `variance 2` uses those whose own FD is below twice the best FD.]{.short}
+
+**Approach.** R1 has three neighbours for 10.9.9.0/24: R2 (FD 3000, RD 1000), R3 (FD 5400, RD 2500), R4 (FD 4200, RD 3500).
+
+**Answer.** Successor R2, FD 3000. Feasibility condition RD < 3000: R3 (2500) passes, R4 (3500) fails. Variance 2 gives a limit of 6000: R3's FD 5400 is inside it, so R2 and R3 carry traffic, with a share inversely proportional to the metrics (about 64% and 36%). R4 is never used, though its FD of 4200 is inside the limit, because it is not feasible. If R2 fails, R3 is promoted with no query; R4 would require a query.
+
+```
+R1# show ip eigrp topology 10.9.9.0/24
+P 10.9.9.0/24, 1 successors, FD is 3000
+        via 10.1.2.2 (3000/1000)
+        via 10.1.3.3 (5400/2500)
+```
+:::
+
+::: q
+### Q4.58 Long-form: an HSRP failover timeline.
+[CISCO · TECH-2 · ■■■ · T]{.meta}
+
+[30-second answer: tracking lowers R1's priority at once; with preempt, R2 becomes active in under a second (or at the hold time if R1 simply dies), then R1 preempts back after recovery.]{.short}
+
+**Answer.** Times are for hello 3 s, hold 10 s, R1 priority 110 with a decrement of 20 on Gi0/1, R2 priority 100 with preempt.
+
+| Time | Event | R1 | R2 |
+|---|---|---|---|
+| 0 | steady state | 110, Active | 100, Standby |
+| 10 s | Gi0/1 fails | 90 | 100, hears a lower priority hello |
+| 10 s + 1 hello | R2 preempts | Standby | Active, gratuitous ARP |
+| 40 s | Gi0/1 returns | 110, preempts after delay | Standby |
+
+If R1 were powered off instead, R2 would take over only after the 10 s hold time (about 3 s with `timers msec`). Verification is `show standby brief`. **Mistake.** Forgetting that R2 also needs `preempt` when the cause is a priority change.
+:::
+
+::: q
+### Q4.59 Long-form: label tables at every node of an MPLS L3VPN.
+[JUNIPER · NOKIA · TECH-2 · ■■■ · T]{.meta}
+
+[30-second answer: PE1 pushes (24, 300); P1 swaps 24 for 35; P2 pops 35 (PHP); PE2 maps 300 to VRF A and routes by IP.]{.short}
+
+**Answer.** Customer A: 10.2.2.0/24 behind PE2, loopback 10.255.0.5/32.
+
+| Node | Table | Entry | Action |
+|---|---|---|---|
+| PE1 | VRF A FIB | 10.2.2.0/24: VPN label 300, next hop 10.255.0.5 | push 300, then LDP label 24 |
+| P1 | LFIB | in 24, 10.255.0.5/32 | swap to 35, out to P2 |
+| P2 | LFIB | in 35, 10.255.0.5/32 | pop (PE2 advertised implicit null), out to PE2 |
+| PE2 | VPN LFIB | in 300 | pop, look up in VRF A, forward to CE2 |
+
+Customer B's identical 10.1.1.0/24 has a different RD and RT (65000:2) and a different VPN label, so it lands in VRF B. **Mistake.** Saying the P routers look at label 300; they never do.
+:::
+
+::: q
+### Q4.60 Long-form: QoS policy for a 10 Mb/s branch WAN with a bandwidth check.
+[CISCO · NOKIA · TECH-2 · ■■■ · T]{.meta}
+
+[30-second answer: shape the interface to 10 Mb/s in a parent policy, and in the child give voice an LLQ of 10%, video 30%, critical data 25%, scavenger 1%, and fair queuing to the rest; the reserved sum is 66%, below the 75% limit.]{.short}
+
+**Answer.** The configuration is in §4.11. The check: 10% of 10 Mb/s is 1 Mb/s of strict priority, enough for about ten G.711 calls at roughly 87 kb/s each with overhead. Video 3 Mb/s, critical data 2.5 Mb/s, scavenger 100 kb/s; 3.4 Mb/s remains for default. The shaper makes the Ethernet port behave as a 10 Mb/s link so that the child queues engage. Verify with `show policy-map interface`, and mark with iperf3. **Mistake.** Applying the child policy to a 1 Gb/s port without the parent shaper: it never congests, so it never queues.
 :::
 :::
 :::

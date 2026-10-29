@@ -27,8 +27,10 @@ In *HSRP* (Cisco's Hot Standby Router Protocol) one router is *Active* and forwa
   <text class="sm" x="10" y="150">default gateway = VIP</text>
   <text class="sm" x="330" y="140">after failure: R2 becomes active,</text><text class="sm" x="330" y="150">sends a gratuitous ARP</text>
 </svg>
-<figcaption><b>Figure 4.14</b> First-hop redundancy. Both routers know the VIP; only the active one answers ARP for it with the virtual MAC.</figcaption>
+<figcaption><b>Figure 4.27</b> First-hop redundancy. Both routers know the VIP; only the active one answers ARP for it with the virtual MAC.</figcaption>
 </figure>
+
+HSRP routers move through states: *Initial* (starting), *Learn* (waiting to learn the virtual IP from the active router), *Listen* (knows the virtual IP, hears hellos, is neither active nor standby), *Speak* (takes part in the election, sending hellos), *Standby* (next in line) and *Active*. The router that becomes active sends a gratuitous ARP and, since the virtual MAC is learnt by the switches from the HSRP hellos themselves, forwarding resumes at once. Failure of the active router is detected after the hold time (10 s by default), and a recoverable improvement is to shorten hello and hold (`standby 1 timers msec 200 msec 750`) or to use BFD.
 
 ::: example
 **HSRP with interface tracking.** R1 has priority 110 and tracks its uplink Gi0/1 with a decrement of 20; R2 has priority 100. Both use `preempt`. The VIP is 192.168.1.254.
@@ -54,7 +56,43 @@ Gi0/0       1    90  P Standby 192.168.1.3 local      192.168.1.254   <-- after 
 [Result: tracking changes priority only; the standby takes over only if it has `preempt`. A decrement smaller than the priority gap (here less than 10) would not cause a switch.]{.result}
 :::
 
+<figure>
+<svg viewBox="0 0 480 150" width="480">
+  <line class="ln" x1="40" y1="20" x2="40" y2="120"/><line class="ln" x1="40" y1="120" x2="460" y2="120"/>
+  <text class="sm" x="6" y="30">priority</text><text class="sm" x="20" y="48">110</text><text class="sm" x="20" y="82">100</text><text class="sm" x="26" y="100">90</text><text class="sm" x="440" y="134">time</text>
+  <line class="lg dash" x1="40" y1="78" x2="460" y2="78"/>
+  <path class="acc" d="M40,44 L190,44 L190,98 L330,98 L330,44 L460,44"/><text class="sm" x="48" y="40">R1</text>
+  <path class="ln" d="M40,80 L460,80"/><text class="sm" x="48" y="92">R2 (100, preempt)</text>
+  <line class="lg" x1="190" y1="20" x2="190" y2="120"/><text class="sm" x="194" y="30">uplink fails: R1 = 90, R2 active</text>
+  <line class="lg" x1="330" y1="20" x2="330" y2="120"/><text class="sm" x="334" y="30">uplink back: R1 = 110, preempts</text>
+</svg>
+<figcaption><b>Figure 4.28</b> Priority against time for the tracking example. The roles swap when the lines cross, provided the lower-priority router has preempt enabled.</figcaption>
+</figure>
+
+*VRRP* and *GLBP* are configured in the same way. The VRRP version on IOS-XE and on FRR/Linux (`vrrpd`) uses the group, priority and address; if the router's real interface address equals the virtual address it becomes the owner with priority 255. GLBP distributes different virtual MACs to different hosts, so both routers forward.
+
+```
+! VRRP (IOS-XE)                          ! GLBP
+interface GigabitEthernet0/0             interface GigabitEthernet0/0
+ vrrp 1 ip 192.168.1.254                  glbp 1 ip 192.168.1.254
+ vrrp 1 priority 110                      glbp 1 priority 110
+ vrrp 1 track 1 decrement 20              glbp 1 preempt
+```
+
 Align the Layer 2 and Layer 3 roles: make the HSRP active router also the spanning-tree root for the VLAN, so that traffic does not cross the inter-switch link to reach it. On failover the new active router sends a gratuitous ARP so that switches relearn the virtual MAC.
+
+::: lab
+`LAB 4.8 · 20 MIN`  Packet Tracer, two routers and a host, HSRPv2 with tracking as in the example. Start a continuous ping and shut R1's uplink.
+
+```
+C:\> ping -t 192.168.1.254
+Request timed out.   <-- count the lost packets
+R2# show standby brief
+Gi0/0   1  100 P Active   local   192.168.1.2   192.168.1.254
+```
+
+**What you should notice:** with default timers up to ten seconds of loss when R1 is *disconnected*, but only a few pings when tracking lowers the priority and R2 has preempt, because the standby no longer waits for the hold timer. Convert to VRRP and compare the lost-ping counts.
+:::
 
 ::: check
 1. R1 loses its uplink but stays active. Name two causes. [^c4-11]
@@ -69,6 +107,26 @@ Policy tools decide which routes are accepted, which are modified and which pack
 :::
 
 A *prefix list* matches prefixes by address and length. `ip prefix-list X permit 10.0.0.0/8 ge 16 le 24` matches any prefix inside 10.0.0.0/8 whose length is between 16 and 24. Thus 10.0.0.0/8 does not match (length 8 is below 16), 10.1.0.0/16 and 10.1.1.0/24 match, and 10.1.1.0/25 does not (length 25 is above 24). With no `ge` or `le` only the exact prefix matches. Lists end with an implicit deny.
+
+<figure>
+<svg viewBox="0 0 480 150" width="480">
+  <defs><marker id="m49" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1A1D23"/></marker></defs>
+  <text class="sm" x="10" y="14">route in</text>
+  <line class="ln" x1="50" y1="12" x2="70" y2="12" marker-end="url(#m49)"/>
+  <rect class="box" x="72" y="2" width="110" height="26" rx="2"/><text class="lbl" x="127" y="14" text-anchor="middle">seq 10 match?</text><text class="sm" x="127" y="24" text-anchor="middle">prefix-list CUST</text>
+  <line class="ln" x1="127" y1="28" x2="127" y2="62" marker-end="url(#m49)"/><text class="sm" x="132" y="50">yes</text>
+  <rect class="hl" x="72" y="64" width="110" height="26" rx="2"/><text class="lbl" x="127" y="76" text-anchor="middle">set LOCAL_PREF 200</text><text class="sm" x="127" y="86" text-anchor="middle">then permit</text>
+  <line class="ln" x1="182" y1="12" x2="250" y2="12" marker-end="url(#m49)"/><text class="sm" x="198" y="8">no</text>
+  <rect class="box" x="252" y="2" width="110" height="26" rx="2"/><text class="lbl" x="307" y="14" text-anchor="middle">seq 20 match?</text><text class="sm" x="307" y="24" text-anchor="middle">(no match line: all)</text>
+  <line class="ln" x1="307" y1="28" x2="307" y2="62" marker-end="url(#m49)"/><text class="sm" x="312" y="50">yes</text>
+  <rect class="box" x="252" y="64" width="110" height="26" rx="2"/><text class="lbl" x="307" y="81" text-anchor="middle">permit unchanged</text>
+  <line class="ln" x1="362" y1="12" x2="420" y2="12" marker-end="url(#m49)"/><text class="sm" x="372" y="8">no</text>
+  <rect class="fill" x="422" y="2" width="52" height="26" rx="2"/><text class="lbl" x="448" y="19" text-anchor="middle">deny</text>
+  <text class="sm" x="10" y="120">The first matching clause decides. If none matches, the implicit deny at the end rejects the route.</text>
+  <text class="sm" x="10" y="132">A deny clause with a matching condition removes the route; a permit clause without match lines matches everything.</text>
+</svg>
+<figcaption><b>Figure 4.29</b> How a route map is evaluated. Clauses are tried in sequence-number order.</figcaption>
+</figure>
 
 A *route map* is an ordered list of numbered clauses, each with `match` conditions and `set` actions, and a `permit` or `deny`. The first clause that matches decides; if a permit clause has no match line it matches everything; at the end there is an implicit deny. Route maps are used for BGP policy, for redistribution and for policy-based routing.
 
@@ -92,7 +150,7 @@ route-map SET-LP permit 20          ! no match: everything else passes unchanged
   <path class="acc" d="M368,50 L256,30" marker-end="url(#a49)"/><path class="acc" d="M226,32 L108,52" marker-end="url(#a49)"/><path class="acc" d="M108,98 L226,118" marker-end="url(#a49)"/><path class="acc" d="M256,120 L368,100" marker-end="url(#a49)"/>
   <text class="sm" x="240" y="78" text-anchor="middle">route X circulates</text><text class="sm" x="240" y="88" text-anchor="middle">without a tag to stop it</text>
 </svg>
-<figcaption><b>Figure 4.15</b> Two-way redistribution at two points. A route learnt from EIGRP re-enters EIGRP through OSPF at the other router.</figcaption>
+<figcaption><b>Figure 4.30</b> Two-way redistribution at two points. A route learnt from EIGRP re-enters EIGRP through OSPF at the other router.</figcaption>
 </figure>
 
 ```
@@ -112,7 +170,50 @@ router eigrp CAMPUS
    redistribute ospf 1 metric 100000 10 255 1 1500 route-map OSPF-TO-EIGRP
 ```
 
+A seed metric is needed because the receiving protocol cannot interpret the sender's metric. The defaults differ and are a frequent source of surprise.
+
+| Redistributed into | Seed metric | Notes |
+|---|---|---|
+| OSPF | cost 20 (E2); 1 for BGP routes | `subnets` needed for classless prefixes on older IOS; `metric-type 1` for E1 |
+| EIGRP | none; route not installed without it | `metric bandwidth delay reliability load mtu` or `default-metric` |
+| RIP | none (infinite) | `metric` or `default-metric` |
+| BGP | metric copied (MED) | `redistribute ospf` brings only internal routes unless `match` is used |
+
 *Policy-based routing* (PBR) routes on something other than the destination: `ip policy route-map WEB-VIA-B` on an interface, with `match ip address` for the traffic and `set ip next-hop 192.0.2.5`. *VRF-lite* gives one router several independent routing tables, each with its own interfaces, so two customers can both use 10.0.0.0/24; commands accept a `vrf` keyword (`ping vrf A 10.0.0.1`).
+
+::: example
+**Policy-based routing.** Campus Net sends web traffic from SALES via ISP-B while everything else uses the default route toward ISP-A.
+
+```
+ip access-list extended WEB
+ permit tcp 192.168.10.0 0.0.0.255 any eq 80
+ permit tcp 192.168.10.0 0.0.0.255 any eq 443
+route-map WEB-VIA-B permit 10
+ match ip address WEB
+ set ip next-hop 192.0.2.5
+interface GigabitEthernet0/0.10
+ ip policy route-map WEB-VIA-B
+```
+
+```
+R1# show route-map WEB-VIA-B
+route-map WEB-VIA-B, permit, sequence 10
+  Policy routing matches: 412 packets, 307311 bytes
+```
+
+[Result: matching packets leave via 192.0.2.5 regardless of the routing table; unmatched packets follow normal routing. PBR is stateless, so the return path may differ; add tracking so that it stops when the next hop is dead.]{.result}
+:::
+
+<figure>
+<svg viewBox="0 0 480 130" width="480">
+  <rect class="box" x="140" y="10" width="200" height="110" rx="4"/><text class="sm" x="148" y="24">One physical router</text>
+  <rect class="hl" x="152" y="34" width="86" height="76" rx="2"/><text class="lbl" x="195" y="50" text-anchor="middle">VRF CUST-A</text><text class="sm" x="195" y="66" text-anchor="middle">10.0.0.0/24</text><text class="sm" x="195" y="80" text-anchor="middle">own routing table</text><text class="sm" x="195" y="94" text-anchor="middle">Gi0/3</text>
+  <rect class="fill" x="244" y="34" width="86" height="76" rx="2"/><text class="lbl" x="287" y="50" text-anchor="middle">VRF CUST-B</text><text class="sm" x="287" y="66" text-anchor="middle">10.0.0.0/24</text><text class="sm" x="287" y="80" text-anchor="middle">own routing table</text><text class="sm" x="287" y="94" text-anchor="middle">Gi0/4</text>
+  <text class="sm" x="10" y="60">customer A</text><line class="lg" x1="60" y1="58" x2="152" y2="90"/>
+  <text class="sm" x="400" y="60">customer B</text><line class="lg" x1="398" y1="58" x2="330" y2="90"/>
+</svg>
+<figcaption><b>Figure 4.31</b> VRF-lite. The same prefix lives in two tables; a packet is looked up in the table of the interface it arrived on.</figcaption>
+</figure>
 
 ```
 vrf definition CUST-A
@@ -125,6 +226,24 @@ R1# show ip route vrf CUST-A
 
 ::: trap
 *Claim:* redistributing in both directions between two protocols is safe because AD stops loops. *Why it is wrong:* AD protects only routes for the same prefix learnt natively; a redistributed route is seen as a native one by the second protocol, with another AD. *Correct statement:* tag at the first redistribution and deny the tag at the second.
+:::
+
+::: lens
+[CISCO · JUNIPER · AMAZON]{.co}
+
+Asked as "two-way redistribution loop and how do you stop it" and as "what does this route map do". Show the sequence evaluation and the implicit deny, state that a permit clause with no match matches everything, and distinguish a deny clause in a route map (the route is not redistributed) from a deny in a prefix list.
+:::
+
+::: lab
+`LAB 4.9 · 40 MIN`  GNS3 with IOSv or FRR: three routers, OSPF on one side and EIGRP on the other, mutual redistribution at two routers. Create the loop first, then fix it with tags; finally build VRF-lite with an overlapping 10.0.0.0/24 in two VRFs.
+
+```
+R1# show ip route 10.9.9.0
+Routing entry for 10.9.9.0/24
+  Known via "ospf 1", distance 110, metric 20, type extern 2, tag 110
+```
+
+**What you should notice:** a tag on the route proves where it entered. Without the deny-tag clause, the router prefers the redistributed copy of its own route learned from the other router (an effect of AD); `traceroute` to the prefix bounces between the two redistribution points.
 :::
 
 ## [4.10]{.sec}MPLS and L3VPN [Should · ■■■]{.tag} {#s4-10}
@@ -143,7 +262,33 @@ A *label* is a 32-bit shim header inserted between the Layer 2 and IP headers (E
   <rect class="box" x="300" y="10" width="80" height="26"/><text class="lbl" x="340" y="27" text-anchor="middle">TTL 8</text>
   <text class="sm" x="10" y="52">32 bits; S = 1 marks the last label of the stack, so a two-label VPN packet has S = 0 on the outer label.</text>
 </svg>
-<figcaption><b>Figure 4.16</b> The MPLS shim.</figcaption>
+<figcaption><b>Figure 4.32</b> The MPLS shim.</figcaption>
+</figure>
+
+Each router keeps two label tables. The *LIB* (label information base) holds every label it has learnt from neighbours; the *LFIB* (label forwarding information base) holds the one chosen for each prefix, according to the IGP's best next hop. Label *swap* replaces the top label by the one the next hop advertised; the TTL field is decremented as in IP (and the ingress copies the IP TTL into it, unless `no mpls ip propagate-ttl` hides the core from `traceroute`). On the control plane, LDP (label distribution protocol) runs in a hop-by-hop fashion: each router assigns a local label for every prefix in its IGP and advertises it to its LDP neighbours, so that a *label-switched path* follows the IGP's shortest path.
+
+```
+P1# show mpls ldp neighbor
+    Peer LDP Ident: 10.255.0.3:0; Local LDP Ident 10.255.0.2:0
+        TCP connection: 10.255.0.3.646 - 10.255.0.2.43211
+        State: Oper; Msgs sent/rcvd: 40/39
+P1# show mpls forwarding-table
+Local  Outgoing   Prefix           Bytes Label   Outgoing   Next Hop
+Label  Label      or Tunnel Id     Switched      interface
+24     35         10.255.0.5/32    0             Gi0/2      10.1.23.3     <-- swap 24 to 35
+```
+
+<figure>
+<svg viewBox="0 0 480 180" width="480">
+  <rect class="box" x="10" y="10" width="210" height="64" rx="3"/><text class="sm" x="16" y="24">Customer A, PE1 VRF A (RD 65000:1)</text>
+  <text class="mono" x="16" y="42">10.1.1.0/24 -&gt; 65000:1:10.1.1.0/24</text><text class="sm" x="16" y="58">export RT 65000:1</text>
+  <rect class="box" x="10" y="100" width="210" height="64" rx="3"/><text class="sm" x="16" y="114">Customer B, PE1 VRF B (RD 65000:2)</text>
+  <text class="mono" x="16" y="132">10.1.1.0/24 -&gt; 65000:2:10.1.1.0/24</text><text class="sm" x="16" y="148">export RT 65000:2</text>
+  <rect class="hl" x="260" y="42" width="210" height="96" rx="3"/><text class="lbl" x="365" y="60" text-anchor="middle">MP-BGP VPNv4 table</text>
+  <text class="sm" x="270" y="78">two distinct 96-bit prefixes,</text><text class="sm" x="270" y="90">same IPv4 address</text><text class="sm" x="270" y="108">PE2 imports a route only if its</text><text class="sm" x="270" y="120">import RT matches the export RT</text>
+  <line class="acc" x1="220" y1="42" x2="260" y2="70"/><line class="ln" x1="220" y1="132" x2="260" y2="110"/>
+</svg>
+<figcaption><b>Figure 4.33</b> RD and RT. The RD only makes the prefixes distinct; the RT is the membership rule that decides which VRF receives each one.</figcaption>
 </figure>
 
 An *L3VPN* (RFC 4364) uses three ideas. Each customer has a *VRF* on the PE. A *route distinguisher* (RD, 64 bits) is prefixed to each customer IPv4 route to make a 96-bit *VPNv4* prefix, so that two customers' 10.1.1.0/24 stay distinct in BGP. A *route target* (RT, a BGP extended community) controls which VRFs import which routes: export RTs are attached when a route is advertised, import RTs select it at the far PE. PEs exchange VPNv4 routes over MP-BGP; the transport path between them is given by LDP labels.
@@ -190,7 +335,7 @@ An *L3VPN* (RFC 4364) uses three ideas. Each customer has a *VRF* on the PE. A *
   <text class="sm" x="10" y="118">Highlighted block: transport (LDP) label. Open block below it: VPN label. P2 pops the transport label (PHP).</text>
   <text class="sm" x="10" y="130">Control plane: LDP between neighbours; MP-BGP VPNv4 between PE1 and PE2.</text>
 </svg>
-<figcaption><b>Figure 4.17</b> The label stack at each link of the L3VPN walk.</figcaption>
+<figcaption><b>Figure 4.34</b> The label stack at each link of the L3VPN walk.</figcaption>
 </figure>
 
 ```
@@ -207,6 +352,18 @@ router bgp 65000
  address-family vpnv4
   neighbor 10.255.0.5 activate
   neighbor 10.255.0.5 send-community extended
+```
+
+Verification at the provider edge follows the control plane: first the VRF routing table at each PE, then the VPNv4 table, and finally the label path.
+
+```
+PE1# show ip route vrf CUST-A 10.2.2.0
+B  10.2.2.0/24 [200/0] via 10.255.0.5, 00:12:30          <-- learnt by MP-BGP from PE2
+PE1# show bgp vpnv4 unicast all 10.2.2.0/24
+  Route Distinguisher: 65000:1 (default for vrf CUST-A)
+  Local: 10.255.0.5 (metric 20); label 300; Extended Community: RT:65000:1
+PE1# traceroute vrf CUST-A 10.2.2.1
+  1 10.1.12.2 [MPLS: Labels 24/300 Exp 0] 4 msec         <-- the two-label stack
 ```
 
 Beyond L3VPN, MPLS traffic engineering and Segment Routing (SR-MPLS, SRv6) steer traffic along explicit paths by stacking labels or segment identifiers at the ingress; they matter mainly for service-provider roles and are outside the ENCOR core.

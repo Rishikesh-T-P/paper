@@ -30,7 +30,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: router-on-a-stick uses one trunk and a sub-interface per VLAN on a router, with each packet crossing the link twice; an SVI is a virtual Layer 3 interface on a Layer 3 switch, routed in hardware; SVIs scale better.]{.short}
 
-**Answer.** ROAS is bounded by one link and the router's forwarding rate; it suits small branches. SVIs need `ip routing`, one `interface Vlan N` per VLAN, and the VLAN must exist and have an active port for the SVI to come up. The packet walk is in §4.2 ([Figure 4.3](#s4-2){.ref}). **Follow-up.** Routed ports (`no switchport`) are used on links between Layer 3 switches.
+**Answer.** ROAS is bounded by one link and the router's forwarding rate; it suits small branches. SVIs need `ip routing`, one `interface Vlan N` per VLAN, and the VLAN must exist and have an active port for the SVI to come up. The packet walk is in §4.2 ([Figure 4.6](#s4-2){.ref}). **Follow-up.** Routed ports (`no switchport`) are used on links between Layer 3 switches.
 :::
 
 ::: q
@@ -48,7 +48,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: lowest bridge ID wins root (SW1, lowest MAC at equal priority); each other switch takes its lowest-cost port to the root as the root port; per segment the lowest-cost, then lowest-BID sender is designated; the remaining port on SW3 blocks.]{.short}
 
-**Answer.** The full three-part trace (default priorities, SW3 at 4096, parallel links) is the worked example of §4.3 ([Figure 4.5](#s4-3){.ref}); learn the four-step order rather than the answer. **Mistake.** Giving the root bridge a root port.
+**Answer.** The full three-part trace (default priorities, SW3 at 4096, parallel links) is the worked example of §4.3 ([Figure 4.9](#s4-3){.ref}); learn the four-step order rather than the answer. **Mistake.** Giving the root bridge a root port.
 :::
 
 ::: q
@@ -156,7 +156,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: Down, (Attempt), Init, 2-Way, ExStart, Exchange, Loading, Full.]{.short}
 
-**Answer.** Figure 4.8 shows the packet that causes each step: Hello (Init), a Hello listing our ID (2-Way), DBD master election (ExStart), DBD summaries (Exchange), LSR and LSU (Loading). Attempt applies only to non-broadcast networks.
+**Answer.** Figure 4.16 shows the packet that causes each step: Hello (Init), a Hello listing our ID (2-Way), DBD master election (ExStart), DBD summaries (Exchange), LSR and LSU (Loading). Attempt applies only to non-broadcast networks.
 :::
 
 ::: q

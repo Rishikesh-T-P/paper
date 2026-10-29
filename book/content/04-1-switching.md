@@ -22,6 +22,7 @@
 12. [4.12 IP multicast]{} [OPTIONAL]{}
 13. [4.13 IP services and access lists on IOS]{} [MUST]{}
 14. [4.14 Tunnels and enterprise architecture]{} [OPTIONAL]{}
+15. [4.15 Mini-project: Campus-to-Internet]{} [OPTIONAL]{}
 :::
 
 Every topology and lab in this chapter belongs to one fictional organisation, **Campus Net**: a university network with a sales-and-engineering office floor (VLANs 10 and 20), two border routers, BR1 and BR2, and two upstream providers, ISP-A (AS 100) and ISP-B (AS 200). Subnetting, NAT theory, the longest-prefix-match algorithm, Dijkstra, access-list theory and the internals of the forwarding hardware are taught in their home chapters, and are cited here by one sentence and a page reference. This chapter teaches what is configured on the devices, what the protocols do on the wire, and how each is verified. The CCNA topics are mixed with the CCNP ENCOR topics; the tags tell you which to read first.
@@ -96,7 +97,7 @@ SSH Enabled - version 2.0
   <path class="acc" d="M40,36 L40,42 M70,68 L70,74 M100,100 L100,106"/>
   <text class="sm" x="330" y="14">enable / disable</text><text class="sm" x="330" y="46">configure terminal / end</text><text class="sm" x="330" y="78">interface, router ... / exit</text>
 </svg>
-<figcaption><b>Figure 4.1b</b> The CLI modes. The prompt names the mode: <span class="mono">&gt;</span> user, <span class="mono">#</span> privileged, <span class="mono">(config...)#</span> a configuration mode.</figcaption>
+<figcaption><b>Figure 4.2</b> The CLI modes. The prompt names the mode: <span class="mono">&gt;</span> user, <span class="mono">#</span> privileged, <span class="mono">(config...)#</span> a configuration mode.</figcaption>
 </figure>
 
 A device boots in a fixed order: the ROM monitor runs a power-on self-test, loads the operating-system image from flash, and then reads the saved configuration from NVRAM; if none exists it offers the setup dialogue. The *configuration register* (`show version` prints it, normally 0x2102) controls this. Setting it to 0x2142 makes the router ignore the saved configuration at the next boot, which is the basis of password recovery: boot with 0x2142, copy the startup configuration into running configuration, change the secret, restore 0x2102 and save. Physical access is therefore equivalent to administrative access, which is why console ports are kept in locked rooms.
@@ -113,7 +114,7 @@ Packet forwarding has also evolved in three generations. *Process switching* sen
   <text class="sm" x="157" y="38" text-anchor="middle">best only</text><text class="sm" x="322" y="38" text-anchor="middle">ARP</text>
   <text class="sm" x="10" y="90">Control plane builds the RIB; CEF derives the FIB and the Layer 2 rewrite; the data plane reads only the last two.</text>
 </svg>
-<figcaption><b>Figure 4.1c</b> From routing table to forwarding. A transit packet needs one FIB lookup and one adjacency rewrite.</figcaption>
+<figcaption><b>Figure 4.3</b> From routing table to forwarding. A transit packet needs one FIB lookup and one adjacency rewrite.</figcaption>
 </figure>
 
 [**Junos and FRR** — Junos has a candidate configuration: you edit it, run `commit`, and can `rollback 1`. IOS applies each line instantly. FRR's `vtysh` is IOS-like, and Arista EOS is almost identical to IOS.]{.margin}The same three planes exist on every vendor, but the commands differ. The table maps the five commands one uses most.
@@ -169,7 +170,7 @@ A VLAN divides one physical switch into several broadcast domains, because the s
   <text class="sm" x="10" y="100">Join the two only with a Layer 3 device: router, or switch with ip routing.</text>
   <rect class="accf" x="10" y="108" width="3" height="14"/><text class="sm" x="20" y="119">Every VLAN is normally one IP subnet.</text>
 </svg>
-<figcaption><b>Figure 4.1d</b> A VLAN is a logical switch. Ports of one colour behave as if they belonged to a separate device.</figcaption>
+<figcaption><b>Figure 4.4</b> A VLAN is a logical switch. Ports of one colour behave as if they belonged to a separate device.</figcaption>
 </figure>
 
 A Layer 2 switch forwards on destination MAC address. It *learns* by reading the source MAC of every arriving frame and recording the (MAC, port, VLAN) triple in its MAC address table, which entries expire after 300 seconds of silence by default. For a known destination the frame leaves one port; for a broadcast, a multicast (without snooping) or an *unknown unicast* the switch floods the frame out of every other port in the VLAN. Thus, without VLANs, a single switch is a single broadcast domain, and every host hears every ARP request.
@@ -215,7 +216,7 @@ An *access port* belongs to one VLAN and sends and receives untagged frames. A *
   <rect class="box" x="432" y="74" width="40" height="24"/><text class="lbl" x="452" y="90" text-anchor="middle">FCS</text>
   <text class="sm" x="130" y="116">TPID = 0x8100.  TCI (2 bytes) = PCP 3 bits | DEI 1 bit | VID 12 bits</text>
 </svg>
-<figcaption><b>Figure 4.2</b> The 802.1Q tag. Twelve VID bits give 4096 values, of which 0 and 4095 are reserved, hence 4094 usable VLANs.</figcaption>
+<figcaption><b>Figure 4.5</b> The 802.1Q tag. Twelve VID bits give 4096 values, of which 0 and 4095 are reserved, hence 4094 usable VLANs.</figcaption>
 </figure>
 
 VLAN 1 is the default; 2 to 1001 are normal-range; 1002 to 1005 are reserved for legacy FDDI and Token Ring; 1006 to 4094 are extended. One VLAN on a trunk is the *native VLAN* (VLAN 1 by default), whose frames cross the trunk *untagged*. If the two ends disagree about it, frames leak between VLANs and CDP and spanning tree print a native-VLAN mismatch warning. Best practice is to set the native VLAN to an unused one (for example 99) on both ends and to prune the allowed list to the VLANs that need to cross.
@@ -270,7 +271,7 @@ interface GigabitEthernet0/0.20
   <line class="ln" x1="415" y1="118" x2="415" y2="150" marker-end="url(#a42)"/><text class="sm" x="421" y="138">5 untagged</text>
   <text class="sm" x="10" y="12">trunks: SW1-R1, SW1-SW2 (native VLAN 99)</text>
 </svg>
-<figcaption><b>Figure 4.3</b> The router-on-a-stick hairpin. The packet enters R1 tagged 10 and leaves tagged 20 on the same link.</figcaption>
+<figcaption><b>Figure 4.6</b> The router-on-a-stick hairpin. The packet enters R1 tagged 10 and leaves tagged 20 on the same link.</figcaption>
 </figure>
 
 A *Layer 3 switch* removes the hairpin. Enabling `ip routing` and creating a *switched virtual interface* (SVI) per VLAN lets the switch route in hardware between its own VLANs: `interface Vlan10` with `ip address 192.168.10.1 255.255.255.0` replaces the sub-interface, and hosts keep the same gateway address. SVIs scale better than sub-interfaces, because the forwarding is done by the switching ASIC rather than by a single router link. A *routed port* (`no switchport`) is a Layer 3 port with no VLAN at all.
@@ -309,7 +310,7 @@ Two Layer 2 mechanisms deserve suspicion. The *Dynamic Trunking Protocol* (DTP) 
   <text class="sm" x="10" y="90">SW1 strips the outer tag (1) because VLAN 1 is the native VLAN of the trunk and is sent untagged, leaving tag 20 for SW2.</text>
   <text class="sm" x="10" y="102">Defence: native VLAN unused (not 1) on every trunk; never put hosts in the native VLAN.</text>
 </svg>
-<figcaption><b>Figure 4.1e</b> VLAN hopping by double tagging. The attack is one-way (the reply cannot return) and works only when the attacker's access VLAN equals the trunk's native VLAN. Further defences are in §9.5.</figcaption>
+<figcaption><b>Figure 4.7</b> VLAN hopping by double tagging. The attack is one-way (the reply cannot return) and works only when the attacker's access VLAN equals the trunk's native VLAN. Further defences are in §9.5.</figcaption>
 </figure>
 
 | Local \ Peer | access | trunk | dynamic auto | dynamic desirable |
@@ -347,7 +348,7 @@ Expected: the difference between access and trunk, what the native VLAN is, and 
 :::
 
 ::: lab
-`LAB 4.2 · 15 MIN`  Build Figure 4.3 in Packet Tracer, then break it twice.
+`LAB 4.2 · 15 MIN`  Build Figure 4.6 in Packet Tracer, then break it twice.
 
 ```
 SW1(config-if)# switchport trunk native vlan 1      ! on one end only
@@ -392,7 +393,7 @@ Redundant switch links are desirable, yet a loop produces three failures at once
   <path class="acc" d="M10,52 L200,52"/><text class="sm" x="10" y="64">16-bit priority field = configured priority + VLAN ID (32768 + 1 = 32769)</text>
   <text class="sm" x="10" y="9">Bridge ID (64 bits). Only the top 4 bits are configurable, so priority moves in steps of 4096.</text>
 </svg>
-<figcaption><b>Figure 4.4</b> The bridge ID. The VLAN number occupies the low 12 bits, which is why the configurable priority must be a multiple of 4096.</figcaption>
+<figcaption><b>Figure 4.8</b> The bridge ID. The VLAN number occupies the low 12 bits, which is why the configurable priority must be a multiple of 4096.</figcaption>
 </figure>
 
 A BPDU carries the fields needed for the election: the *root bridge ID* the sender believes in, the *root path cost* from the sender, the *sender's own bridge ID* and the *sender port ID* (port priority, 128 by default, and port number), plus the timers (hello, forward delay, max age) set by the root. Only the root generates BPDUs; every other switch relays an updated copy through its designated ports, adding the cost of the link on which it was received. That is why a non-root switch's root path cost is, in effect, the sum of the costs of the links its BPDU crossed. When a switch stops hearing the root's BPDUs on its root port for max-age (20 s), it assumes the path is lost and starts a new election. A *topology change* (a port moving to or from forwarding) is signalled up to the root, which tells every switch to shorten its MAC-table ageing to 15 s, so stale entries do not blackhole traffic.
@@ -436,7 +437,7 @@ Link costs depend on speed. The classic (short) values are 10 Mb/s = 100, 100 Mb
   <circle class="hl" cx="308" cy="149" r="8"/><path class="acc" d="M302,143 L314,155 M314,143 L302,155"/>
   <text class="sm" x="308" y="176" text-anchor="middle">alternate (blocking)</text>
 </svg>
-<figcaption><b>Figure 4.5</b> Part 1 of the election. R = root port, D = designated port, cross = blocked. Every port on the root is designated; SW3 blocks because SW2 has the lower BID.</figcaption>
+<figcaption><b>Figure 4.9</b> Part 1 of the election. R = root port, D = designated port, cross = blocked. Every port on the root is designated; SW3 blocks because SW2 has the lower BID.</figcaption>
 </figure>
 
 ::: trap
@@ -473,7 +474,7 @@ Gi0/1   Desg FWD 4  128.1  P2p      <-- forwards VLAN 20
   <rect class="fill" x="10" y="68" width="14" height="22"/><rect class="hl" x="24" y="68" width="446" height="22"/>
   <text class="lbl" x="250" y="83" text-anchor="middle">proposal, agreement, forwarding; discarding is brief</text>
 </svg>
-<figcaption><b>Figure 4.6</b> Convergence after a link failure, drawn to scale.</figcaption>
+<figcaption><b>Figure 4.10</b> Convergence after a link failure, drawn to scale.</figcaption>
 </figure>
 
 | | 802.1D | Rapid STP (802.1w) | PVST+ / Rapid PVST+ | MST (802.1s) |
@@ -499,7 +500,7 @@ MST groups VLANs into instances, so that 1000 VLANs can share two trees. Switche
   <text class="sm" x="10" y="186">PortFast and BPDU Guard on every host-facing port</text>
   <path class="acc" d="M62,170 L40,170 L40,184 L8,184"/>
 </svg>
-<figcaption><b>Figure 4.6b</b> Where the guard features go in a campus: Root Guard downward from the distribution layer, Loop Guard on access uplinks, PortFast with BPDU Guard on edge ports.</figcaption>
+<figcaption><b>Figure 4.11</b> Where the guard features go in a campus: Root Guard downward from the distribution layer, Loop Guard on access uplinks, PortFast with BPDU Guard on edge ports.</figcaption>
 </figure>
 
 Several safeguards complete the design. **PortFast** with **BPDU Guard** goes on access ports: PortFast skips the wait, and BPDU Guard puts the port in err-disabled state if a BPDU arrives, which stops a rogue switch. **Root Guard** goes on distribution downlinks to keep access switches from becoming root; a port that hears a superior BPDU moves to root-inconsistent. **Loop Guard** goes on non-designated uplinks, so that a port that suddenly stops receiving BPDUs (a unidirectional link) does not start forwarding. **UDLD** detects the unidirectional fibre itself.
@@ -539,7 +540,7 @@ Gi0/2            Altn BLK 4         128.2    P2p   <-- alternate
   <rect class="hl" x="30" y="94" width="90" height="22" rx="2"/><text class="sm" x="75" y="108" text-anchor="middle">forwards at once</text>
   <text class="sm" x="170" y="108">Each hop repeats the handshake, so the wave crosses a campus in milliseconds.</text>
 </svg>
-<figcaption><b>Figure 4.6c</b> The Rapid STP proposal and agreement handshake on a point-to-point link.</figcaption>
+<figcaption><b>Figure 4.12</b> The Rapid STP proposal and agreement handshake on a point-to-point link.</figcaption>
 </figure>
 
 *EtherChannel* bundles up to eight parallel links into one logical port-channel, which spanning tree treats as one link, so that no member is blocked and the bandwidth adds. Members must match in speed, duplex, VLAN list and trunk mode. Negotiation is by LACP (IEEE 802.1AX, modes `active` and `passive`), by Cisco's PAgP (`desirable`, `auto`) or statically with `on`. A bundle forms when at least one end initiates and both use the same protocol; `on` never negotiates, so it pairs only with `on`.

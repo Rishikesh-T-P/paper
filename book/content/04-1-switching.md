@@ -126,14 +126,14 @@ An *access port* belongs to one VLAN and sends and receives untagged frames. A *
   <text class="sm" x="10" y="68">802.1Q tagged frame (4 bytes inserted; FCS recomputed)</text>
   <rect class="box" x="10" y="74" width="60" height="24"/><text class="lbl" x="40" y="90" text-anchor="middle">Dest 6</text>
   <rect class="box" x="70" y="74" width="60" height="24"/><text class="lbl" x="100" y="90" text-anchor="middle">Src 6</text>
-  <rect class="hl" x="130" y="74" width="56" height="24"/><rect class="box" x="130" y="74" width="56" height="24" fill="none"/><text class="lbl" x="158" y="90" text-anchor="middle">TPID 0x8100</text>
+  <rect class="hl" x="130" y="74" width="56" height="24"/><rect class="box" x="130" y="74" width="56" height="24" fill="none"/><text class="lbl" x="158" y="90" text-anchor="middle">TPID 2</text>
   <rect class="hl" x="186" y="74" width="30" height="24"/><rect class="acc" x="186" y="74" width="30" height="24"/><text class="lbl" x="201" y="90" text-anchor="middle">PCP 3</text>
   <rect class="hl" x="216" y="74" width="22" height="24"/><rect class="acc" x="216" y="74" width="22" height="24"/><text class="lbl" x="227" y="90" text-anchor="middle">DEI</text>
   <rect class="hl" x="238" y="74" width="48" height="24"/><rect class="acc" x="238" y="74" width="48" height="24"/><text class="lbl" x="262" y="90" text-anchor="middle">VID 12</text>
   <rect class="box" x="286" y="74" width="46" height="24"/><text class="lbl" x="309" y="90" text-anchor="middle">Type 2</text>
   <rect class="box" x="332" y="74" width="100" height="24"/><text class="lbl" x="382" y="90" text-anchor="middle">Payload</text>
   <rect class="box" x="432" y="74" width="40" height="24"/><text class="lbl" x="452" y="90" text-anchor="middle">FCS</text>
-  <text class="sm" x="186" y="116">TCI (2 bytes) = PCP 3 bits | DEI 1 bit | VID 12 bits</text>
+  <text class="sm" x="130" y="116">TPID = 0x8100.  TCI (2 bytes) = PCP 3 bits | DEI 1 bit | VID 12 bits</text>
 </svg>
 <figcaption><b>Figure 4.2</b> The 802.1Q tag. Twelve VID bits give 4096 values, of which 0 and 4095 are reserved, hence 4094 usable VLANs.</figcaption>
 </figure>

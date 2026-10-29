@@ -21,7 +21,7 @@ This part is a *decoder* layer. A table marked ★ exists nowhere else in the bo
 [**Candidate reports** — anonymous, self-reported accounts on sites such as GeeksforGeeks, Glassdoor, Jointaro and Medium. They span 2016 to 2026, formats change every year, and a drive's own invitation always overrides this book.]{.margin}Wherever a table states what a company asks or how its test is laid out, the source is a set of candidate reports. We therefore write "reported" and give the year, and we never present a report as a rule. Use the tables to plan; confirm on the day.
 
 | You have | Open |
-|---|---|
+|----------------------------------------|------------------------------|
 | 30 seconds in a coding round | the decoders of [A1](#s13-1){.ref} |
 | the night before a networking round | the mnemonics and tables of [A2](#s13-2){.ref} |
 | an online assessment tomorrow | [A3](#s13-3){.ref}, then the mock papers of [Part III](#ch14){.ref} |
@@ -40,7 +40,7 @@ The basic table, from *n* ≤ 12 to *n* ≥ 10<sup>9</sup>, is printed in the Re
 ★ **Constraint signals other than *n*.**
 
 | Signal in the statement | It implies | Reach for |
-|---|---|---|
+|------------------------|------------------------|----------------------------|
 | *n* ≤ 40 | 2<sup>40</sup> is too large, but two halves of 2<sup>20</sup> are not | meet in the middle: enumerate each half, combine by sorting or hashing |
 | *k* ≤ 20 with large *n* | state is a subset of *k* items | bitmask DP over *k*, 2<sup>*k*</sup> × *k* |
 | values up to 10<sup>9</sup> | no array can be indexed by value | hash map, or coordinate compression after sorting |
@@ -61,7 +61,7 @@ The first 31 rows of the decoder, from "sorted" to "validate a sequence of proto
 ★ **Keyword decoder, second half.**
 
 | Signal in the problem | Think | Anchors |
-|---|---|---|
+|------------------------------|--------------------------------|----------|
 | minimum meeting rooms; peak overlap | sort starts, min-heap of end times; or a sweep line | 253, 1094 |
 | insert into sorted intervals; remove fewest to avoid overlap | one linear merge; greedy by earliest end | 57, 435 |
 | add *v* to every element of [*l*, *r*], many times | difference array, then one prefix pass | 1094, 1109 |
@@ -130,7 +130,7 @@ int missing(vector<int> a) {
 The twenty-two patterns below are the reusable shapes of the pillar. The template of each is printed once, in the section named; the bug is the one interviewers most often see, and checking for it is the cheapest review one can run.
 
 | # | Pattern | Trigger | Classic bug | Template |
-|---|---|---|---|---|
+|--|--------------|------------------|----------------------------|--------|
 | 1 | Two pointers, opposite ends | sorted; pair or triple | 3Sum without skipping duplicates | [§1.2](#s1-2){.ref} |
 | 2 | Two pointers, read and write | in place; remove or compact | writing over an element not yet read | [§1.2](#s1-2){.ref} |
 | 3 | Fixed window | "of size *k*" | evicting `a[i-k]` off by one | [§1.2](#s1-2){.ref} |
@@ -167,7 +167,7 @@ UMPIRE, from CodePath, names six steps: **U**nderstand, **M**atch, **P**lan, **I
 ★ **UMPIRE, minutes and phrases.**
 
 | Step | Minutes | Say this | Not this |
-|---|---|---|---|
+|--------|------|------------------------------------|----------------|
 | Understand | 0–5 | "Let me restate it: given … return …. Can the input be empty? Are values bounded? Duplicates, negatives?" | starting to type |
 | Match | 5–8 | "Contiguous and longest suggests a sliding window; let me check that it fits." | "I think I have seen this one." |
 | Plan | 8–15 | "A naive way is O(*n*²) over all pairs. The inner loop repeats a sum, so a prefix sum removes it. Is that direction fine with you?" | coding before agreement |
@@ -184,7 +184,7 @@ The containers are taught in [§2.21](#s2-21){.ref} (C++) and [§2.16](#s2-16){.
 ★ **I need …, in C++ and in Python.**
 
 | I need | C++ | Python |
-|---|---|---|
+|----------------|----------------------------------|--------------------------|
 | sort by a key, ties by another | `sort(v.begin(), v.end(), [](auto& a, auto& b){ return a.x < b.x; })` (not stable) | `v.sort(key=lambda t: (t[0], -t[1]))` (stable) |
 | a min-heap | `priority_queue<int, vector<int>, greater<int>> pq;` | `heapq.heappush(h, x)`; negate for a max-heap |
 | first element not less than *x* | `lower_bound(v.begin(), v.end(), x)` | `bisect.bisect_left(a, x)` |
@@ -217,7 +217,7 @@ Mnemonics that live elsewhere: the OSI order (*All People Seem To Need Data Proc
 ★ **Mnemonics.**
 
 | Topic | Hook | It decodes to |
-|---|---|---|
+|----------------|----------------------|----------------------------------------|
 | TCP/IP layers, top to bottom | *Aunt Tina Is Nice* | Application, Transport, Internet, Network access |
 | PDU names, top to bottom | *Do Some People Fear Birthdays* | Data, Segment, Packet, Frame, Bits |
 | TCP flags in header order | *Cats Eat Under All People's Red Sofas Freely* | CWR, ECE, URG, ACK, PSH, RST, SYN, FIN |
@@ -292,7 +292,7 @@ The ports every candidate knows (FTP, SSH, Telnet, SMTP, DNS, DHCP, HTTP, BGP, H
 ★ **Good to know, for networking roles.**
 
 | Port or number | Service | Note |
-|---|---|---|
+|----------------|------------------|----------------------------------|
 | TCP 49 | TACACS+ | device administration; RADIUS is UDP 1812 and 1813 |
 | UDP 500, UDP 4500 | IKE, IPsec NAT traversal | ESP is IP protocol 50 and AH is 51 |
 | TCP 646 | LDP | also UDP 646 for hellos |
@@ -325,7 +325,7 @@ The Cisco administrative-distance table is in the Revision Spread of Pillar 4 ([
 ★ **Default distance or preference; lower wins everywhere.**
 
 | Source | Cisco IOS | Junos | Arista EOS | Nokia SR OS |
-|---|---|---|---|---|
+|----------------|----------|----------------|----------|--------------|
 | Connected, local | 0 | 0 | 0 | 0 |
 | Static | 1 | 5 | 1 | 5 |
 | OSPF internal | 110 | 10 | 110 | 10 |
@@ -342,7 +342,7 @@ The Cisco administrative-distance table is in the Revision Spread of Pillar 4 ([
 ### Pointers
 
 | Need | Where | Question |
-|---|---|---|
+|----------------------------------------|--------------------------|--------|
 | Header bit layouts: Ethernet, 802.1Q, ARP, IPv4, IPv6, TCP, UDP | [§3.3](#s3-3){.ref}, [§3.5](#s3-5){.ref}, [§3.6](#s3-6){.ref}, [§3.7](#s3-7){.ref}, [§3.9](#s3-9){.ref}, [§4.2](#s4-2){.ref} | [Q3.3](#ps3){.ref} |
 | "What happens when you type google.com": the nine-stage ladder and its two-minute version | [§3.11](#s3-11){.ref} | [Q3.45](#ps3){.ref} |
 | Troubleshooting skeleton, the SCALPEL card and the layer command matrix | [§11.2](#s11-2){.ref}, [§11.5](#s11-5){.ref} | [Q11.1](#ps11){.ref} |
@@ -362,7 +362,7 @@ The platforms (HackerRank, AMCAT, Mercer Mettl, CoCubes) and their habits, such 
 ★ **Reported OA formats, nine companies (candidate reports, 2022 to 2026).**
 
 | Company | Platform reported | Reported format | Topics |
-|---|---|---|---|
+|--------|----------|--------------------------------------|----------------------|
 | Cisco | HackerRank | 2023: 90 min, 42 questions (40 MCQ and 2 coding); 2024: 41 MCQ and 1 coding; 2026 guides: about 90 min, about 40 MCQ and 2 DSA. Coding in C, Python or Java; AI proctoring; no negative marking reported. The 2025 network-engineer drive (Bengaluru) added a presentation after the test. | networking (TCP/IP, OSI, routing, security), OS, DBMS, aptitude, C output |
 | Juniper | HackerRank | 90 min, 33 questions (32 MCQ and 1 coding). October 2024 internship: 38 questions (35 MCQ and 3 coding), tight on time. Older reports: about 50 networking and C MCQs. Four to five rounds in all. | aptitude, CN, DBMS, OS, HTML/CSS, output prediction, time complexity |
 | Qualcomm | varies by drive | sectioned MCQs; no fixed duration reported | aptitude, C (pointers, `const`, structs and unions, padding, `volatile`, `static`), OS, architecture, digital logic, networking |
@@ -382,7 +382,7 @@ The method is the two-pass method of [§12.1](#s12-1){.ref}: read for three minu
 ★ **Budgets by format (minutes).**
 
 | Format | Read | MCQ | Coding | Buffer | Total | Rule of thumb |
-|---|---|---|---|---|---|---|
+|----------------|-----|------------------|----------|------|-----|------------------------|
 | Juniper A: 32 MCQ and 1 coding, 90 min | 3 | 27 | 45 | 15 | 90 | about 50 s per MCQ; the buffer funds a second pass |
 | Juniper B: 35 MCQ and 3 coding, 90 min | 3 | 26 | 20 + 20 + 15 | 6 | 90 | 45 s per MCQ; bank every easy coding case first |
 | Qualcomm: 50 MCQ, 60 min | 2 | 17 (aptitude, 15) + 20 (C, 20) + 8 (OS and architecture, 10) + 4 (CN, 5) | none | 9 | 60 | answer CN and OS first if sections are not locked: they are the quickest marks |
@@ -395,7 +395,7 @@ The checks in each row are arithmetic: 3 + 27 + 45 + 15 = 90; 3 + 26 + 55 + 6 = 
 ★ **Coding triage: when the verdict is not "accepted".**
 
 | Verdict or symptom | Usual cause | Fix |
-|---|---|---|
+|----------------------|--------------------------|----------------------------|
 | time limit exceeded, C++ | `cin`/`cout` unsynchronised, or `endl` flushing every line | `ios::sync_with_stdio(false); cin.tie(nullptr);` and `'\n'` |
 | time limit exceeded, Python | `input()` on large input; a nested loop | `sys.stdin.readline`; a built-in or a hash map |
 | wrong answer on a few hidden cases | overflow in a sum or product | `long long`; reduce modulo early |
@@ -412,7 +412,7 @@ Eight habits remove options before any arithmetic starts. A seconds budget appli
 ★ **Elimination, with one worked case each.**
 
 | # | Tactic | Worked case |
-|---|---|---|
+|--|----------------------|--------------------------------------------------|
 | 1 | Strike absolute words ("always", "never", "guarantees") unless the statement is a definition | *Which statement about UDP is correct? (a) It always delivers in order (b) It never uses a checksum (c) It has no connection set-up (d) It guarantees delivery.* Three options carry absolutes and are false; the answer is (c). |
 | 2 | Map each option to its layer; wrong-layer options are distractors | *Which device separates broadcast domains? Hub, switch, router, repeater.* Only a router (or a Layer 3 switch with VLANs) works. |
 | 3 | Estimate the order of magnitude first | *Transmission time of a 1,500-byte frame on 1 Gb/s: (a) 12 ms (b) 1.2 ms (c) 12 µs (d) 1.2 µs.* 1,500 bytes is about 10<sup>4</sup> bits and 10<sup>4</sup> / 10<sup>9</sup> is 10<sup>−5</sup> s, so (c); exact: 12,000 / 10<sup>9</sup> = 12 µs. |
@@ -427,7 +427,7 @@ Eight habits remove options before any arithmetic starts. A seconds budget appli
 Aptitude formula cards are not repeated here. Each topic has one card with two solved examples, and the forty further MCQs of [the Pillar 12 set](#ps12){.ref} follow the same order.
 
 | Aptitude topic | Card |
-|---|---|
+|------------------------------------------------------------|--------|
 | Divisibility, divisors, cycles of unit digits, remainders, HCF and LCM, bases | [§12.2](#s12-2){.ref} |
 | Percentages, profit and loss, ratio, mixtures, averages | [§12.3](#s12-3){.ref} |
 | Work and pipes, speed, trains, boats | [§12.4](#s12-4){.ref} |
@@ -438,7 +438,7 @@ Aptitude formula cards are not repeated here. Each topic has one card with two s
 The C output traps are numbered T1 to T36 in [§2.15](#s2-15){.ref}. Use the index below to jump from what a snippet contains to the trap that explains it.
 
 | The snippet contains | Look at |
-|---|---|
+|--------------------------------------------------|--------------------|
 | two writes to one variable, `i++` with `++i` | T1, T12, T17 |
 | `sizeof`, array parameters, `strlen` | T2, T6, T25 |
 | `printf` return value, format specifiers | T3, T31 |
@@ -465,7 +465,7 @@ An HR round is short, and the offer that follows it is a document, so both rewar
 The behavioural material is taught once, in Pillar 12.
 
 | Need | Home | Model answers |
-|---|---|---|
+|----------------------------------------|------------|------------------|
 | STAR and STAR-L, with the Action share of the time | [§12.12](#s12-12){.ref} | [Q12.43 to Q12.50](#ps12){.ref} |
 | The sixteen Amazon Leadership Principles and the story bank | [§12.12](#s12-12){.ref} | [Q12.43 to Q12.50](#ps12){.ref} |
 | "Tell me about yourself", with the product named for each company | [§12.12](#s12-12){.ref} | [Q12.41](#ps12){.ref} |
@@ -479,7 +479,7 @@ Every frame has the same three parts: a plain claim, one piece of evidence, and 
 ★ **Twenty further questions.**
 
 | Question | Frame |
-|---|---|
+|------------------------|----------------------------------------------------|
 | What do you know about us? | One product, one recent public announcement, one team; check the careers page the day before. Then: "this is why the role interests me." |
 | Your biggest achievement? | One project or result with a number, in two sentences; then what it taught you. |
 | How do you handle pressure? | Name a method (list tasks, ask early for help, cut scope), then a deadline from a project or exam that shows it working. |
@@ -508,7 +508,7 @@ The basic lesson (compare *guaranteed annual cash*, and see which items can move
 ★ **What each component is and how to value it.**
 
 | Component | What to ask | How to value it |
-|---|---|---|
+|------------|------------------------------|----------------------------------|
 | Fixed base | monthly gross, and the split into basic, house-rent allowance and special allowance | fully; the basic sets the provident-fund and gratuity amounts |
 | Employer provident fund | percentage of basic, and whether it is inside or outside the base | counted in CTC but not in monthly pay; value it, but it is not cash you can spend |
 | Gratuity | confirm it is accrued, not paid yearly | last drawn basic × 15 / 26 × years of service, payable after five years under the Payment of Gratuity Act; value at zero for a short stay |
@@ -539,7 +539,7 @@ Hence the headline ranks C above D by 3 per year, whereas the cash ranks D above
 ★ **Words for the conversation.**
 
 | Step | Say | Because |
-|---|---|---|
+|----------|--------------------------------------------|--------------------------|
 | Thank | "Thank you; I am glad to receive this offer and I would like to join." | enthusiasm comes first and costs nothing |
 | Ask for the details | "Could you share the break-up in writing: base, variable payout history, bonus terms and vesting?" | you cannot negotiate what you cannot see |
 | Ask for time | "May I have a few working days to decide?" | a considered answer is normal; pressure is a signal |

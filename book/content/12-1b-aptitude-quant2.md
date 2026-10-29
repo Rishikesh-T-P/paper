@@ -270,6 +270,33 @@ All five topics in this section are rate problems: a quantity done per unit of t
 [Result: (a) 130°; (b) about 4:21:49; (c) Saturday.]{.result}
 :::
 
+#### Formula card: mensuration
+
+- Rectangle: area *lb*, perimeter 2(*l* + *b*). Circle: area π*r*<sup>2</sup>, circumference 2π*r*; use π = 22/7 when the radius is a multiple of 7.
+- Cuboid: volume *lbh*, surface 2(*lb* + *bh* + *hl*). Cube: volume *a*<sup>3</sup>, surface 6*a*<sup>2</sup>.
+- Cylinder: volume π*r*<sup>2</sup>*h*, curved surface 2π*rh*. Cone: volume (1/3)π*r*<sup>2</sup>*h*. Sphere: volume (4/3)π*r*<sup>3</sup>.
+- 1 m<sup>3</sup> = 1,000 litres; 1 litre = 1,000 cm<sup>3</sup>.
+
+**Shortcut.** Convert every length to one unit first; most errors are unit errors.
+
+::: example
+**A rectangular tank is 4 m long, 3 m wide and 2.5 m deep. How many litres does it hold when full?**
+
+1. Volume = 4 × 3 × 2.5 = 30 m<sup>3</sup>.
+2. Each cubic metre is 1,000 litres.
+
+[Result: 30,000 litres.]{.result}
+:::
+
+::: example
+**A cylindrical cable drum has radius 7 cm and height 20 cm. Find its volume and curved surface area (π = 22/7).**
+
+1. Volume = (22/7) × 7<sup>2</sup> × 20 = 22 × 7 × 20 = 3,080 cm<sup>3</sup>.
+2. Curved surface = 2 × (22/7) × 7 × 20 = 880 cm<sup>2</sup>.
+
+[Result: 3,080 cm<sup>3</sup> and 880 cm<sup>2</sup>.]{.result}
+:::
+
 ::: check
 1. A sum of ₹10,000 at 10% compound: find CI − SI over three years. [^c12b-5]
 2. Ways to arrange the letters of ROUTER. [^c12b-6]

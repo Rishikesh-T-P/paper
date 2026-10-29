@@ -203,23 +203,23 @@ private:
 [30-second answer: one `RoutingTable` class holding a dictionary per prefix length; lookup tries lengths from 32 down to 0 and returns the first match, so it costs at most 33 hash probes. For millions of routes use a trie ([§1.9](#s1-9){.ref}).]{.short}
 
 ```python
-import ipaddress
+import ipaddress as ip
 
 class RoutingTable:
     def __init__(self):
-        self.by_len = {}                      # prefix length -> {network: next hop}
-    def add(self, prefix, next_hop):
-        net = ipaddress.ip_network(prefix)
-        self.by_len.setdefault(net.prefixlen, {})[net] = next_hop
+        self.by_len = {}              # length -> {network as int: next hop}
+    def add(self, prefix, hop):
+        n = ip.ip_network(prefix)
+        self.by_len.setdefault(n.prefixlen, {})[int(n.network_address)] = hop
     def delete(self, prefix):
-        net = ipaddress.ip_network(prefix)
-        self.by_len.get(net.prefixlen, {}).pop(net, None)
-    def lookup(self, ip):
-        a = int(ipaddress.ip_address(ip))
-        for plen in sorted(self.by_len, reverse=True):          # longest first
-            net = ipaddress.ip_network(((a >> (32 - plen)) << (32 - plen), plen))
-            if net in self.by_len[plen]:
-                return self.by_len[plen][net]
+        n = ip.ip_network(prefix)
+        self.by_len.get(n.prefixlen, {}).pop(int(n.network_address), None)
+    def lookup(self, addr):
+        a = int(ip.ip_address(addr))
+        for plen in sorted(self.by_len, reverse=True):     # longest first
+            key = (a >> (32 - plen)) << (32 - plen)
+            if key in self.by_len[plen]:
+                return self.by_len[plen][key]
         return None
 ```
 

@@ -14,7 +14,7 @@
 4. [12D · Computer organisation (12.10)]{} [SHOULD]{}
 5. [12E · Light system design for networking roles (12.11)]{} [MUST]{}
 6. [12F · Behavioural interviews, STAR and Amazon principles (12.12)]{} [MUST]{}
-7. [12G · Résumé and project deep-dives (12.13)]{} [MUST]{}
+7. [12G · Résumé and project deep-dives (12.13 and 12.14)]{} [MUST]{}
 :::
 
 Pillars 1 to 11 teach what a network engineer must know. This pillar teaches what stands between that knowledge and the offer: the online assessment that creates the shortlist, the core-computing viva that every campus panel adds, the design conversation, the behavioural round and the document that starts all of them. None of it is difficult in the way BGP is difficult; all of it is lost by the unprepared through speed, vocabulary and structure. We therefore treat each topic as a drill: a formula card, a shortcut, and worked examples that can be redone on paper in two minutes.

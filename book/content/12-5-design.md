@@ -78,10 +78,9 @@ The numbers in step 2 are quick if a few conversions are fixed in memory.
 <line x1="205" y1="102" x2="332" y2="140"/><line x1="275" y1="102" x2="332" y2="140"/>
 <line x1="210" y1="102" x2="428" y2="140"/><line x1="270" y1="102" x2="428" y2="140"/>
 </g>
-<text class="sm" x="240" y="124" text-anchor="middle">each building: dual uplinks to both cores (distribution pair and access layer inside)</text>
 <text class="sm" x="240" y="182" text-anchor="middle">OSPF area 0 on core links; one stub area per building summarising 10.b.0.0/16</text>
 </svg>
-<figcaption><b>Figure 12.12</b> Campus Net, collapsed to one line per building: dual cores, dual firewalls and dual uplinks, so that no single device failure isolates a building.</figcaption>
+<figcaption><b>Figure 12.12</b> Campus Net, collapsed to one line per building: dual cores, dual firewalls and dual uplinks from each building (each box contains its own distribution pair and access layer), so that no single device failure isolates a building.</figcaption>
 </figure>
 
 **Deep-dive 1: addressing and VLANs.** One /16 per building gives each distribution pair one summary route. The second octet is the building, and the third octet is the VLAN, grouped by role.

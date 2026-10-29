@@ -48,9 +48,9 @@ Reasoning questions test method more than knowledge. Each family has one drawing
 <line class="ln" x1="32" y1="108" x2="32" y2="118"/>
 <text class="lbl" x="56" y="116">child below</text>
 <text class="lbl" x="170" y="14">A is B's sister; C is B's mother; D is C's father</text>
-<rect class="box" x="230" y="26" width="16" height="16"/><text class="sm" x="238" y="52" text-anchor="middle">D</text>
+<rect class="box" x="230" y="26" width="16" height="16"/><text class="sm" x="256" y="38">D</text>
 <line class="ln" x1="238" y1="42" x2="238" y2="62"/>
-<circle class="box" cx="238" cy="72" r="8"/><text class="sm" x="238" y="92" text-anchor="middle">C</text>
+<circle class="box" cx="238" cy="72" r="8"/><text class="sm" x="252" y="76">C</text>
 <line class="ln" x1="238" y1="80" x2="238" y2="90"/>
 <line class="ln" x1="200" y1="96" x2="276" y2="96"/>
 <line class="ln" x1="200" y1="96" x2="200" y2="104"/><line class="ln" x1="276" y1="96" x2="276" y2="104"/>
@@ -112,7 +112,7 @@ Reasoning questions test method more than knowledge. Each family has one drawing
 - Data sufficiency options: (A) I alone; (B) II alone; (C) both together, neither alone; (D) each alone; (E) neither, even together. Test each statement alone first, then both.
 
 <figure>
-<svg viewBox="0 0 480 120" width="480">
+<svg viewBox="0 0 480 132" width="480">
 <text class="lbl" x="120" y="14" text-anchor="middle">Case 1: R overlaps S</text>
 <circle class="box" cx="100" cy="68" r="40"/><circle class="fill" cx="100" cy="68" r="20" style="opacity:.8"/>
 <ellipse class="box" cx="135" cy="68" rx="26" ry="14"/>
@@ -121,7 +121,7 @@ Reasoning questions test method more than knowledge. Each family has one drawing
 <circle class="box" cx="340" cy="68" r="40"/><circle class="fill" cx="326" cy="68" r="18"/>
 <ellipse class="box" cx="368" cy="68" rx="22" ry="14"/>
 <text class="sm" x="320" y="72">S</text><text class="sm" x="300" y="46">D</text><text class="sm" x="362" y="72">R</text>
-<text class="sm" x="240" y="112" text-anchor="middle">"All S are D; some D are R": both drawings are legal, so "some S are R" does not follow</text>
+<text class="sm" x="240" y="126" text-anchor="middle">"All S are D; some D are R": both drawings are legal, so "some S are R" does not follow</text>
 </svg>
 <figcaption><b>Figure 12.4</b> A conclusion is valid only if it holds in every legal drawing; here the second drawing breaks it.</figcaption>
 </figure>
@@ -142,6 +142,21 @@ Reasoning questions test method more than knowledge. Each family has one drawing
 2. (b) Neither statement alone gives a speed over the whole journey. Together, with equal halves, the average is 2 × 60 × 40/100 = 48 km/h, whatever the distance. Answer C.
 
 [Result: (a) A; (b) C.]{.result}
+:::
+
+#### Formula card: puzzles by the grid method
+
+- Draw a table with the people as rows and each attribute as a column. Mark a cross for every "not" clue and a tick for every "is" clue; each tick forces crosses in its row and column.
+- Start with the clue that names a single cell, then use elimination: when a row or column has one empty cell left, it is a tick.
+
+::: example
+**Asha, Ravi and Meena each manage one of a router, a switch and a firewall, and each works one shift: morning, afternoon or night. (i) Ravi works the morning shift. (ii) The router's manager works nights. (iii) Asha does not manage the firewall. (iv) Meena does not manage the switch. (v) Ravi does not manage the firewall. Who manages what, and when?**
+
+1. (iv): Meena manages the router or the firewall. (iii): Asha manages the router or the switch. (v): Ravi manages the router or the switch.
+2. (i) and (ii): Ravi works mornings, so he is not the router's manager; hence Ravi manages the switch.
+3. Then Asha has the router, and Meena the firewall. By (ii) Asha, who has the router, works nights, so Meena works afternoons.
+
+[Result: Asha, router, night; Ravi, switch, morning; Meena, firewall, afternoon.]{.result}
 :::
 
 ::: check

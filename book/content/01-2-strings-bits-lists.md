@@ -84,7 +84,128 @@ bool parse_mac(const char *s, uint8_t mac[6]) {
 }
 ```
 
+An IPv6 address adds one difficulty, the *zero compression* `::`, which stands for one or more groups of zeros and may appear once. The method is to collect the groups before and after the `::` in two arrays, and to place the second array at the end of the 16 bytes, leaving the zeros in between.
+
+```c
+bool parse_ipv6(const char *s, uint8_t out[16]) {
+    uint16_t g[2][8];                     /* groups before and after "::" */
+    int n[2] = {0, 0}, side = 0;
+    if (s[0] == ':') {                    /* a leading colon must be "::" */
+        if (s[1] != ':') return false;
+        side = 1; s += 2;
+    }
+    while (*s) {
+        unsigned v = 0; int digits = 0;
+        while (isxdigit((unsigned char)*s)) {
+            v = v * 16 + (unsigned)hexval(*s++);
+            if (++digits > 4) return false;
+        }
+        if (digits == 0 || n[0] + n[1] >= 8) return false;
+        g[side][n[side]++] = (uint16_t)v;
+        if (!*s) break;
+        if (*s++ != ':') return false;
+        if (*s == ':') {                  /* "::" */
+            if (side == 1) return false;  /* only one allowed */
+            side = 1; s++;
+        } else if (!*s) return false;     /* trailing single colon */
+    }
+    int total = n[0] + n[1];
+    if (side == 0 ? total != 8 : total > 7) return false;
+    memset(out, 0, 16);
+    for (int i = 0; i < n[0]; i++) {
+        out[2*i] = g[0][i] >> 8;  out[2*i + 1] = g[0][i] & 0xFF;
+    }
+    for (int i = 0; i < n[1]; i++) {
+        int pos = 8 - n[1] + i;           /* right-aligned */
+        out[2*pos] = g[1][i] >> 8;  out[2*pos + 1] = g[1][i] & 0xFF;
+    }
+    return true;
+}
+```
+
+Without a `::` exactly eight groups are required; with one, at most seven, because `::` must replace at least one group. For `2001:db8::1`, the groups before the gap are `2001` and `0db8`, the group after it is `1`, and the 16 bytes are `20 01 0d b8` followed by ten zero bytes and `00 01`. The forms with an embedded IPv4 suffix (`::ffff:192.0.2.1`) are omitted here; they add a final step that calls `parse_ipv4`.
+
 A CIDR string `a.b.c.d/p` is handled by parsing the address up to the slash, then parsing *p* as a decimal number in 0–32 with the same no-leading-zero rule. Validation of IPv6 groups and the reporting problems built on these parsers are in the Problem Set ([Problem Set](#ps1){.ref}).
+
+### Substring search
+
+*Idea.* To find a pattern of length *m* in a text of length *n*, the naive method compares at every start position and costs O(*nm*) in the worst case (`aaaa…ab` against `aaab`). The Knuth–Morris–Pratt (KMP) method never moves backwards in the text. It precomputes, for each prefix of the pattern, the length of the longest proper prefix that is also a suffix; after a mismatch, that length says how much of the pattern is still known to match. *Recognise:* "find the pattern", "repeated substring", "does *B* occur in *A*". *Complexity:* O(*n* + *m*) time, O(*m*) space.
+
+```cpp
+vector<int> prefixFunction(const string& p) {   // pi[i]: border of p[0..i]
+    vector<int> pi(p.size(), 0);
+    for (size_t i = 1, k = 0; i < p.size(); ++i) {
+        while (k && p[i] != p[k]) k = pi[k - 1];   // shorter border
+        if (p[i] == p[k]) ++k;
+        pi[i] = k;
+    }
+    return pi;
+}
+int findFirst(const string& s, const string& p) {  // first index or -1
+    if (p.empty()) return 0;
+    vector<int> pi = prefixFunction(p);
+    for (size_t i = 0, k = 0; i < s.size(); ++i) {
+        while (k && s[i] != p[k]) k = pi[k - 1];
+        if (s[i] == p[k]) ++k;
+        if (k == p.size()) return (int)(i - k + 1);
+    }
+    return -1;
+}
+```
+
+For the pattern `ababc`, the table is `pi = [0, 0, 1, 2, 0]`: for example `abab` has the border `ab`, so `pi[3] = 2`. Searching `abababc`, the match length `k` runs 1, 2, 3, 4 over `abab`, then the text character `a` meets pattern character `c` and `k` falls back from 4 to `pi[3] = 2` instead of restarting at zero; the match then continues 3, 4, 5 and ends at index 6, so the answer is 6 − 5 + 1 = 2. The pointer `i` never moves back, which is the source of the linear bound. A common alternative is the rolling hash of Rabin and Karp: hash each window of length *m* in O(1) by removing the leading character and adding the trailing one, and verify only on a hash match; it runs in O(*n* + *m*) on average and extends to many patterns at once.
+
+::: lab
+`LAB 1.4 · 10 MIN` Check the parser against the C library, which is the reference implementation. Put `hexval` and `parse_ipv6` of this section in `v6.c`, with the driver below, and compile.
+
+```c
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+/* ... hexval() and parse_ipv6() from this section ... */
+int main(void) {
+    const char *t[] = { "::", "::1", "1::", "2001:db8::ff00:42:8329",
+        "1:2:3:4:5:6:7:8", "1:2:3:4:5:6:7::", "1::2::3", ":1:2:3:4:5:6:7",
+        "12345::", "1:2:3:4:5:6:7:8:9", "1:2:3:4:5:6:7:8:", "g::1",
+        "1:::2" };
+    int bad = 0;
+    for (size_t i = 0; i < sizeof t / sizeof *t; i++) {
+        uint8_t mine[16], ref[16];
+        int a = parse_ipv6(t[i], mine);
+        int b = inet_pton(AF_INET6, t[i], ref) == 1;
+        int same = (a == b) && (!a || memcmp(mine, ref, 16) == 0);
+        printf("%-26s mine=%d lib=%d %s\n", t[i], a, b,
+               same ? "ok" : "MISMATCH");
+        bad += !same;
+    }
+    printf("%d mismatches\n", bad);
+    return bad != 0;
+}
+```
+
+```
+$ gcc -Wall -o v6 v6.c && ./v6
+::                         mine=1 lib=1 ok
+::1                        mine=1 lib=1 ok
+1::                        mine=1 lib=1 ok
+2001:db8::ff00:42:8329     mine=1 lib=1 ok
+1:2:3:4:5:6:7:8            mine=1 lib=1 ok
+1:2:3:4:5:6:7::            mine=1 lib=1 ok
+1::2::3                    mine=0 lib=0 ok
+:1:2:3:4:5:6:7             mine=0 lib=0 ok
+12345::                    mine=0 lib=0 ok
+1:2:3:4:5:6:7:8:9          mine=0 lib=0 ok
+1:2:3:4:5:6:7:8:           mine=0 lib=0 ok
+g::1                       mine=0 lib=0 ok
+1:::2                      mine=0 lib=0 ok
+0 mismatches
+```
+
+**What you should notice:** the seven malformed strings (two `::`, a leading single colon, five-digit group, nine groups, trailing colon, non-hex letter, three colons) are all rejected by both, and the valid ones give identical bytes. Add your own cases; every mismatch is a bug in one of the two, and the library is usually right.
+:::
 
 ::: check
 1. Why is `01.2.3.4` rejected even though `atoi("01")` is 1? [^c1-8]
@@ -162,7 +283,7 @@ void describe(uint32_t ip, unsigned p,
 *Claim:* `0xFFFFFFFFu << (32 - p)` is correct for every prefix length. *Why it is wrong:* for *p* = 0 the shift count is 32, which equals the width of the type, and the C standard leaves that undefined (x86 silently reduces the count modulo 32 and returns the unshifted value). *Correct statement:* special-case *p* = 0 as in `mask_of`.
 :::
 
-@<figure>
+<figure>
 <svg viewBox="0 0 450 142" width="486">
 <text class="sm" x="10" y="41" text-anchor="start">IP</text>
 <rect class="lg" x="70" y="30" width="11" height="16"/>
@@ -388,7 +509,7 @@ void describe(uint32_t ip, unsigned p,
 <rect class="lg" x="429" y="96" width="11" height="16"/>
 <text class="mono" x="434.5" y="108" text-anchor="middle">0</text><text class="sm" x="70" y="18" text-anchor="start">10</text><text class="sm" x="164" y="18" text-anchor="start">20</text><text class="sm" x="258" y="18" text-anchor="start">30</text><text class="sm" x="352" y="18" text-anchor="start">40</text><line class="ln" x1="70" y1="86" x2="440" y2="86"/><text class="sm" x="70" y="130" text-anchor="start">network 10.20.28.0; broadcast = network OR NOT mask = 10.20.31.255; shaded = host bits</text>
 </svg>
-<figcaption><b>Figure 1.3</b> The same-subnet test in bits. AND with the mask keeps the 22 network bits and clears the 10 host bits.</figcaption>
+<figcaption><b>Figure 1.6</b> The same-subnet test in bits. AND with the mask keeps the 22 network bits and clears the 10 host bits.</figcaption>
 </figure>
 
 ::: example
@@ -404,6 +525,54 @@ void describe(uint32_t ip, unsigned p,
 :::
 
 *Complexity.* Every operation here is O(1); `popcount` by clearing the lowest bit is O(*number of set bits*). GCC and Clang offer `__builtin_popcount` and `__builtin_clz`, but interviewers usually want the loop.
+
+### Packing and unpacking header fields
+
+Protocol headers pack several fields into one byte or word, and reading them is a matter of shifts and masks. The layout of the IPv4 header is taught with the other headers (Pillar 3); the code below extracts the fields of its first eight bytes: the version and header length share byte 0, the traffic class shares byte 1, the total length fills bytes 2–3, and bytes 6–7 hold three flag bits above a 13-bit fragment offset counted in units of eight bytes.
+
+```c
+typedef struct {
+    unsigned version, hdr_bytes, dscp, ecn, total_len, df, mf, frag_bytes;
+} Ip4Info;
+
+void ip4_fields(const uint8_t *h, Ip4Info *o) {
+    unsigned ff = (unsigned)h[6] << 8 | h[7];           /* flags + offset */
+    o->version   = h[0] >> 4;
+    o->hdr_bytes = (h[0] & 0x0Fu) * 4;  /* IHL counts words */
+    o->dscp      = h[1] >> 2;
+    o->ecn       = h[1] & 0x03u;
+    o->total_len = (unsigned)h[2] << 8 | h[3];
+    o->df        = (ff >> 14) & 1u;
+    o->mf        = (ff >> 13) & 1u;
+    o->frag_bytes = (ff & 0x1FFFu) * 8;
+}
+```
+
+| Byte | 0 | 1 | 2 | 3 | 6 | 7 |
+|---|---|---|---|---|---|---|
+| Value | 0x45 | 0x00 | 0x00 | 0x73 | 0x40 | 0x00 |
+| Field | version 4, IHL 5 | DSCP 0, ECN 0 | total length 0x0073 = 115 | | flags 010 (DF set) | offset 0 |
+
+For the bytes shown, the header is 5 × 4 = 20 bytes long, the packet is 115 bytes, and the *don't fragment* flag is set. Reading multi-byte fields byte by byte, as above, avoids both alignment faults and byte-order mistakes, because it does not depend on the host's endianness.
+
+### Bitmasks as sets
+
+An integer of *n* bits can represent a subset of *n* items, so that the union is `|`, the intersection is `&`, membership is a bit test, and all subsets are the integers 0 to 2^*n* − 1. This is practical for *n* ≤ 20 (about 10^6 subsets). *Recognise:* "all subsets", "choose a subset such that", small *n*.
+
+```cpp
+int countSubsetsWithSum(const vector<int>& a, int target) {   // n <= 20
+    int n = a.size(), count = 0;
+    for (unsigned m = 0; m < (1u << n); ++m) {
+        long long sum = 0;
+        for (int i = 0; i < n; ++i)
+            if (m >> i & 1u) sum += a[i];
+        if (sum == target) ++count;
+    }
+    return count;
+}
+```
+
+The empty subset is included (it has sum zero). The cost is O(2^*n* · *n*); iterating only over the set bits with `x &= x - 1` and `ctz` removes the inner scan.
 
 ::: lens
 [QUALCOMM · BROADCOM · JUNIPER · CISCO]{.co}
@@ -442,11 +611,11 @@ Node *push_front(Node *head, int v) {
 
 To delete a node we must re-point the link that leads to it. For a middle node that link is the previous node's `next`; for the first node it is the `head` variable itself, which is why a naive version needs a special case for the head. If we hold a pointer to the link (a `Node **`), both cases are the same.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 420 130" width="454"><defs><marker id="a4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a4b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
 <rect class="box" x="10" y="20" width="40" height="24"/><text class="mono" x="30" y="35" text-anchor="middle">head</text><rect class="box" x="100" y="20" width="60" height="24"/><line class="ln" x1="133.0" y1="20" x2="133.0" y2="44"/><text class="mono" x="116.5" y="35.0" text-anchor="middle">A</text><rect class="box" x="210" y="20" width="60" height="24"/><line class="ln" x1="243.0" y1="20" x2="243.0" y2="44"/><text class="mono" x="226.5" y="35.0" text-anchor="middle">B</text><rect class="box" x="320" y="20" width="60" height="24"/><line class="ln" x1="353.0" y1="20" x2="353.0" y2="44"/><text class="mono" x="336.5" y="35.0" text-anchor="middle">C</text><line class="ln" x1="50" y1="32" x2="100" y2="32" marker-end="url(#a4)"/><line class="ln" x1="133" y1="32" x2="210" y2="32" marker-end="url(#a4)"/><line class="ln" x1="243" y1="32" x2="320" y2="32" marker-end="url(#a4)"/><text class="sm" x="395" y="35" text-anchor="middle">NULL</text><line class="ln" x1="353" y1="32" x2="375" y2="32" marker-end="url(#a4)"/><path class="acc" d="M133,44 Q200,78 320,44" marker-end="url(#a4b)"/><text class="sm" x="240" y="84" text-anchor="middle">&#42;pp = (&#42;pp)->next  bypasses B</text><rect class="box" x="115" y="95" width="36" height="22"/><text class="mono" x="133" y="110" text-anchor="middle">pp</text><line class="ln" x1="133" y1="95" x2="133" y2="46" marker-end="url(#a4)"/>
 </svg>
-<figcaption><b>Figure 1.4</b> The pointer-to-pointer idiom. pp holds the address of the link that points at the current node (head, or the next field of the predecessor), so the head needs no special case.</figcaption>
+<figcaption><b>Figure 1.7</b> The pointer-to-pointer idiom. pp holds the address of the link that points at the current node (head, or the next field of the predecessor), so the head needs no special case.</figcaption>
 </figure>
 
 ```c
@@ -477,11 +646,11 @@ For `3 → 5 → 3 → 7` and key 3, `delete_all` removes the head (the link `he
 
 Three pointers walk the list: `prev` (the already reversed part), `head` (the current node) and `next`, saved before the current `next` field is overwritten. The classic bug is to overwrite first and so lose the rest of the list.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 400 170" width="432"><defs><marker id="a3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a3b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
 <text class="sm" x="10" y="24" text-anchor="start">before:  prev = NULL, curr = 1</text><rect class="box" x="80" y="30" width="60" height="24"/><line class="ln" x1="113.0" y1="30" x2="113.0" y2="54"/><text class="mono" x="96.5" y="45.0" text-anchor="middle">1</text><rect class="box" x="190" y="30" width="60" height="24"/><line class="ln" x1="223.0" y1="30" x2="223.0" y2="54"/><text class="mono" x="206.5" y="45.0" text-anchor="middle">2</text><rect class="box" x="300" y="30" width="60" height="24"/><line class="ln" x1="333.0" y1="30" x2="333.0" y2="54"/><text class="mono" x="316.5" y="45.0" text-anchor="middle">3</text><text class="sm" x="30" y="45" text-anchor="middle">NULL</text><line class="ln" x1="113" y1="42" x2="190" y2="42" marker-end="url(#a3)"/><line class="ln" x1="223" y1="42" x2="300" y2="42" marker-end="url(#a3)"/><text class="sm" x="375" y="45" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="42" x2="355" y2="42" marker-end="url(#a3)"/><path class="accf" d="M96,56 l-4,7 l8,0 z"/><text class="lbl" x="96" y="73" text-anchor="middle">curr</text><path class="accf" d="M20,56 l-4,7 l8,0 z"/><text class="lbl" x="20" y="73" text-anchor="middle">prev</text><text class="sm" x="10" y="104" text-anchor="start">after one iteration:  curr = 2, prev = 1</text><rect class="box" x="80" y="110" width="60" height="24"/><line class="ln" x1="113.0" y1="110" x2="113.0" y2="134"/><text class="mono" x="96.5" y="125.0" text-anchor="middle">1</text><rect class="box" x="190" y="110" width="60" height="24"/><line class="ln" x1="223.0" y1="110" x2="223.0" y2="134"/><text class="mono" x="206.5" y="125.0" text-anchor="middle">2</text><rect class="box" x="300" y="110" width="60" height="24"/><line class="ln" x1="333.0" y1="110" x2="333.0" y2="134"/><text class="mono" x="316.5" y="125.0" text-anchor="middle">3</text><text class="sm" x="30" y="125" text-anchor="middle">NULL</text><path class="acc" d="M120,134 Q70,154 40,130" marker-end="url(#a3b)"/><line class="ln" x1="223" y1="122" x2="300" y2="122" marker-end="url(#a3)"/><text class="sm" x="375" y="125" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="122" x2="355" y2="122" marker-end="url(#a3)"/><path class="accf" d="M96,136 l-4,7 l8,0 z"/><text class="lbl" x="96" y="153" text-anchor="middle">prev</text><path class="accf" d="M206,136 l-4,7 l8,0 z"/><text class="lbl" x="206" y="153" text-anchor="middle">curr</text>
 </svg>
-<figcaption><b>Figure 1.5</b> One step of in-place reversal. The accent arrow is the single pointer rewritten; next was saved first so that the rest of the list is not lost.</figcaption>
+<figcaption><b>Figure 1.8</b> One step of in-place reversal. The accent arrow is the single pointer rewritten; next was saved first so that the rest of the list is not lost.</figcaption>
 </figure>
 
 ```c
@@ -532,6 +701,13 @@ Node *cycle_start(Node *head) {            /* NULL if there is no cycle */
 }
 ```
 
+<figure>
+<svg viewBox="0 0 480 160" width="518"><defs><marker id="a12" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<circle class="box" cx="30" cy="90" r="9"/><line class="ln" x1="39" y1="90" x2="61" y2="90"/><circle class="box" cx="70" cy="90" r="9"/><line class="ln" x1="79" y1="90" x2="101" y2="90"/><circle class="box" cx="110" cy="90" r="9"/><line class="ln" x1="119" y1="90" x2="141" y2="90"/><circle class="box" cx="150" cy="90" r="9"/><line class="ln" x1="159" y1="90" x2="181" y2="90"/><text class="lbl" x="90" y="122" text-anchor="middle">a nodes</text><text class="sm" x="30" y="70" text-anchor="middle">head</text><circle class="ln" cx="250" cy="90" r="60" style="fill:none"/><circle class="box" cx="190" cy="90" r="9" style="fill:#FFF4C2"/><text class="sm" x="190" y="68" text-anchor="middle">start</text><circle class="box" cx="270.5" cy="146.4" r="9" style="fill:#FFF4C2"/><text class="sm" x="292.52120859954016" y="164.3815572471545" text-anchor="middle">meeting</text><text class="lbl" x="190" y="128" text-anchor="middle">b</text><text class="lbl" x="300" y="130" text-anchor="middle">c</text><text class="sm" x="330" y="60" text-anchor="start">cycle length L = b + c</text><text class="sm" x="330" y="74" text-anchor="start">slow walked a + b</text><text class="sm" x="330" y="88" text-anchor="start">fast walked 2(a + b)</text><text class="sm" x="330" y="108" text-anchor="start">a + b = kL, so a = (k-1)L + c:</text><text class="sm" x="330" y="122" text-anchor="start">a pointer from the head and one</text><text class="sm" x="330" y="136" text-anchor="start">from the meeting point meet at start</text>
+</svg>
+<figcaption><b>Figure 1.9</b> The geometry behind Floyd's cycle test. The tail has a nodes; the meeting point lies b steps round the cycle from its start and c steps short of completing it.</figcaption>
+</figure>
+
 Why the second phase finds the start. Let *a* be the number of nodes from the head to the cycle start, *b* the distance from the start to the meeting point along the cycle, and *c* the remainder of the cycle, so the cycle length is *L* = *b* + *c*. When they meet, `slow` has taken *a* + *b* steps and `fast` twice as many, and the difference is a whole number *k* of laps: 2(*a* + *b*) − (*a* + *b*) = *kL*. Hence *a* = *kL* − *b* = (*k* − 1)*L* + *c*. A pointer from the head and one from the meeting point, both moving one step at a time, therefore reach the cycle start together, because the second one needs *c* steps to reach it and then some whole laps.
 
 ::: trap
@@ -557,6 +733,28 @@ Node *merge(Node *a, Node *b) {            /* both sorted ascending */
 
 Returning `dummy.next` is legal: it points to nodes that were allocated elsewhere, and only the local `dummy` itself vanishes on return. Returning `&dummy`, or a pointer to any local array, would be the classic dangling-pointer bug.
 
+To trace `merge` on `1 → 4 → 6` and `2 → 3 → 7 → 8`, the pointer `tail` appends the smaller head each time:
+
+| a | b | taken | output so far |
+|---|---|---|---|
+| 1 | 2 | 1 | 1 |
+| 4 | 2 | 2 | 1 2 |
+| 4 | 3 | 3 | 1 2 3 |
+| 4 | 7 | 4 | 1 2 3 4 |
+| 6 | 7 | 6 | 1 2 3 4 6 |
+| empty | 7 | remainder of `b` | 1 2 3 4 6 7 8 |
+
+The first line of every list problem is the choice between a list and an array, which depends on what the program does most.
+
+| Operation | Array | Singly linked list |
+|---|---|---|
+| index *i* | O(1) | O(*i*) |
+| insert or delete at the front | O(*n*) | O(1) |
+| insert or delete after a known node | O(*n*) | O(1) |
+| search | O(*n*), O(log *n*) if sorted | O(*n*) |
+| memory per element | the value only | the value and a pointer, plus allocator overhead |
+| cache behaviour | sequential, fast | scattered, slow |
+
 ### Doubly linked lists
 
 A doubly linked list adds a `prev` field, which makes deleting a *given* node O(1) with no search for its predecessor. Using a circular list with a sentinel node removes every `NULL` check:
@@ -575,6 +773,20 @@ void dl_unlink(DNode *n) {
 ```
 
 The order of the four writes in `dl_insert_after` matters: `n` is wired to its neighbours first, and the neighbours are changed last. This structure is the core of the LRU cache in [§1.15](#s1-15){.ref} and of the intrusive lists inside operating-system kernels.
+
+Operating-system kernels and router software often *embed* the list node inside the object it links, so that one allocation serves the object and its place on several lists. The macro `container_of` then recovers the object from a pointer to the embedded node, by subtracting the offset of the member.
+
+```c
+#include <stddef.h>
+#define container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - offsetof(type, member)))
+
+struct pkt { int len; DNode link; };        /* DNode from above */
+
+int pkt_len(DNode *n) { return container_of(n, struct pkt, link)->len; }
+```
+
+The list code is written once for `DNode` and works for every object type that embeds one; this is the design behind the Linux `list_head`.
 
 ::: lens
 [ARISTA · JUNIPER · NOKIA · BROADCOM]{.co}
@@ -619,11 +831,51 @@ bool balanced(const char *s) {
 }
 ```
 
+### Stacks and queues in C
+
+An array with a top index is the simplest stack. Every operation checks for overflow and underflow and reports it, because the caller, not the language, owns the error. A linked queue keeps pointers to both ends so that `enqueue` at the tail is O(1); with a single pointer it would be O(*n*).
+
+```c
+typedef struct { int a[64]; int top; } Stack;  /* top = element count */
+bool st_push(Stack *s, int v) {
+    if (s->top == 64) return false;
+    s->a[s->top++] = v;
+    return true;
+}
+bool st_pop(Stack *s, int *v) {
+    if (s->top == 0) return false;
+    *v = s->a[--s->top];
+    return true;
+}
+
+typedef struct { Node *head, *tail; } Queue;      /* Node: list section */
+bool enqueue(Queue *q, int v) {
+    Node *n = malloc(sizeof *n);
+    if (!n) return false;
+    n->val = v; n->next = NULL;
+    if (q->tail) q->tail->next = n;
+    else q->head = n;                       /* empty queue: head too */
+    q->tail = n;
+    return true;
+}
+bool dequeue(Queue *q, int *v) {
+    Node *n = q->head;
+    if (!n) return false;
+    *v = n->val;
+    q->head = n->next;
+    if (!q->head) q->tail = NULL;  /* queue became empty */
+    free(n);
+    return true;
+}
+```
+
+The classic queue bug is leaving `tail` pointing at the freed last node after the queue empties, which the second-to-last line above prevents.
+
 ### The ring buffer
 
 Packet drivers hand frames from an interrupt handler to a consumer through a fixed array used circularly. The producer writes at `tail` and the consumer reads at `head`; both wrap with a modulus. The difficulty is that `head == tail` describes both an empty and a full buffer. Three remedies exist: keep a `count`, waste one slot, or let the indices run freely and compare their difference.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 470 190" width="508">
 <text class="sm" x="20" y="14" text-anchor="start">head = 2 (next to read), tail = 6 (next to write), count = 4</text><rect class="box" style="fill:none" x="20" y="40" width="32" height="24"/>
 <text class="mono" x="36.0" y="55.0" text-anchor="middle"></text>
@@ -681,7 +933,7 @@ Packet drivers hand frames from an interrupt handler to a consumer through a fix
 <text class="mono" x="260.0" y="149.0" text-anchor="middle">g</text>
 <text class="sm" x="260.0" y="168" text-anchor="middle">7</text><path class="accf" d="M228,132 l-4,-7 l8,0 z"/><text class="lbl" x="228" y="122" text-anchor="middle">head</text><path class="accf" d="M100,160 l-4,7 l8,0 z"/><text class="lbl" x="100" y="177" text-anchor="middle">tail</text><text class="sm" x="300" y="150" text-anchor="start">head == tail alone is ambiguous:</text><text class="sm" x="300" y="163" text-anchor="start">empty or full. count resolves it.</text>
 </svg>
-<figcaption><b>Figure 1.6</b> A circular buffer of capacity eight, before and after the write index wraps. A separate count removes the full-versus-empty ambiguity.</figcaption>
+<figcaption><b>Figure 1.10</b> A circular buffer of capacity eight, before and after the write index wraps. A separate count removes the full-versus-empty ambiguity.</figcaption>
 </figure>
 
 ```c

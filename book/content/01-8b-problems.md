@@ -135,7 +135,7 @@ bool is_pal(Node *h) {
   for (Node *p = h; ok && r;
        p = p->next, r = r->next)
     if (p->val != r->val) ok = false;
-  reverse(save);          /* restore the list */
+  reverse(save);    /* restore the list */
   return ok;
 }
 ```
@@ -316,7 +316,7 @@ class MinStack {
 public:
   void push(int x) {
     int m = s.empty() ? x
-                      : min(x, s.back().second);
+        : min(x, s.back().second);
     s.push_back({x, m});
   }
   void pop() { s.pop_back(); }
@@ -352,7 +352,9 @@ public:
     out.pop(); return v;
   }
   int peek() { shift(); return out.top(); }
-  bool empty() { return in.empty() && out.empty(); }
+  bool empty() {
+    return in.empty() && out.empty();
+  }
 };
 ```
 
@@ -371,7 +373,8 @@ public:
 int evalRPN(const vector<string>& t) {
   vector<long long> st;
   for (auto& s : t) {
-    if (s.size() == 1 && strchr("+-*/", s[0])) {
+    if (s.size() == 1 &&
+        strchr("+-*/", s[0])) {
       long long b = st.back(); st.pop_back();
       long long a = st.back(); st.pop_back();
       char o = s[0];
@@ -403,10 +406,12 @@ vector<int> maxWindow(const vector<int>& a,
   for (int i = 0; i < (int)a.size(); ++i) {
     if (!dq.empty() && dq.front() <= i - k)
       dq.pop_front();
-    while (!dq.empty() && a[dq.back()] <= a[i])
+    while (!dq.empty() &&
+           a[dq.back()] <= a[i])
       dq.pop_back();
     dq.push_back(i);
-    if (i >= k - 1) r.push_back(a[dq.front()]);
+    if (i >= k - 1)
+      r.push_back(a[dq.front()]);
   }
   return r;
 }
@@ -493,7 +498,9 @@ TreeNode* lca(TreeNode* t, TreeNode* p,
 int kthSmallest(TreeNode* t, int k) {
   vector<TreeNode*> st;
   while (t || !st.empty()) {
-    while (t) { st.push_back(t); t = t->left; }
+    while (t) {
+      st.push_back(t); t = t->left;
+    }
     t = st.back(); st.pop_back();
     if (--k == 0) return t->val;
     t = t->right;
@@ -566,7 +573,10 @@ The tree `1 (2, 3)` becomes `1,2,#,#,3,#,#,`. Without the null markers the strin
 
 ```cpp
 struct Trie {
-  struct N { N* c[26] = {}; bool end = false; };
+  struct N {
+    N* c[26] = {};
+    bool end = false;
+  };
   N root;
   void insert(const string& w) {
     N* t = &root;
@@ -611,7 +621,8 @@ static bool prune(Node *t, uint32_t p,
   if (i == len) t->hop = -1;
   else {
     unsigned b = (p >> (31 - i)) & 1u;
-    if (t->c[b] && prune(t->c[b], p, len, i+1)) {
+    if (t->c[b] &&
+        prune(t->c[b], p, len, i + 1)) {
       free(t->c[b]);
       t->c[b] = NULL;
     }
@@ -650,7 +661,7 @@ bool add_rule(Node *root, uint32_t p,
 }
 int decide(const Node *root, uint32_t ip) {
   int a = trie_lookup(root, ip);
-  return a < 0 ? 0 : a;   /* 1 allow, 0 deny */
+  return a < 0 ? 0 : a;  /* 1 = allow */
 }
 ```
 
@@ -677,7 +688,8 @@ struct LPM {
   int lookup(uint32_t a) {
     for (int len = 32; len >= 0; --len) {
       auto it = t[len].find(mk(a, len));
-      if (it != t[len].end()) return it->second;
+      if (it != t[len].end())
+        return it->second;
     }
     return -1;
   }
@@ -714,8 +726,10 @@ int findMaxXor(const vector<int>& a) {
     int u = 0, cur = 0;
     for (int i = 30; i >= 0; --i) {
       int b = ((x >> i) & 1) ^ 1;
-      if (t[u][b]) { cur |= 1 << i; u = t[u][b]; }
-      else u = t[u][b ^ 1];
+      if (t[u][b]) {
+        cur |= 1 << i;
+        u = t[u][b];
+      } else u = t[u][b ^ 1];
     }
     best = max(best, cur);
   }

@@ -157,6 +157,17 @@ The time budget below suits a twenty-minute round. Most of the time belongs to t
 | 8:00 | L | "Verify a name lookup from two clients; add a post-change test: resolve a name from every scope." |
 :::
 
+::: example
+**Recovering when a hypothesis fails.** The same Case 1 prompt, but the interviewer answers differently: the client's DNS server *is* correct.
+
+| Time | Step | Spoken |
+|---|---|---|
+| 3:00 | L | "The client uses 192.168.50.53, which is right, so hypothesis one is ruled out. I return to Assess." |
+| 3:30 | A | "Next: the DNS server is down, or port 53 is filtered from VLAN 10. One test separates them: query the server from another VLAN." |
+| 4:30 | L | "It answers from VLAN 20, so the server is up. I now read the ACL hit counts for UDP 53 on the VLAN 10 interface." |
+| 6:00 | P | "A deny line for port 53 has rising matches; it was added with the scope change. That explains why only VLAN 10 fails." |
+:::
+
 ::: lens
 [CISCO · GOOGLE · AMAZON]{.co}
 

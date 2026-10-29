@@ -54,6 +54,27 @@ Three consequences follow. First, a test with partial marks per test case reward
 
 This chapter uses C++ for general algorithms and C for linked lists, bit tricks and networking problems, as the interviews do. One language is used for each solution; where Python differs materially, one sentence says so.
 
+::: example
+**A 90-minute test with about 40 multiple-choice questions and two coding problems.** The format is typical of the reports for Cisco and Juniper; the aim is to spend the time where marks are cheapest.
+
+1. Minutes 0–3: read every question title and the marking scheme. Note whether wrong answers are penalised and whether sections lock after submission.
+2. Minutes 3–33: answer the multiple-choice questions in two passes. In the first, answer anything that takes under 45 seconds and flag the rest; in the second, return to the flagged ones in order of confidence. Never leave a blank if there is no penalty.
+3. Minutes 33–38: read both coding problems and their constraints, and choose the easier one first.
+4. Minutes 38–63: solve the first problem. Submit a correct brute force early, because most platforms award marks per passed test case, and then optimise.
+5. Minutes 63–83: solve the second problem in the same way.
+6. Minutes 83–90: re-run the edge cases of [§1.17](#s1-17){.ref} on both, then submit.
+
+| Block | Minutes | Rule |
+|---|---|---|
+| read and plan | 3 | titles, marking, negative marking |
+| multiple choice | 30 | 45 seconds each, two passes |
+| coding problem 1 | 25 | brute force first |
+| coding problem 2 | 20 | partial credit counts |
+| buffer | 12 | edge cases, resubmission |
+
+[Result: a plan that banks the certain marks first. Rehearse it on a timer before the real test.]{.result}
+:::
+
 ::: lens
 [CISCO · JUNIPER · ARISTA]{.co}
 
@@ -87,6 +108,38 @@ Consider a switch. Flooding a frame to every port costs O(*p*) for *p* ports, wh
 |---|---|---|---|---|---|---|
 | Capacity after | 1 | 2 | 4 | 8 | 16 | 32 |
 | Elements copied | 0 | 1 | 2 | 4 | 8 | 16 |
+
+### Counting operations in practice
+
+The table gives the number of steps for *n* = 10^5, and the time they take at 10^8 steps per second. It shows why the ladder of growth rates, and not the constant factors, decides whether a solution passes.
+
+| Growth | Steps for *n* = 10^5 | Time at 10^8 steps/s | Typical source |
+|---|---|---|---|
+| O(1) | 1 | instant | array index, hash lookup |
+| O(log *n*) | 17 | instant | binary search, heap operation |
+| O(*n*) | 10^5 | 1 ms | one pass |
+| O(*n* log *n*) | 1.7 × 10^6 | 17 ms | sorting |
+| O(*n*²) | 10^10 | 100 s | all pairs |
+| O(2^*n*) | more than the atoms in the universe | never | all subsets |
+
+<figure>
+<svg viewBox="0 0 420 190" width="454">
+<text class="sm" x="10" y="14" text-anchor="start">steps for n = 10^5 (log scale, one tick per power of ten)</text><line class="lg" x1="90" y1="26" x2="90" y2="150"/><text class="sm" x="90" y="162" text-anchor="middle">0</text><line class="lg" x1="120" y1="26" x2="120" y2="150"/><text class="sm" x="120" y="162" text-anchor="middle"></text><line class="lg" x1="150" y1="26" x2="150" y2="150"/><text class="sm" x="150" y="162" text-anchor="middle">2</text><line class="lg" x1="180" y1="26" x2="180" y2="150"/><text class="sm" x="180" y="162" text-anchor="middle"></text><line class="lg" x1="210" y1="26" x2="210" y2="150"/><text class="sm" x="210" y="162" text-anchor="middle">4</text><line class="lg" x1="240" y1="26" x2="240" y2="150"/><text class="sm" x="240" y="162" text-anchor="middle"></text><line class="lg" x1="270" y1="26" x2="270" y2="150"/><text class="sm" x="270" y="162" text-anchor="middle">6</text><line class="lg" x1="300" y1="26" x2="300" y2="150"/><text class="sm" x="300" y="162" text-anchor="middle"></text><line class="lg" x1="330" y1="26" x2="330" y2="150"/><text class="sm" x="330" y="162" text-anchor="middle">8</text><line class="lg" x1="360" y1="26" x2="360" y2="150"/><text class="sm" x="360" y="162" text-anchor="middle"></text><line class="lg" x1="390" y1="26" x2="390" y2="150"/><text class="sm" x="390" y="162" text-anchor="middle">10</text><text class="lbl" x="10" y="41" text-anchor="start">O(1)</text><rect class="fill" x="90" y="30" width="2" height="14"/><text class="lbl" x="10" y="65" text-anchor="start">O(log n)</text><rect class="fill" x="90" y="54" width="36.9" height="14"/><text class="lbl" x="10" y="89" text-anchor="start">O(n)</text><rect class="fill" x="90" y="78" width="150" height="14"/><text class="lbl" x="10" y="113" text-anchor="start">O(n log n)</text><rect class="fill" x="90" y="102" width="186.9" height="14"/><text class="lbl" x="10" y="137" text-anchor="start">O(n^2)</text><rect class="fill" x="90" y="126" width="300" height="14"/><line class="acc dash" x1="330" y1="22" x2="330" y2="150"/><text class="acct" x="334" y="22" text-anchor="start">1 s of work: 10^8</text><text class="sm" x="210" y="176" text-anchor="middle">exponent of 10</text>
+</svg>
+<figcaption><b>Figure 1.1</b> Growth rates at n = 10^5. The accent line is the budget of about 10^8 simple steps per second; quadratic work lies two decades beyond it.</figcaption>
+</figure>
+
+**Recursion.** To find the cost of a recursive function, write the recurrence and solve it. A function that makes two calls on halves and does a linear amount of work, `T(n) = 2T(n/2) + O(n)`, as in merge sort, costs O(*n* log *n*): there are log *n* levels and each level does O(*n*) work in total. A function that halves and does constant work, `T(n) = T(n/2) + O(1)`, as in binary search, costs O(log *n*). A function that makes two calls on `n - 1`, `T(n) = 2T(n-1) + O(1)`, costs O(2^*n*), which is why the naive Fibonacci function is unusable beyond *n* ≈ 40. Remembering the results of earlier calls, termed *memoisation*, removes the repeated work and reduces it to O(*n*):
+
+```cpp
+long long fib(int n, vector<long long>& memo) {   // memo sized n + 1, zeros
+    if (n < 2) return n;
+    if (memo[n]) return memo[n];                    // already computed
+    return memo[n] = fib(n - 1, memo) + fib(n - 2, memo);
+}
+```
+
+The same idea, applied to a table filled in order, is dynamic programming ([§1.14](#s1-14){.ref}). Further, the *best*, *average* and *worst* cases may differ: a hash lookup is O(1) on average but O(*n*) at worst, and quicksort is O(*n* log *n*) on average but O(*n*²) at worst. In an interview one states which case is meant.
 
 ### The six-step routine
 
@@ -140,11 +193,18 @@ Most array problems become linear when we maintain two indices or one running to
 
 An array stores its elements contiguously, so the address of `a[i]` is `base + i * sizeof(T)` and indexing costs O(1). For the same reason, inserting or deleting in the middle costs O(*n*), since the later elements must move. A two-dimensional array in C is stored row by row, so `m[r][c]` sits at offset `r * cols + c`; scanning along a row is therefore faster than scanning down a column, because it follows memory order.
 
+<figure>
+<svg viewBox="0 0 390 118" width="421">
+<text class="sm" x="10" y="14" text-anchor="start">int a[6], 4 bytes per element, base address 0x1000</text><rect class="box" style="fill:none" x="20" y="30" width="60" height="26"/><text class="mono" x="50" y="47" text-anchor="middle">a[0]</text><text class="sm" x="50" y="72" text-anchor="middle">0x1000</text><rect class="box" style="fill:none" x="80" y="30" width="60" height="26"/><text class="mono" x="110" y="47" text-anchor="middle">a[1]</text><text class="sm" x="110" y="72" text-anchor="middle">0x1004</text><rect class="box" style="fill:none" x="140" y="30" width="60" height="26"/><text class="mono" x="170" y="47" text-anchor="middle">a[2]</text><text class="sm" x="170" y="72" text-anchor="middle">0x1008</text><rect class="hl" x="200" y="30" width="60" height="26"/><rect class="box" style="fill:none" x="200" y="30" width="60" height="26"/><text class="mono" x="230" y="47" text-anchor="middle">a[3]</text><text class="sm" x="230" y="72" text-anchor="middle">0x100c</text><rect class="box" style="fill:none" x="260" y="30" width="60" height="26"/><text class="mono" x="290" y="47" text-anchor="middle">a[4]</text><text class="sm" x="290" y="72" text-anchor="middle">0x1010</text><rect class="box" style="fill:none" x="320" y="30" width="60" height="26"/><text class="mono" x="350" y="47" text-anchor="middle">a[5]</text><text class="sm" x="350" y="72" text-anchor="middle">0x1014</text><path class="accf" d="M200,88 l-4,7 l8,0 z"/><text class="lbl" x="200" y="108" text-anchor="middle">address of a[3] = 0x1000 + 3 &#42; 4 = 0x100C</text>
+</svg>
+<figcaption><b>Figure 1.2</b> An array is one contiguous block. The address of a[i] is base + i times the element size, so indexing is one multiplication and one addition.</figcaption>
+</figure>
+
 ### Two pointers, opposite ends
 
 *Idea.* On a sorted array, one pointer at each end moves inward, and each step discards an element that cannot be part of any answer. *Recognise:* "sorted", "pair with sum", "palindrome", "container". *Complexity:* O(*n*) time, O(1) space.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 360 190" width="389"><defs><marker id="a1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
 <text class="sm" x="20" y="14" text-anchor="start">start: L = 0, R = 5, a[L] + a[R] = 12 > 10, so R moves left</text><rect class="box" style="fill:none" x="20" y="40" width="30" height="24"/>
 <text class="mono" x="35.0" y="55.0" text-anchor="middle">1</text>
@@ -184,7 +244,7 @@ An array stores its elements contiguously, so the address of `a[i]` is `base + i
 <text class="mono" x="185.0" y="151.0" text-anchor="middle">11</text>
 <text class="sm" x="185.0" y="170" text-anchor="middle">5</text><path class="accf" d="M95,134 l-4,-7 l8,0 z"/><text class="lbl" x="95" y="124" text-anchor="middle">L</text><path class="accf" d="M125,134 l-4,-7 l8,0 z"/><text class="lbl" x="125" y="124" text-anchor="middle">R</text><text class="sm" x="225" y="52" text-anchor="start">sum too large: R--</text><text class="sm" x="225" y="66" text-anchor="start">sum too small: L++</text><text class="sm" x="225" y="80" text-anchor="start">sum equal: answer</text>
 </svg>
-<figcaption><b>Figure 1.1</b> Opposite-end pointers on a sorted array with target 10. Each step discards one element that cannot belong to any answer, so at most n steps occur.</figcaption>
+<figcaption><b>Figure 1.3</b> Opposite-end pointers on a sorted array with target 10. Each step discards one element that cannot belong to any answer, so at most n steps occur.</figcaption>
 </figure>
 
 ```cpp
@@ -226,6 +286,34 @@ int dedupe(vector<int>& a) {  // a sorted; returns the new length
 *Claim:* compare `a[r]` with `a[r-1]` to detect a duplicate. *Why it is wrong:* once the writer has overwritten earlier cells, `a[r-1]` may no longer be the previous kept value. *Correct statement:* compare with `a[w-1]`, the last element of the answer, and never write before the cell has been read.
 :::
 
+### Three-way partition (the Dutch national flag)
+
+*Idea.* To sort an array that holds only three distinct values in one pass, keep three regions: values equal to the first class at the left, the second class in the middle, and the third class at the right, with an unexamined region between the middle and the right. The same partition step sorts packets into three priority classes in place, and it is the core of quicksort for inputs with many equal keys. *Recognise:* "sort an array of 0, 1 and 2", "partition around a pivot", "segregate". *Complexity:* O(*n*) time, O(1) space, one pass.
+
+```cpp
+void sortColors(vector<int>& a) {        // values 0, 1, 2 only
+    int lo = 0, mid = 0, hi = (int)a.size() - 1;
+    while (mid <= hi) {                  // [mid, hi] is unexamined
+        if (a[mid] == 0)      swap(a[lo++], a[mid++]);
+        else if (a[mid] == 1) ++mid;
+        else                  swap(a[mid], a[hi--]);   // do not advance mid
+    }
+}
+```
+
+The invariant is: `a[0..lo)` holds zeros, `a[lo..mid)` holds ones, `a[hi+1..n)` holds twos. A value swapped in from the right has not been examined, so `mid` stays; a value swapped in from the left is a one and is already in its region.
+
+| lo | mid | hi | `a[mid]` | action | array after |
+|---|---|---|---|---|---|
+| 0 | 0 | 5 | 2 | swap with `a[hi]` | 0 0 2 1 1 2 |
+| 0 | 0 | 4 | 0 | `lo++`, `mid++` | 0 0 2 1 1 2 |
+| 1 | 1 | 4 | 0 | `lo++`, `mid++` | 0 0 2 1 1 2 |
+| 2 | 2 | 4 | 2 | swap with `a[hi]` | 0 0 1 1 2 2 |
+| 2 | 2 | 3 | 1 | `mid++` | 0 0 1 1 2 2 |
+| 2 | 3 | 3 | 1 | `mid++`, loop ends | 0 0 1 1 2 2 |
+
+[Starting array `2 0 2 1 1 0`; result `0 0 1 1 2 2`. The classic bug is advancing `mid` after swapping with `hi`, which skips an unexamined value.]{.result}
+
 ### Sliding window, fixed size
 
 *Idea.* Instead of re-summing *k* elements for each position, add the entering element and subtract the leaving one. *Recognise:* "subarray of size *k*", "every window of length *k*". *Complexity:* O(*n*) time, O(1) space.
@@ -248,7 +336,7 @@ The classic bug is the off-by-one at eviction: the element leaving when index `i
 
 *Idea.* The right edge advances every step; the left edge advances only while the window violates a condition. Each index enters and leaves once, so the work is O(*n*) although two loops are nested. *Recognise:* "longest or shortest contiguous subarray or substring such that …". *Complexity:* O(*n*) time, O(*alphabet*) space.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 330 152" width="356">
 <text class="sm" x="20" y="14" text-anchor="start">s = abcabcbb. State after right = 4 (character b); the repeat moved left from 0 to 2.</text><rect class="box" style="fill:none" x="20" y="40" width="34" height="24"/>
 <text class="mono" x="37.0" y="55.0" text-anchor="middle">a</text>
@@ -278,7 +366,7 @@ The classic bug is the off-by-one at eviction: the element leaving when index `i
 <text class="mono" x="275.0" y="55.0" text-anchor="middle">b</text>
 <text class="sm" x="275.0" y="74" text-anchor="middle">7</text><path class="acc" d="M90,76 v6 h98 v-6"/><path class="accf" d="M105,38 l-4,-7 l8,0 z"/><text class="lbl" x="105" y="28" text-anchor="middle">left</text><path class="accf" d="M173,38 l-4,-7 l8,0 z"/><text class="lbl" x="173" y="28" text-anchor="middle">right</text><text class="lbl" x="139.0" y="96" text-anchor="middle">window = "cab", length 3</text><text class="sm" x="20" y="128" text-anchor="start">every count in the window is at most 1, so the window is valid</text><text class="sm" x="20" y="142" text-anchor="start">best = 3 so far; the next c repeats, so left moves to 3 (shrink with while)</text>
 </svg>
-<figcaption><b>Figure 1.2</b> Variable sliding window. The right edge always advances; the left edge advances only to restore the invariant.</figcaption>
+<figcaption><b>Figure 1.4</b> Variable sliding window. The right edge always advances; the left edge advances only to restore the invariant.</figcaption>
 </figure>
 
 ```cpp
@@ -354,6 +442,15 @@ A switch's MAC table and a router's flow table are the networking forms of this 
 
 *Recognise:* "have we seen", "count occurrences", "pair that …", "group by", "first non-repeating", "duplicate". *Typical templates:* a set for membership, a map for counts, and a sorted or canonical form of an item as the key (for anagrams, the sorted letters).
 
+<figure>
+<svg viewBox="0 0 440 185" width="475"><defs><marker id="a10" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
+<text class="sm" x="10" y="12" text-anchor="start">bucket = key mod 6</text><rect class="box" x="10" y="22" width="30" height="22"/><text class="mono" x="25" y="37" text-anchor="middle">0</text><line class="ln" x1="40" y1="33" x2="70" y2="33" marker-end="url(#a10)"/><rect class="box" x="70" y="22" width="44" height="22"/><text class="mono" x="92" y="37" text-anchor="middle">12</text><line class="ln" x1="114" y1="33" x2="140" y2="33" marker-end="url(#a10)"/><rect class="box" x="140" y="22" width="44" height="22"/><text class="mono" x="162" y="37" text-anchor="middle">18</text><rect class="box" x="10" y="48" width="30" height="22"/><text class="mono" x="25" y="63" text-anchor="middle">1</text><text class="sm" x="60" y="63" text-anchor="start">empty</text><rect class="box" x="10" y="74" width="30" height="22"/><text class="mono" x="25" y="89" text-anchor="middle">2</text><line class="ln" x1="40" y1="85" x2="70" y2="85" marker-end="url(#a10)"/><rect class="box" x="70" y="74" width="44" height="22"/><text class="mono" x="92" y="89" text-anchor="middle">8</text><rect class="box" x="10" y="100" width="30" height="22"/><text class="mono" x="25" y="115" text-anchor="middle">3</text><line class="ln" x1="40" y1="111" x2="70" y2="111" marker-end="url(#a10)"/><rect class="box" x="70" y="100" width="44" height="22"/><text class="mono" x="92" y="115" text-anchor="middle">21</text><line class="ln" x1="114" y1="111" x2="140" y2="111" marker-end="url(#a10)"/><rect class="box" x="140" y="100" width="44" height="22"/><text class="mono" x="162" y="115" text-anchor="middle">9</text><line class="ln" x1="184" y1="111" x2="210" y2="111" marker-end="url(#a10)"/><rect class="box" x="210" y="100" width="44" height="22"/><text class="mono" x="232" y="115" text-anchor="middle">15</text><rect class="box" x="10" y="126" width="30" height="22"/><text class="mono" x="25" y="141" text-anchor="middle">4</text><text class="sm" x="60" y="141" text-anchor="start">empty</text><rect class="box" x="10" y="152" width="30" height="22"/><text class="mono" x="25" y="167" text-anchor="middle">5</text><line class="ln" x1="40" y1="163" x2="70" y2="163" marker-end="url(#a10)"/><rect class="box" x="70" y="152" width="44" height="22"/><text class="mono" x="92" y="167" text-anchor="middle">23</text><text class="sm" x="300" y="60" text-anchor="start">load factor = entries / buckets = 7 / 6</text><text class="sm" x="300" y="74" text-anchor="start">lookup(15): bucket 3, then walk</text><text class="sm" x="300" y="88" text-anchor="start">the chain 21, 9, 15</text><text class="sm" x="300" y="110" text-anchor="start">when the load factor passes 1:</text><text class="sm" x="300" y="124" text-anchor="start">double the buckets and re-insert</text>
+</svg>
+<figcaption><b>Figure 1.5</b> A hash table with chaining. Keys that collide share a bucket's list; the expected chain length equals the load factor.</figcaption>
+</figure>
+
+Two collision strategies exist. *Chaining* keeps a list per bucket, as drawn; deletion is easy and the table degrades gracefully when full. *Open addressing* stores entries in the array itself and probes to the next free cell (linear probing) after a collision; it is more compact and faster to scan, but it needs a load factor well below one, and deletion needs a tombstone marker. When the load factor passes a threshold the table doubles its bucket count and re-inserts every entry, an O(*n*) step that is amortised over the insertions exactly as for the dynamic array of [§1.1](#s1-1){.ref}.
+
 ::: example
 **Longest consecutive sequence.** Given an unsorted array, find the length of the longest run of consecutive integers (for example 1, 2, 3, 4), in O(*n*) time.
 
@@ -388,6 +485,40 @@ int longestConsecutive(const vector<int>& a) {
 ::: trap
 *Claim:* `m[key]` is a harmless way to test whether a key exists. *Why it is wrong:* in C++ the subscript operator inserts a default value when the key is absent, which changes the map and its size during the test. *Correct statement:* use `find` or `count` to test, and `[]` only when inserting or incrementing is intended.
 :::
+
+### Hashing network keys: a flow table
+
+A router or firewall keeps per-flow state in a hash table whose key is the 5-tuple (source address, destination address, source port, destination port, protocol). Two points make this a favourite question. First, one must hash the *fields*, not the bytes of the struct, because a C struct may contain padding bytes whose values are unspecified; two equal keys could then hash differently. Secondly, equality must compare the same fields.
+
+```c
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef struct {
+    uint32_t src, dst;
+    uint16_t sport, dport;
+    uint8_t  proto;
+} FlowKey;
+
+static uint32_t fnv_byte(uint32_t h, uint8_t b) {
+    return (h ^ b) * 16777619u;
+}
+
+uint32_t flow_hash(const FlowKey *k) {  /* FNV-1a over the fields */
+    uint32_t h = 2166136261u;
+    uint32_t w[3] = { k->src, k->dst, (uint32_t)k->sport << 16 | k->dport };
+    for (int i = 0; i < 3; i++)
+        for (int b = 0; b < 32; b += 8)
+            h = fnv_byte(h, (uint8_t)(w[i] >> b));
+    return fnv_byte(h, k->proto);
+}
+bool flow_eq(const FlowKey *a, const FlowKey *b) {
+    return a->src == b->src && a->dst == b->dst && a->sport == b->sport
+        && a->dport == b->dport && a->proto == b->proto;
+}
+```
+
+The bucket is `flow_hash(k) % nbuckets`. *Follow-ups.* To make the two directions of a connection land in the same entry, order the two (address, port) pairs before hashing. Equal-cost multipath forwarding applies the same idea in hardware: a hash of the 5-tuple selects the path, so all packets of a flow take one path and arrive in order, while different flows spread over the paths.
 
 ::: check
 1. Which is faster for counting lowercase letters: `unordered_map<char,int>` or `int cnt[26]`? [^c1-6]

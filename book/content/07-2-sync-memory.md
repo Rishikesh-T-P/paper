@@ -4,11 +4,11 @@
 
 A *critical section* is a stretch of code that touches shared data and must not be executed by two threads at once. Enforcing this is *mutual exclusion*, and the tools differ in who may release them, whether a waiter sleeps, and where they may be used. We meet five: the mutex, the semaphore, the spinlock, the condition variable and the read-write lock.
 
-A *mutex* (mutual-exclusion lock) has two states and an owner. `pthread_mutex_lock` takes it, sleeping if another thread holds it; `pthread_mutex_unlock` releases it, and only the owner may do so. Figure 7.7 shows the second thread being put to sleep and woken. The race in [7.3](#s7-3){.ref} disappears when the increment is placed between the two calls, at the price of slower code. On the four-core test machine, two threads making two million increments in total took about 120 ms under a contended mutex and about 20 ms with `__atomic_fetch_add`, an *atomic* instruction that performs the single-word update without ever sleeping; the unprotected loop was faster still, and wrong. Only the ordering of these figures should be trusted, not their values.
+A *mutex* (mutual-exclusion lock) has two states and an owner. `pthread_mutex_lock` takes it, sleeping if another thread holds it; `pthread_mutex_unlock` releases it, and only the owner may do so. Figure 7.9 shows the second thread being put to sleep and woken. The race in [7.3](#s7-3){.ref} disappears when the increment is placed between the two calls, at the price of slower code. On the four-core test machine, two threads making two million increments in total took about 120 ms under a contended mutex and about 20 ms with `__atomic_fetch_add`, an *atomic* instruction that performs the single-word update without ever sleeping; the unprotected loop was faster still, and wrong. Only the ordering of these figures should be trusted, not their values.
 
 <figure>
 <svg viewBox="0 0 480 150" width="480"><defs><marker id="imx" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="amx" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="8" y="38" text-anchor="start">Thread A</text><text class="lbl" x="8" y="98" text-anchor="start">Thread B</text><rect class="fill" x="60" y="24" width="72" height="26" rx="0"/><text class="sm" x="96.0" y="40.0" text-anchor="middle">work</text><rect class="box" x="132" y="24" width="144" height="26" rx="0" style="fill:#FFF4C2"/><text class="sm" x="204.0" y="40.0" text-anchor="middle">holds the mutex</text><rect class="fill" x="276" y="24" width="108" height="26" rx="0"/><text class="sm" x="330.0" y="40.0" text-anchor="middle">work</text><rect class="fill" x="60" y="84" width="108" height="26" rx="0"/><text class="sm" x="114.0" y="100.0" text-anchor="middle">work</text><rect class="box dash" x="168" y="84" width="108" height="26" rx="0" style="fill:#fafafa"/><text class="sm" x="222.0" y="100.0" text-anchor="middle">blocked: asleep</text><rect class="box" x="276" y="84" width="108" height="26" rx="0" style="fill:#FFF4C2"/><text class="sm" x="330.0" y="100.0" text-anchor="middle">holds the mutex</text><text class="mono" x="132" y="18" text-anchor="middle">lock</text><text class="mono" x="276" y="18" text-anchor="middle">unlock</text><text class="mono" x="168" y="78" text-anchor="middle">lock (fails)</text><line class="acc" x1="276" y1="52" x2="276" y2="80" marker-end="url(#amx)" /><text class="sm" x="280" y="70" text-anchor="start">wake</text><text class="sm" x="280" y="78" text-anchor="middle"></text><line class="ln" x1="60" y1="124" x2="384" y2="124" marker-end="url(#imx)" /><text class="sm" x="384" y="138" text-anchor="end">time</text><text class="sm" x="60" y="138" text-anchor="start">Only the holder may unlock; the mutex records its owner.</text></svg>
-<figcaption><b>Figure 7.7</b> A mutex timeline. Thread B fails to lock, sleeps, and is woken when A unlocks.</figcaption>
+<figcaption><b>Figure 7.9</b> A mutex timeline. Thread B fails to lock, sleeps, and is woken when A unlocks.</figcaption>
 </figure>
 
 [**Semaphore** — a counter with two operations. A car park with a "spaces free: 5" board: `wait` takes a space, `post` returns one.]{.margin}A *semaphore* is a non-negative counter with two atomic operations: `wait` (also P or down) decrements it, sleeping while it is zero, and `post` (V or up) increments it and wakes a sleeper. It has no owner, so any thread may post. A *counting* semaphore initialised to N admits N threads at once, as a pool of N identical resources; a *binary* semaphore (N = 1) behaves like a lock but may be released by a different thread than the one that took it, which makes it a signalling device between threads.
@@ -20,7 +20,7 @@ A *spinlock* does not sleep: a waiter loops on an atomic test until the lock is 
 #include <stdio.h>
 
 #if defined(__x86_64__)
-#define cpu_relax() __builtin_ia32_pause()   /* be kind to the sibling hyper-thread */
+#define cpu_relax() __builtin_ia32_pause()   /* ease the sibling thread */
 #else
 #define cpu_relax() ((void)0)
 #endif
@@ -119,6 +119,11 @@ static void *producer(void *arg)
     }
 }
 
+```
+
+The consumer mirrors the producer, and `main` starts the threads and compares the sums:
+
+```c
 static void *consumer(void *arg)
 {
     (void)arg;
@@ -145,10 +150,14 @@ static void *consumer(void *arg)
 int main(void)
 {
     pthread_t p[PRODUCERS], c[CONSUMERS];
-    for (int i = 0; i < PRODUCERS; i++) pthread_create(&p[i], NULL, producer, NULL);
-    for (int i = 0; i < CONSUMERS; i++) pthread_create(&c[i], NULL, consumer, NULL);
-    for (int i = 0; i < PRODUCERS; i++) pthread_join(p[i], NULL);
-    for (int i = 0; i < CONSUMERS; i++) pthread_join(c[i], NULL);
+    for (int i = 0; i < PRODUCERS; i++)
+        pthread_create(&p[i], NULL, producer, NULL);
+    for (int i = 0; i < CONSUMERS; i++)
+        pthread_create(&c[i], NULL, consumer, NULL);
+    for (int i = 0; i < PRODUCERS; i++)
+        pthread_join(p[i], NULL);
+    for (int i = 0; i < CONSUMERS; i++)
+        pthread_join(c[i], NULL);
     printf("sum in = %ld, sum out = %ld, %s\n", sum_in, sum_out,
            sum_in == sum_out ? "match" : "MISMATCH");
     return 0;
@@ -175,15 +184,18 @@ static sem_t empty, full;                  /* free slots, filled slots */
 static pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 static long sum;
 
+/* Taking m before waiting on empty would deadlock on a full buffer: the
+   producer would sleep holding m, and the consumer could never get m. */
 static void *producer(void *arg)
 {
     (void)arg;
     for (int i = 1; i <= ITEMS; i++) {
-        sem_wait(&empty);                  /* first: reserve a slot ... */
-        pthread_mutex_lock(&m);            /* ... then take the lock. Swap them and a  */
-        buf[in] = i; in = (in + 1) % SLOTS;/* full buffer deadlocks: producer holds m   */
-        pthread_mutex_unlock(&m);          /* while sleeping, so the consumer cannot    */
-        sem_post(&full);                   /* take m to make room.                      */
+        sem_wait(&empty);              /* first reserve a slot ... */
+        pthread_mutex_lock(&m);        /* ... then take the lock */
+        buf[in] = i;
+        in = (in + 1) % SLOTS;
+        pthread_mutex_unlock(&m);
+        sem_post(&full);
     }
     return NULL;
 }
@@ -228,6 +240,15 @@ The order of the two waits in the producer matters. If the producer took the mut
 
 A mutex and a binary semaphore are not interchangeable. Because a mutex has an owner, the system can lend the owner a higher priority when a more urgent thread waits (priority inheritance, [7.6](#s7-6){.ref}), can detect an unlock by the wrong thread, and can offer recursive and error-checking variants. A semaphore, lacking an owner, can be posted from an interrupt handler or from another thread, which is exactly what signalling needs.
 
+### Dining philosophers
+
+Five philosophers sit round a table with one fork between each pair of neighbours; each needs both adjacent forks to eat. If every philosopher takes the left fork and then waits for the right, all five hold one fork and wait for another: the Coffman conditions hold and nobody ever eats. The remedy follows from the prevention table in [7.6](#s7-6){.ref}: number the forks and make each philosopher take the lower-numbered fork first. Four philosophers still take their left fork first, but the fifth must take fork 0 before fork 4, so the cycle cannot close. Other cures, a waiter who admits at most four philosophers at once or `trylock` with back-off, break hold-and-wait instead.
+
+<figure>
+<svg viewBox="0 0 480 210" width="480"><defs><marker id="iph" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="aph" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="125" y="12" text-anchor="middle">each takes its left fork: deadlock</text><rect class="fill" x="151.2671151375484" y="58.45898033750315" width="18" height="12" rx="0"/><text class="sm" x="160.2671151375484" y="67.45898033750315" text-anchor="middle">F0</text><rect class="fill" x="173.06339097770922" y="125.54101966249684" width="18" height="12" rx="0"/><text class="sm" x="182.06339097770922" y="134.54101966249684" text-anchor="middle">F1</text><rect class="fill" x="116.0" y="167.0" width="18" height="12" rx="0"/><text class="sm" x="125.0" y="176.0" text-anchor="middle">F2</text><rect class="fill" x="58.93660902229078" y="125.54101966249686" width="18" height="12" rx="0"/><text class="sm" x="67.93660902229078" y="134.54101966249686" text-anchor="middle">F3</text><rect class="fill" x="80.73288486245161" y="58.458980337503164" width="18" height="12" rx="0"/><text class="sm" x="89.73288486245161" y="67.45898033750316" text-anchor="middle">F4</text><circle class="box" cx="125.0" cy="51.0" r="13"/><text class="lbl" x="125.0" y="54.0" text-anchor="middle">P0</text><circle class="box" cx="183.96550401029953" cy="93.84094634875326" r="13"/><text class="lbl" x="183.96550401029953" y="96.84094634875326" text-anchor="middle">P1</text><circle class="box" cx="161.44268564213334" cy="163.15905365124675" r="13"/><text class="lbl" x="161.44268564213334" y="166.15905365124675" text-anchor="middle">P2</text><circle class="box" cx="88.55731435786667" cy="163.15905365124675" r="13"/><text class="lbl" x="88.55731435786667" y="166.15905365124675" text-anchor="middle">P3</text><circle class="box" cx="66.03449598970047" cy="93.84094634875326" r="13"/><text class="lbl" x="66.03449598970047" y="96.84094634875326" text-anchor="middle">P4</text><line class="acc" x1="133.0935179426659" y1="62.423439381891306" x2="176.28230673294786" y2="125.0133400157018" marker-end="url(#aph)" /><line class="acc" x1="175.60220213621145" y1="105.06837623109386" x2="130.97378705292007" y2="166.58432578151965" marker-end="url(#aph)" /><line class="acc" x1="148.18036288310532" y1="158.67454754294818" x2="77.4096967073108" y2="134.10359458152462" marker-end="url(#aph)" /><line class="acc" x1="88.72404999710416" y1="149.1600465712211" x2="89.61378797728197" y2="72.45841295466067" marker-end="url(#aph)" /><line class="acc" x1="79.39986704091321" y1="89.67359027284559" x2="150.7204215295393" y2="66.84032666659326" marker-end="url(#aph)" /><text class="lbl" x="365" y="12" text-anchor="middle">forks ordered 0 to 4: take the lower first</text><rect class="fill" x="391.2671151375484" y="58.45898033750315" width="18" height="12" rx="0"/><text class="sm" x="400.2671151375484" y="67.45898033750315" text-anchor="middle">F0</text><rect class="fill" x="413.0633909777092" y="125.54101966249684" width="18" height="12" rx="0"/><text class="sm" x="422.0633909777092" y="134.54101966249684" text-anchor="middle">F1</text><rect class="fill" x="356.0" y="167.0" width="18" height="12" rx="0"/><text class="sm" x="365.0" y="176.0" text-anchor="middle">F2</text><rect class="fill" x="298.9366090222908" y="125.54101966249686" width="18" height="12" rx="0"/><text class="sm" x="307.9366090222908" y="134.54101966249686" text-anchor="middle">F3</text><rect class="fill" x="320.7328848624516" y="58.458980337503164" width="18" height="12" rx="0"/><text class="sm" x="329.7328848624516" y="67.45898033750316" text-anchor="middle">F4</text><circle class="box" cx="365.0" cy="51.0" r="13"/><text class="lbl" x="365.0" y="54.0" text-anchor="middle">P0</text><circle class="box" cx="423.9655040102995" cy="93.84094634875326" r="13"/><text class="lbl" x="423.9655040102995" y="96.84094634875326" text-anchor="middle">P1</text><circle class="box" cx="401.4426856421333" cy="163.15905365124675" r="13"/><text class="lbl" x="401.4426856421333" y="166.15905365124675" text-anchor="middle">P2</text><circle class="box" cx="328.5573143578667" cy="163.15905365124675" r="13"/><text class="lbl" x="328.5573143578667" y="166.15905365124675" text-anchor="middle">P3</text><circle class="box" cx="306.0344959897005" cy="93.84094634875326" r="13" style="fill:#FFF4C2"/><text class="lbl" x="306.0344959897005" y="96.84094634875326" text-anchor="middle">P4</text><text class="sm" x="365" y="196" text-anchor="middle">P4 must take F0 before F4, which breaks the cycle</text><text class="sm" x="125" y="196" text-anchor="middle">P(i) holds F(i) and waits for F(i+1): a cycle of five</text></svg>
+<figcaption><b>Figure 7.10</b> Dining philosophers. Left: the circular wait. Right: ordering the forks removes it.</figcaption>
+</figure>
+
 ### Read-write locks
 
 When many threads read and few write, `pthread_rwlock` lets any number of readers hold the lock together but gives a writer exclusive access. A reader-preferring implementation can *starve* a writer that waits behind a steady stream of readers; a writer-preferring one blocks new readers once a writer is waiting, trading reader latency for freedom from starvation.
@@ -267,7 +288,7 @@ A *resource-allocation graph* draws tasks as circles and resources as squares, w
 
 <figure>
 <svg viewBox="0 0 480 200" width="480"><defs><marker id="irg" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="arg" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="120" y="14" text-anchor="middle">single instances: deadlock</text><text class="lbl" x="360" y="14" text-anchor="middle">two instances of R1: no deadlock</text><circle class="box" cx="40" cy="60" r="16"/><text class="lbl" x="40" y="63" text-anchor="middle">P1</text><rect class="box" x="182" y="42" width="36" height="36" rx="0"/><text class="sm" x="200" y="37" text-anchor="middle">R2</text><circle class="accf" cx="200" cy="60" r="3.2"/><circle class="box" cx="200" cy="160" r="16"/><text class="lbl" x="200" y="163" text-anchor="middle">P2</text><rect class="box" x="22" y="142" width="36" height="36" rx="0"/><text class="sm" x="40" y="137" text-anchor="middle">R1</text><circle class="accf" cx="40" cy="160" r="3.2"/><line class="acc" x1="56" y1="60" x2="180" y2="60" marker-end="url(#arg)" /><text class="sm" x="118" y="54" text-anchor="middle">requests</text><line class="acc" x1="200" y1="80" x2="200" y2="142" marker-end="url(#arg)" /><text class="sm" x="206" y="114" text-anchor="start">held by</text><line class="acc" x1="184" y1="160" x2="60" y2="160" marker-end="url(#arg)" /><text class="sm" x="122" y="174" text-anchor="middle">requests</text><line class="acc" x1="40" y1="140" x2="40" y2="78" marker-end="url(#arg)" /><text class="sm" x="34" y="114" text-anchor="end">held by</text><circle class="box" cx="270" cy="60" r="16"/><text class="lbl" x="270" y="63" text-anchor="middle">P1</text><rect class="box" x="412" y="42" width="36" height="36" rx="0"/><text class="sm" x="430" y="37" text-anchor="middle">R1</text><circle class="accf" cx="423" cy="60" r="3.2"/><circle class="accf" cx="437" cy="60" r="3.2"/><circle class="box" cx="430" cy="160" r="16"/><text class="lbl" x="430" y="163" text-anchor="middle">P2</text><rect class="box" x="252" y="142" width="36" height="36" rx="0"/><text class="sm" x="270" y="137" text-anchor="middle">R2</text><circle class="accf" cx="270" cy="160" r="3.2"/><circle class="box" cx="350" cy="110" r="16"/><text class="lbl" x="350" y="113" text-anchor="middle">P3</text><line class="acc" x1="286" y1="60" x2="410" y2="60" marker-end="url(#arg)" /><line class="acc" x1="430" y1="80" x2="430" y2="142" marker-end="url(#arg)" /><line class="acc" x1="414" y1="160" x2="290" y2="160" marker-end="url(#arg)" /><line class="acc" x1="270" y1="140" x2="270" y2="78" marker-end="url(#arg)" /><line class="ln" x1="416" y1="76" x2="364" y2="99" marker-end="url(#irg)" /><text class="sm" x="350" y="134" text-anchor="middle">P3 is not waiting;</text><text class="sm" x="350" y="144" text-anchor="middle">it will release R1</text><text class="sm" x="240" y="194" text-anchor="middle">Arrow from a process: request. Arrow from a resource: assignment. Dots are instances.</text></svg>
-<figcaption><b>Figure 7.8</b> Resource-allocation graphs. Left: a cycle with single-instance resources is a deadlock. Right: a cycle with a multi-instance resource is not, since P3 can finish and release R1.</figcaption>
+<figcaption><b>Figure 7.11</b> Resource-allocation graphs. Left: a cycle with single-instance resources is a deadlock. Right: a cycle with a multi-instance resource is not, since P3 can finish and release R1.</figcaption>
 </figure>
 
 ::: trap
@@ -283,25 +304,46 @@ Thread 1 locks A then B; thread 2 locks B then A. If each takes its first lock b
 #include <stdio.h>
 #include <unistd.h>
 
-static pthread_mutex_t A = PTHREAD_MUTEX_INITIALIZER, B = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t A = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t B = PTHREAD_MUTEX_INITIALIZER;
 
-static void *t1(void *x) { (void)x;
-    pthread_mutex_lock(&A); usleep(100000); pthread_mutex_lock(&B);   /* A then B */
-    puts("t1 done"); pthread_mutex_unlock(&B); pthread_mutex_unlock(&A); return NULL; }
+static void *t1(void *x)
+{
+    (void)x;
+    pthread_mutex_lock(&A);                  /* order: A, then B */
+    usleep(100000);                          /* make the bad interleaving certain */
+    pthread_mutex_lock(&B);
+    puts("t1 done");
+    pthread_mutex_unlock(&B);
+    pthread_mutex_unlock(&A);
+    return NULL;
+}
 
-static void *t2(void *x) { (void)x;
+static void *t2(void *x)
+{
+    (void)x;
 #ifdef FIXED
-    pthread_mutex_lock(&A); usleep(100000); pthread_mutex_lock(&B);   /* same order */
+    pthread_mutex_lock(&A);                  /* same order as t1: no cycle */
+    usleep(100000);
+    pthread_mutex_lock(&B);
 #else
-    pthread_mutex_lock(&B); usleep(100000); pthread_mutex_lock(&A);   /* B then A: cycle */
+    pthread_mutex_lock(&B);                  /* order: B, then A: a cycle */
+    usleep(100000);
+    pthread_mutex_lock(&A);
 #endif
-    puts("t2 done"); pthread_mutex_unlock(&A); pthread_mutex_unlock(&B); return NULL; }
+    puts("t2 done");
+    pthread_mutex_unlock(&A);
+    pthread_mutex_unlock(&B);
+    return NULL;
+}
 
 int main(void)
 {
     pthread_t a, b;
-    pthread_create(&a, NULL, t1, NULL); pthread_create(&b, NULL, t2, NULL);
-    pthread_join(a, NULL); pthread_join(b, NULL);
+    pthread_create(&a, NULL, t1, NULL);
+    pthread_create(&b, NULL, t2, NULL);
+    pthread_join(a, NULL);
+    pthread_join(b, NULL);
     return 0;
 }
 ```
@@ -352,7 +394,7 @@ Thread 1 ...  #0  __futex_abstimed_wait_common64 ... pthread_join
 
 <figure>
 <svg viewBox="0 0 480 190" width="480"><defs><marker id="iiv" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="aiv" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="139" y="12" text-anchor="middle">without inheritance</text><text class="lbl" x="32" y="39" text-anchor="end">H</text><line class="lg" x1="34" y1="50" x2="243" y2="50" /><text class="lbl" x="32" y="73" text-anchor="end">M</text><line class="lg" x1="34" y1="84" x2="243" y2="84" /><text class="lbl" x="32" y="107" text-anchor="end">L</text><line class="lg" x1="34" y1="118" x2="243" y2="118" /><rect class="box" x="34" y="96" width="38" height="20" rx="0" style="fill:#FFF4C2"/><text class="lbl" x="53.0" y="109.0" text-anchor="middle"></text><rect class="box dash" x="72" y="28" width="133" height="20" rx="0" style="fill:#fafafa"/><text class="lbl" x="138.5" y="41.0" text-anchor="middle"></text><rect class="box" x="91" y="62" width="76" height="20" rx="0" style="fill:#F1F2F3"/><text class="lbl" x="129.0" y="75.0" text-anchor="middle"></text><rect class="box" x="167" y="96" width="38" height="20" rx="0" style="fill:#FFF4C2"/><text class="lbl" x="186.0" y="109.0" text-anchor="middle"></text><rect class="box" x="205" y="28" width="38" height="20" rx="0" style="fill:#F1F2F3"/><text class="lbl" x="224.0" y="41.0" text-anchor="middle"></text><text class="sm" x="34" y="134" text-anchor="middle">0</text><line class="ln" x1="34" y1="126" x2="34" y2="129" /><text class="sm" x="72" y="134" text-anchor="middle">2</text><line class="ln" x1="72" y1="126" x2="72" y2="129" /><text class="sm" x="110" y="134" text-anchor="middle">4</text><line class="ln" x1="110" y1="126" x2="110" y2="129" /><text class="sm" x="148" y="134" text-anchor="middle">6</text><line class="ln" x1="148" y1="126" x2="148" y2="129" /><text class="sm" x="186" y="134" text-anchor="middle">8</text><line class="ln" x1="186" y1="126" x2="186" y2="129" /><text class="sm" x="224" y="134" text-anchor="middle">10</text><line class="ln" x1="224" y1="126" x2="224" y2="129" /><text class="sm" x="72" y="20" text-anchor="middle">H arrives</text><text class="sm" x="98.6" y="54" text-anchor="middle">M arrives</text><text class="sm" x="178.4" y="106" text-anchor="middle">unlock</text><text class="sm" x="148" y="150" text-anchor="middle">H waits 7 units; M ran first</text><text class="lbl" x="379" y="12" text-anchor="middle">with inheritance</text><text class="lbl" x="272" y="39" text-anchor="end">H</text><line class="lg" x1="274" y1="50" x2="483" y2="50" /><text class="lbl" x="272" y="73" text-anchor="end">M</text><line class="lg" x1="274" y1="84" x2="483" y2="84" /><text class="lbl" x="272" y="107" text-anchor="end">L</text><line class="lg" x1="274" y1="118" x2="483" y2="118" /><rect class="box" x="274" y="96" width="76" height="20" rx="0" style="fill:#FFF4C2"/><text class="lbl" x="312.0" y="109.0" text-anchor="middle"></text><rect class="box dash" x="312" y="28" width="38" height="20" rx="0" style="fill:#fafafa"/><text class="lbl" x="331.0" y="41.0" text-anchor="middle"></text><rect class="box" x="350" y="28" width="38" height="20" rx="0" style="fill:#F1F2F3"/><text class="lbl" x="369.0" y="41.0" text-anchor="middle"></text><rect class="box" x="388" y="62" width="57" height="20" rx="0" style="fill:#F1F2F3"/><text class="lbl" x="416.5" y="75.0" text-anchor="middle"></text><text class="sm" x="274" y="134" text-anchor="middle">0</text><line class="ln" x1="274" y1="126" x2="274" y2="129" /><text class="sm" x="312" y="134" text-anchor="middle">2</text><line class="ln" x1="312" y1="126" x2="312" y2="129" /><text class="sm" x="350" y="134" text-anchor="middle">4</text><line class="ln" x1="350" y1="126" x2="350" y2="129" /><text class="sm" x="388" y="134" text-anchor="middle">6</text><line class="ln" x1="388" y1="126" x2="388" y2="129" /><text class="sm" x="426" y="134" text-anchor="middle">8</text><line class="ln" x1="426" y1="126" x2="426" y2="129" /><text class="sm" x="464" y="134" text-anchor="middle">10</text><line class="ln" x1="464" y1="126" x2="464" y2="129" /><text class="sm" x="312" y="20" text-anchor="middle">H arrives</text><text class="sm" x="350" y="106" text-anchor="middle">unlock</text><text class="sm" x="388" y="150" text-anchor="middle">H waits 2 units; L ran at H priority</text><text class="sm" x="240" y="178" text-anchor="middle">Shaded yellow: L holds the lock. Dashed: waiting. H, M, L = high, medium, low priority.</text></svg>
-<figcaption><b>Figure 7.9</b> Priority inversion. Without inheritance, H waits for M's whole run. With inheritance, L finishes its critical section at H's priority and H resumes after two units.</figcaption>
+<figcaption><b>Figure 7.12</b> Priority inversion. Without inheritance, H waits for M's whole run. With inheritance, L finishes its critical section at H's priority and H resumes after two units.</figcaption>
 </figure>
 
 ::: lens

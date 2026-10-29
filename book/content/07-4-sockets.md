@@ -20,14 +20,14 @@ A TCP server prepares a *listening socket* and then serves connections one by on
 
 <figure>
 <svg viewBox="0 0 480 300" width="480"><defs><marker id="ild" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="ald" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="95" y="12" text-anchor="middle">Server</text><text class="lbl" x="385" y="12" text-anchor="middle">Client</text><line class="lg" x1="95" y1="18" x2="95" y2="292" /><line class="lg" x1="385" y1="18" x2="385" y2="292" /><rect class="box" x="20" y="25" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="37" text-anchor="middle">socket()</text><rect class="box" x="20" y="47" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="59" text-anchor="middle">bind(port)</text><rect class="box" x="20" y="69" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="81" text-anchor="middle">listen(backlog)</text><rect class="box" x="20" y="91" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="103" text-anchor="middle">accept()  blocks</text><rect class="box" x="20" y="205" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="217" text-anchor="middle">recv()  blocks</text><rect class="box" x="20" y="229" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="241" text-anchor="middle">send(reply)</text><rect class="box" x="20" y="253" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="265" text-anchor="middle">recv() returns 0</text><rect class="box" x="20" y="273" width="150" height="18" rx="0"/><text class="mono" x="95.0" y="285" text-anchor="middle">close()</text><rect class="box" x="310" y="111" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="123" text-anchor="middle">socket()</text><rect class="box" x="310" y="133" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="145" text-anchor="middle">connect()  blocks</text><rect class="box" x="310" y="173" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="185" text-anchor="middle">connect() returns</text><rect class="box" x="310" y="205" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="217" text-anchor="middle">send(request)</text><rect class="box" x="310" y="241" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="253" text-anchor="middle">recv() blocks</text><rect class="box" x="310" y="261" width="150" height="18" rx="0"/><text class="mono" x="385.0" y="273" text-anchor="middle">close()</text><rect class="box" x="20" y="91" width="150" height="18" rx="0" style="fill:#FFF4C2"/><text class="mono" x="95.0" y="103.0" text-anchor="middle">accept()  blocks</text><line class="acc" x1="310" y1="148" x2="170" y2="160" marker-end="url(#ald)" /><text class="sm" x="240" y="150" text-anchor="middle">SYN</text><line class="acc" x1="170" y1="162" x2="310" y2="172" marker-end="url(#ald)" /><text class="sm" x="240" y="172" text-anchor="middle">SYN-ACK</text><line class="acc" x1="310" y1="182" x2="170" y2="192" marker-end="url(#ald)" /><text class="sm" x="240" y="186" text-anchor="middle">ACK</text><text class="sm" x="240" y="202" text-anchor="middle">accept() returns a new descriptor</text><line class="ln" x1="310" y1="220" x2="170" y2="226" marker-end="url(#ild)" /><text class="sm" x="240" y="222" text-anchor="middle">data</text><line class="ln" x1="170" y1="240" x2="310" y2="246" marker-end="url(#ild)" /><text class="sm" x="240" y="238" text-anchor="middle">data</text><line class="ln" x1="310" y1="274" x2="170" y2="268" marker-end="url(#ild)" /><text class="sm" x="240" y="266" text-anchor="middle">FIN</text></svg>
-<figcaption><b>Figure 7.13</b> The call sequence of a TCP exchange. The kernel completes the three-way handshake without the server's process; accept() merely collects the finished connection.</figcaption>
+<figcaption><b>Figure 7.16</b> The call sequence of a TCP exchange. The kernel completes the three-way handshake without the server's process; accept() merely collects the finished connection.</figcaption>
 </figure>
 
-The mapping to the wire is worth fixing in mind. `connect()` sends a SYN and returns when the SYN-ACK arrives and the final ACK has been sent. On the server the kernel answers SYNs by itself: it keeps half-open connections in a *SYN queue*, moves each to the *accept queue* when its handshake completes, and `accept()` simply removes the oldest entry ( Figure 7.14 ). The `backlog` argument sizes the accept queue, limited by the system maximum; when it is full the kernel drops or ignores further handshake completions, so clients see delays or retransmitted SYNs.
+The mapping to the wire is worth fixing in mind. `connect()` sends a SYN and returns when the SYN-ACK arrives and the final ACK has been sent. On the server the kernel answers SYNs by itself: it keeps half-open connections in a *SYN queue*, moves each to the *accept queue* when its handshake completes, and `accept()` simply removes the oldest entry (Figure 7.17). The `backlog` argument sizes the accept queue, limited by the system maximum; when it is full the kernel drops or ignores further handshake completions, so clients see delays or retransmitted SYNs.
 
 <figure>
 <svg viewBox="0 0 480 130" width="480"><defs><marker id="iaq" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="aaq" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><rect class="box" x="10" y="40" width="90" height="50" rx="0"/><text class="sm" x="55.0" y="68.0" text-anchor="middle">incoming SYN</text><rect class="fill" x="140" y="30" width="120" height="70" rx="0"/><text class="lbl" x="200.0" y="64.0" text-anchor="middle">SYN queue</text><text class="sm" x="200.0" y="73.0" text-anchor="middle">half-open: SYN received</text><rect class="fill" x="300" y="30" width="120" height="70" rx="0"/><text class="lbl" x="360.0" y="64.0" text-anchor="middle">accept queue</text><text class="sm" x="360.0" y="73.0" text-anchor="middle">handshake complete</text><line class="ln" x1="100" y1="65" x2="138" y2="65" marker-end="url(#iaq)" /><text class="sm" x="120" y="58" text-anchor="middle">SYN-ACK</text><line class="acc" x1="260" y1="65" x2="298" y2="65" marker-end="url(#aaq)" /><text class="sm" x="280" y="58" text-anchor="middle">ACK</text><line class="ln" x1="420" y1="65" x2="465" y2="65" marker-end="url(#iaq)" /><text class="mono" x="446" y="58" text-anchor="middle">accept()</text><text class="sm" x="360" y="116" text-anchor="middle">length capped by min(backlog, somaxconn); when full, new ACKs are dropped or ignored</text><text class="sm" x="200" y="116" text-anchor="middle"></text></svg>
-<figcaption><b>Figure 7.14</b> The two kernel queues behind a listening socket.</figcaption>
+<figcaption><b>Figure 7.17</b> The two kernel queues behind a listening socket.</figcaption>
 </figure>
 
 ### Addresses and byte order
@@ -54,7 +54,7 @@ static void die(const char *what) { perror(what); exit(1); }
 int main(int argc, char **argv)
 {
     int port = argc > 1 ? atoi(argv[1]) : 8080;
-    signal(SIGPIPE, SIG_IGN);                    /* write to a closed peer gives EPIPE */
+    signal(SIGPIPE, SIG_IGN);  /* write to a closed peer gives EPIPE */
 
     int ls = socket(AF_INET, SOCK_STREAM, 0);
     if (ls < 0) die("socket");
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
 
     struct sockaddr_in a = { .sin_family = AF_INET,
-                             .sin_port = htons(port),          /* host to network order */
+                             .sin_port = htons(port),  /* host to network order */
                              .sin_addr.s_addr = htonl(INADDR_ANY) };
     if (bind(ls, (struct sockaddr *)&a, sizeof a) < 0) die("bind");
     if (listen(ls, 128) < 0) die("listen");
@@ -83,14 +83,14 @@ int main(int argc, char **argv)
         char buf[4096];
         ssize_t n;
         while ((n = recv(c, buf, sizeof buf, 0)) > 0) {
-            for (ssize_t off = 0; off < n; ) {   /* send may write less than asked */
+            for (ssize_t off = 0; off < n; ) {   /* send may be partial */
                 ssize_t w = send(c, buf + off, n - off, 0);
                 if (w < 0) { if (errno == EINTR) continue; goto done; }
                 off += w;
             }
         }
     done:
-        close(c);                                /* sends FIN; the next client is accepted */
+        close(c);  /* sends FIN; the next client is accepted */
     }
 }
 ```
@@ -114,13 +114,19 @@ int main(int argc, char **argv)
     int s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) { perror("socket"); return 1; }
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons(port) };
-    if (inet_pton(AF_INET, ip, &a.sin_addr) != 1) { fprintf(stderr, "bad address\n"); return 1; }
-    if (connect(s, (struct sockaddr *)&a, sizeof a) < 0) { perror("connect"); return 1; }
+    if (inet_pton(AF_INET, ip, &a.sin_addr) != 1) {
+        fprintf(stderr, "bad address\n");
+        return 1;
+    }
+    if (connect(s, (struct sockaddr *)&a, sizeof a) < 0) {
+        perror("connect");
+        return 1;
+    }
 
     const char *msg = "hello, socket\n";
     send(s, msg, strlen(msg), 0);
     char buf[128];
-    ssize_t n = recv(s, buf, sizeof buf - 1, 0);     /* may return fewer bytes: see the text */
+    ssize_t n = recv(s, buf, sizeof buf - 1, 0);   /* may be partial */
     if (n < 0) { perror("recv"); return 1; }
     buf[n] = '\0';
     printf("echo: %s", buf);
@@ -162,22 +168,23 @@ TCP delivers a byte stream, so one `send()` is not one `recv()`. Three sends of 
 int main(void)
 {
     int ls = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in a = { .sin_family = AF_INET, .sin_addr.s_addr = htonl(INADDR_LOOPBACK) };
+    struct sockaddr_in a = { .sin_family = AF_INET,
+                             .sin_addr.s_addr = htonl(INADDR_LOOPBACK) };
     socklen_t len = sizeof a;
-    bind(ls, (struct sockaddr *)&a, sizeof a);            /* port 0: kernel picks one */
+    bind(ls, (struct sockaddr *)&a, sizeof a);  /* port 0: kernel picks one */
     listen(ls, 1);
     getsockname(ls, (struct sockaddr *)&a, &len);
 
     int c = socket(AF_INET, SOCK_STREAM, 0);
-    connect(c, (struct sockaddr *)&a, sizeof a);          /* completes via the accept queue */
+    connect(c, (struct sockaddr *)&a, sizeof a);   /* completes at once */
     int s = accept(ls, NULL, NULL);
 
     char msg[20];
     memset(msg, 'x', sizeof msg);
-    send(c, msg, 10, 0);                                  /* three separate sends */
+    send(c, msg, 10, 0);  /* three separate sends */
     send(c, msg, 20, 0);
     send(c, msg, 5, 0);
-    usleep(200000);                                       /* let all three arrive first */
+    usleep(200000);  /* let all three arrive first */
 
     char buf[100];
     ssize_t n;
@@ -208,7 +215,7 @@ ssize_t readn(int fd, void *buf, size_t n)
     size_t got = 0;
     while (got < n) {
         ssize_t r = recv(fd, (char *)buf + got, n - got, 0);
-        if (r == 0) return got == 0 ? 0 : -1;       /* EOF inside a message is an error */
+        if (r == 0) return got == 0 ? 0 : -1;   /* EOF mid-message: error */
         if (r < 0) { if (errno == EINTR) continue; return -1; }
         got += r;
     }
@@ -241,7 +248,7 @@ ssize_t recv_msg(int fd, void *p, uint32_t cap)    /* returns payload length */
     ssize_t r = readn(fd, &be, 4);
     if (r <= 0) return r;
     uint32_t len = ntohl(be);
-    if (len > cap) return -1;                       /* never trust a peer's length */
+    if (len > cap) return -1;  /* never trust a peer's length */
     return readn(fd, p, len) < 0 ? -1 : (ssize_t)len;
 }
 ```
@@ -270,14 +277,18 @@ int main(int argc, char **argv)
     int s = socket(AF_INET, SOCK_DGRAM, 0);
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons(port),
                              .sin_addr.s_addr = htonl(INADDR_ANY) };
-    if (s < 0 || bind(s, (struct sockaddr *)&a, sizeof a) < 0) { perror("udp"); return 1; }
+    if (s < 0 || bind(s, (struct sockaddr *)&a, sizeof a) < 0) {
+        perror("udp");
+        return 1;
+    }
     for (;;) {
         char buf[1500];
         struct sockaddr_in from;
         socklen_t len = sizeof from;
-        ssize_t n = recvfrom(s, buf, sizeof buf, 0, (struct sockaddr *)&from, &len);
+        ssize_t n = recvfrom(s, buf, sizeof buf, 0,
+                             (struct sockaddr *)&from, &len);
         if (n < 0) { perror("recvfrom"); continue; }
-        sendto(s, buf, n, 0, (struct sockaddr *)&from, len);   /* reply to the sender */
+        sendto(s, buf, n, 0, (struct sockaddr *)&from, len);   /* reply */
     }
 }
 ```
@@ -314,7 +325,8 @@ int dial(const char *host, const char *port)
 int main(void)
 {
     int fd = dial("localhost", "8083");
-    printf("dial returned %s\n", fd >= 0 ? "a connected socket" : "-1 (connection refused)");
+    printf("dial returned %s\n",
+           fd >= 0 ? "a connected socket" : "-1 (connection refused)");
     return 0;
 }
 ```
@@ -382,7 +394,7 @@ static void *serve(void *arg)
     char buf[4096];
     ssize_t n;
     while ((n = recv(c, buf, sizeof buf, 0)) > 0)
-        send(c, buf, n, MSG_NOSIGNAL);           /* short writes ignored for brevity */
+        send(c, buf, n, MSG_NOSIGNAL);  /* short writes ignored for brevity */
     close(c);
     return NULL;
 }
@@ -393,7 +405,11 @@ int main(void)
     setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons(8084),
                              .sin_addr.s_addr = htonl(INADDR_ANY) };
-    if (bind(ls, (struct sockaddr *)&a, sizeof a) < 0 || listen(ls, 128) < 0) { perror("bind"); return 1; }
+    if (bind(ls, (struct sockaddr *)&a, sizeof a) < 0 ||
+        listen(ls, 128) < 0) {
+        perror("bind/listen");
+        return 1;
+    }
     for (;;) {
         int c = accept(ls, NULL, NULL);
         if (c < 0) continue;
@@ -411,11 +427,11 @@ The program is correct and the logic stays linear, since each thread blocks in `
 
 `select` takes three bit sets of descriptors (read, write, exceptional), blocks until one is ready, and returns with the sets modified to show which; the caller rebuilds the sets on every call. The sets have a fixed size, `FD_SETSIZE`, normally 1024, so a descriptor numbered 1024 or more cannot be watched at all. `poll` takes an array of `struct pollfd`, which removes the size limit and the rebuilding of bit sets. Both are O(n) per call: the kernel scans every watched descriptor, and so does the program to find the ready ones.
 
-`epoll` stores the interest list *inside the kernel*. `epoll_ctl` adds, modifies or removes a descriptor once; `epoll_wait` returns only the descriptors that are ready. The kernel keeps the interest list as a red-black tree and attaches a callback to each socket's wait queue; when data arrives, the callback moves that descriptor onto a *ready list* ( Figure 7.15 ). The cost of a wait is therefore proportional to the number of ready descriptors, not the number watched.
+`epoll` stores the interest list *inside the kernel*. `epoll_ctl` adds, modifies or removes a descriptor once; `epoll_wait` returns only the descriptors that are ready. The kernel keeps the interest list as a red-black tree and attaches a callback to each socket's wait queue; when data arrives, the callback moves that descriptor onto a *ready list* (Figure 7.18). The cost of a wait is therefore proportional to the number of ready descriptors, not the number watched.
 
 <figure>
 <svg viewBox="0 0 480 215" width="480"><defs><marker id="iep" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="aep" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><rect class="fill" x="10" y="20" width="120" height="160" rx="0"/><text class="lbl" x="70.0" y="103.0" text-anchor="middle"></text><text class="lbl" x="70" y="14" text-anchor="middle">your process</text><rect class="box" x="20" y="34" width="100" height="36" rx="0"/><text class="mono" x="70.0" y="51.0" text-anchor="middle">epoll_ctl</text><text class="sm" x="70.0" y="60.0" text-anchor="middle">ADD / MOD / DEL</text><rect class="box" x="20" y="132" width="100" height="36" rx="0"/><text class="mono" x="70.0" y="149.0" text-anchor="middle">epoll_wait</text><text class="sm" x="70.0" y="158.0" text-anchor="middle">returns ready fds</text><rect class="fill" x="165" y="20" width="150" height="160" rx="0"/><text class="lbl" x="240.0" y="103.0" text-anchor="middle"></text><text class="lbl" x="240" y="14" text-anchor="middle">epoll instance (kernel)</text><rect class="box" x="175" y="34" width="130" height="60" rx="0"/><text class="lbl" x="240.0" y="63.0" text-anchor="middle">interest list</text><text class="sm" x="240.0" y="72.0" text-anchor="middle">red-black tree keyed by fd</text><rect class="box" x="175" y="118" width="130" height="50" rx="0" style="fill:#FFF4C2"/><text class="lbl" x="240.0" y="142.0" text-anchor="middle">ready list</text><text class="sm" x="240.0" y="151.0" text-anchor="middle">linked list, filled by callbacks</text><line class="ln" x1="120" y1="52" x2="173" y2="52" marker-end="url(#iep)" /><line class="acc" x1="173" y1="143" x2="122" y2="150" marker-end="url(#aep)" /><rect class="box" x="360" y="20" width="110" height="36" rx="0"/><text class="sm" x="415.0" y="37.0" text-anchor="middle">socket A</text><text class="sm" x="415.0" y="46.0" text-anchor="middle">wait queue</text><rect class="box" x="360" y="66" width="110" height="36" rx="0"/><text class="sm" x="415.0" y="83.0" text-anchor="middle">socket B</text><text class="sm" x="415.0" y="92.0" text-anchor="middle">wait queue</text><rect class="box" x="360" y="112" width="110" height="36" rx="0" style="fill:#FFF4C2"/><text class="sm" x="415.0" y="129.0" text-anchor="middle">socket C</text><text class="sm" x="415.0" y="138.0" text-anchor="middle">wait queue</text><path class="acc" d="M360,130 Q330,130 305,143" marker-end="url(#aep)" /><text class="sm" x="335" y="160" text-anchor="middle">data arrives: callback</text><text class="sm" x="335" y="170" text-anchor="middle">adds C to the ready list</text><line class="lg" x1="305" y1="52" x2="358" y2="38" /><line class="lg" x1="305" y1="60" x2="358" y2="84" /><line class="lg" x1="305" y1="70" x2="358" y2="128" /><text class="sm" x="240" y="200" text-anchor="middle">Each wait costs O(ready descriptors), not O(watched descriptors).</text></svg>
-<figcaption><b>Figure 7.15</b> Inside epoll. The interest list is built once by epoll_ctl; the socket callbacks fill the ready list; epoll_wait only drains it.</figcaption>
+<figcaption><b>Figure 7.18</b> Inside epoll. The interest list is built once by epoll_ctl; the socket callbacks fill the ready list; epoll_wait only drains it.</figcaption>
 </figure>
 
 | | `select` | `poll` | `epoll` |
@@ -426,17 +442,13 @@ The program is correct and the logic stays linear, since each thread blocks in `
 | Edge-triggered mode | no | no | yes |
 | Portability | POSIX everywhere | POSIX | Linux only (BSD: `kqueue`) |
 
-::: margin
-[**Level or edge** — level-triggered is a doorbell that rings while the visitor stands there; edge-triggered rings once when the visitor arrives, and it is your job to let everyone in.]{.margin}
-:::
-
 ### Level-triggered and edge-triggered
 
-By default `epoll` is *level-triggered*: `epoll_wait` reports a descriptor on every call for as long as it is ready, that is, while unread data remains. In *edge-triggered* mode (`EPOLLET`) it reports a descriptor only when its state *changes* from not ready to ready: once per arrival of new data. The two behaviours are drawn in Figure 7.16.
+[**Level or edge** — level-triggered is a doorbell that rings while the visitor stands there; edge-triggered rings once on arrival, and you must let everyone in.]{.margin}By default `epoll` is *level-triggered*: `epoll_wait` reports a descriptor on every call for as long as it is ready, that is, while unread data remains. In *edge-triggered* mode (`EPOLLET`) it reports a descriptor only when its state *changes* from not ready to ready: once per arrival of new data. The two behaviours are drawn in Figure 7.19.
 
 <figure>
 <svg viewBox="0 0 480 175" width="480"><defs><marker id="ilt" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="alt" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="sm" x="8" y="40" text-anchor="start">data in socket</text><text class="sm" x="8" y="100" text-anchor="start">level-triggered</text><text class="sm" x="8" y="148" text-anchor="start">edge-triggered</text><path class="ln" d="M90,50 L120,50 L120,26 L300,26 L300,50 L360,50" /><text class="sm" x="210" y="20" text-anchor="middle">unread bytes remain</text><line class="ln" x1="150" y1="108" x2="150" y2="84" marker-end="url(#ilt)" /><line class="ln" x1="180" y1="108" x2="180" y2="84" marker-end="url(#ilt)" /><line class="ln" x1="210" y1="108" x2="210" y2="84" marker-end="url(#ilt)" /><line class="ln" x1="240" y1="108" x2="240" y2="84" marker-end="url(#ilt)" /><line class="ln" x1="270" y1="108" x2="270" y2="84" marker-end="url(#ilt)" /><line class="ln" x1="120" y1="108" x2="120" y2="84" marker-end="url(#ilt)" /><line class="acc" x1="120" y1="156" x2="120" y2="124" marker-end="url(#alt)" /><line class="lg" x1="90" y1="110" x2="360" y2="110" /><line class="lg" x1="90" y1="158" x2="360" y2="158" /><text class="sm" x="210" y="78" text-anchor="middle">every epoll_wait reports it while data remains</text><text class="sm" x="210" y="122" text-anchor="middle">reported once, on the rising edge: read until EAGAIN</text><text class="sm" x="210" y="172" text-anchor="middle">epoll_wait calls at t = 1 ... 6</text></svg>
-<figcaption><b>Figure 7.16</b> Level-triggered reports every wait while data remains. Edge-triggered reports once, at the rising edge.</figcaption>
+<figcaption><b>Figure 7.19</b> Level-triggered reports every wait while data remains. Edge-triggered reports once, at the rising edge.</figcaption>
 </figure>
 
 Edge-triggered mode demands two disciplines. The sockets must be *non-blocking* (`O_NONBLOCK`), and on each notification the program must read until `read` returns `EAGAIN`, because an event is not repeated if data is left behind. Using ET with a blocking socket hangs the server at the last read, and not draining loses the rest of the data until the peer sends more. In return ET needs fewer `epoll_wait` calls.
@@ -494,6 +506,11 @@ int main(int argc, char **argv)
     add(ep, ls, EPOLLIN);                         /* listener: level-triggered */
     printf("epoll server on port %d\n", port);
 
+```
+
+The event loop follows.
+
+```c
     struct epoll_event evs[MAX_EVENTS];
     for (;;) {
         int n = epoll_wait(ep, evs, MAX_EVENTS, -1);
@@ -510,7 +527,7 @@ int main(int argc, char **argv)
                         perror("accept"); break;
                     }
                     set_nonblock(c);
-                    add(ep, c, EPOLLIN | EPOLLRDHUP | EPOLLET);   /* edge-triggered */
+                    add(ep, c, EPOLLIN | EPOLLRDHUP | EPOLLET);   /* ET */
                 }
                 continue;
             }
@@ -531,13 +548,13 @@ int main(int argc, char **argv)
                            queue the rest and register EPOLLOUT. We drop it. */
                         break;
                     }
-                } else if (r == 0) { closed = 1; break; }          /* peer closed */
+                } else if (r == 0) { closed = 1; break; }  /* peer closed */
                 else if (errno == EAGAIN || errno == EWOULDBLOCK) break;
                 else if (errno == EINTR) continue;
                 else { closed = 1; break; }
             }
             if (closed || (evs[i].events & EPOLLRDHUP))
-                close(fd);                        /* close() also removes it from epoll */
+                close(fd);  /* close() also removes it from epoll */
         }
     }
 }
@@ -558,6 +575,10 @@ Read it in four steps. The setup is `socket`, `bind`, `listen` and `set_nonblock
 
 int main(int argc, char **argv)
 {
+    if (argc < 3) {
+        fprintf(stderr, "usage: loadgen port connections\n");
+        return 1;
+    }
     int port = atoi(argv[1]), conns = atoi(argv[2]);
     int *fd = malloc(conns * sizeof *fd);
     struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons(port) };
@@ -565,13 +586,19 @@ int main(int argc, char **argv)
     int ok = 0;
     for (int i = 0; i < conns; i++) {
         fd[i] = socket(AF_INET, SOCK_STREAM, 0);
-        if (connect(fd[i], (struct sockaddr *)&a, sizeof a) < 0) { perror("connect"); break; }
+        if (connect(fd[i], (struct sockaddr *)&a, sizeof a) < 0) {
+            perror("connect");
+            break;
+        }
         ok++;
     }
-    for (int i = 0; i < ok; i++) {              /* one round trip on every connection */
+    for (int i = 0; i < ok; i++) {  /* one round trip on every connection */
         char b[16];
         send(fd[i], "ping", 4, 0);
-        if (recv(fd[i], b, sizeof b, 0) != 4) { fprintf(stderr, "bad echo on %d\n", i); break; }
+        if (recv(fd[i], b, sizeof b, 0) != 4) {
+            fprintf(stderr, "bad echo on %d\n", i);
+            break;
+        }
     }
     printf("%d of %d connections echoed\n", ok, conns);
     return 0;
@@ -596,7 +623,7 @@ $ ./loadgen 8082 3000
 | 1,000 | | | |
 | 10,000 | | n/a (over 1024 descriptors) | |
 
-[Fill in resident memory and the time to echo all connections; the shape of the curve, not the values, is the lesson.]{.sm}
+*Fill in resident memory and the time to echo all connections; the shape of the curve, not the values, is the lesson.*
 
 ### Further models and pitfalls
 

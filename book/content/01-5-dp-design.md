@@ -1,165 +1,5 @@
 ::: {.p1}
 
-## [1.12]{.sec}Recursion and backtracking [Should · ■■□]{.tag} {#s1-12}
-
-::: bigidea
-Backtracking builds an answer one choice at a time and undoes each choice after exploring it, so a single recursive function enumerates every candidate while the constraints prune the hopeless ones early.
-:::
-
-A recursive function needs a *base case* that stops the recursion and a *step* that moves towards it. Backtracking adds a *path* that is extended before the recursive call and restored after it: choose, explore, un-choose. *Recognise:* "all combinations, permutations or subsets", "generate all", "place so that no two conflict", and small limits (*n* ≤ 12 for permutations, *n* ≤ 20 for subsets). The cost is the size of the search tree: 2^*n* for subsets, *n*! for permutations.
-
-```cpp
-void subsets(const vector<int>& a, int i, vector<int>& path,
-             vector<vector<int>>& out) {
-    if (i == (int)a.size()) { out.push_back(path); return; }   // copy
-    subsets(a, i + 1, path, out);  // skip a[i]
-    path.push_back(a[i]);                                        // choose
-    subsets(a, i + 1, path, out);  // explore
-    path.pop_back();  // un-choose
-}
-```
-
-The two classic bugs are forgetting the un-choose step, which leaks choices into sibling branches, and (in Python) appending `path` itself rather than a copy `path[:]`, so that every stored answer changes as the path changes.
-
-::: example
-**Restore IP addresses.** Given a string of digits such as `25525511135`, return every way to insert three dots so that the result is a valid IPv4 address (four parts, each 0–255, no leading zeros).
-
-1. The search has four levels. At each level we choose the length of the next part, 1 to 3 digits.
-2. A part is rejected if it has a leading zero and length above one, or exceeds 255.
-3. After four parts, the answer is valid only if all digits have been consumed.
-4. Pruning by these rules leaves very few branches: at most 3^4 = 81 leaves are ever reached.
-
-```cpp
-void restore(const string& s, int pos, int parts, string& cur,
-             vector<string>& out) {
-    if (parts == 4) {
-        if (pos == (int)s.size())                    // all digits used
-            out.push_back(cur.substr(0, cur.size() - 1));   // drop last '.'
-        return;
-    }
-    size_t keep = cur.size();
-    for (int len = 1; len <= 3 && pos + len <= (int)s.size(); ++len) {
-        string seg = s.substr(pos, len);
-        if ((len > 1 && seg[0] == '0') || stoi(seg) > 255) continue;
-        cur += seg + '.';  // choose
-        restore(s, pos + len, parts + 1, cur, out);  // explore
-        cur.resize(keep);  // un-choose
-    }
-}
-```
-
-| Part lengths tried | Parts | Outcome |
-|---|---|---|
-| 3, 3, 2, 3 | 255.255.11.135 | all 11 digits used: accepted |
-| 3, 3, 3, 2 | 255.255.111.35 | all 11 digits used: accepted |
-| 3, 3, 1, ? | 255.255.1.? | the remaining `1135` has four digits, no length 1–3 uses them all: dead end |
-| 2, 2, 2, 3 | 25.52.55.111 | four parts built but two digits are left over: rejected |
-| 2, 5, ... | `25.5...` then `525` | a part such as `511` exceeds 255 and is skipped |
-
-[Result for `25525511135`: `255.255.11.135` and `255.255.111.35`. Call as `restore(s, 0, 0, cur, out)` with an empty `cur`.]{.result}
-:::
-
-::: trap
-*Claim:* Python's recursion handles a depth-first search of any size. *Why it is wrong:* CPython allows about 1000 nested calls by default, and a path graph of 10^5 vertices raises `RecursionError`; C overflows its stack in the same way. *Correct statement:* use an explicit stack for deep graphs, or raise the limit only when the depth is known and modest.
-:::
-
-## [1.13]{.sec}Sorting, binary search and intervals [Must · ■■□]{.tag} {#s1-13}
-
-::: bigidea
-Sorting costs O(*n* log *n*) once and then makes many questions cheap, because order lets us discard half the data at each comparison.
-:::
-
-Comparison sorts cannot beat O(*n* log *n*); the table of algorithms is in the Revision Spread ([the Revision Spread](#rv1){.ref}). In C, `qsort` takes a comparator that must return negative, zero or positive, and it must never be written as `return a - b`, which overflows for large values.
-
-```c
-int cmp_int(const void *pa, const void *pb) {
-    int a = *(const int *)pa, b = *(const int *)pb;
-    return (a > b) - (a < b);  /* -1, 0 or 1; no overflow */
-}
-/* qsort(arr, n, sizeof arr[0], cmp_int); */
-```
-
-### Binary search
-
-*Idea.* In a sorted range, compare with the middle element and discard the half that cannot contain the target. We use one canonical form with a half-open range `[lo, hi)`, which finds the first index whose value is not less than *x*, termed the *lower bound*. Every variant (first occurrence, insertion point, first true of a monotone predicate) is this loop.
-
-```cpp
-int lowerBound(const vector<int>& a, int x) {   // first a[i] >= x, or n
-    int lo = 0, hi = (int)a.size();
-    while (lo < hi) {
-        int mid = lo + (hi - lo) / 2;  // not (lo + hi) / 2: avoids overflow
-        if (a[mid] < x) lo = mid + 1; else hi = mid;
-    }
-    return lo;
-}
-```
-
-The two classic bugs are the midpoint overflow in `(lo + hi) / 2` for ranges beyond 2^30, and an update such as `lo = mid`, which loops forever when `hi = lo + 1`. The loop runs ⌈log₂ *n*⌉ times.
-
-**Binary search on the answer.** When the answer is a number and a yes/no test "is *x* enough?" is monotone (false up to a threshold, true after it), the same loop searches the range of possible answers. *Recognise:* "minimise the maximum", "smallest capacity such that …", "at most *D* days".
-
-::: example
-**Ship packages within D days.** Packages of weights `1..10` must be shipped in order; a ship carries at most its capacity per day. Find the smallest capacity that ships everything in 5 days.
-
-1. The capacity is at least the heaviest package (10) and at most the total (55).
-2. For a trial capacity, load greedily and count days: a larger capacity never needs more days, so the test is monotone.
-3. Search the range for the first capacity needing at most 5 days.
-
-```cpp
-int shipWithinDays(const vector<int>& w, int days) {
-    int lo = *max_element(w.begin(), w.end());
-    int hi = accumulate(w.begin(), w.end(), 0);  // answer lies in [lo, hi]
-    while (lo < hi) {
-        int mid = lo + (hi - lo) / 2, need = 1, load = 0;
-        for (int x : w) {
-            if (load + x > mid) { ++need; load = 0; }  // start the next day
-            load += x;
-        }
-        if (need <= days) hi = mid; else lo = mid + 1;
-    }
-    return lo;
-}
-```
-
-| lo | hi | mid | days needed | action |
-|---|---|---|---|---|
-| 10 | 55 | 32 | 2 | hi = 32 |
-| 10 | 32 | 21 | 3 | hi = 21 |
-| 10 | 21 | 15 | 5 | hi = 15 |
-| 10 | 15 | 12 | 6 | lo = 13 |
-| 13 | 15 | 14 | 6 | lo = 15 |
-
-[Result: 15. Time O(*n* log(sum)).]{.result}
-:::
-
-### Intervals
-
-*Idea.* Sorting intervals by start brings overlapping ones next to each other, so one pass can merge them: an interval overlaps the last merged interval when its start is at most that interval's end. *Recognise:* "merge", "overlapping", "meeting rooms", "insert interval", IP address ranges (as pairs of 32-bit integers).
-
-```cpp
-vector<array<long long, 2>> mergeIntervals(vector<array<long long, 2>> v) {
-    sort(v.begin(), v.end());  // by start, then end
-    vector<array<long long, 2>> out;
-    for (auto& iv : v) {
-        if (!out.empty() && iv[0] <= out.back()[1])   // overlaps the last
-            out.back()[1] = max(out.back()[1], iv[1]);
-        else
-            out.push_back(iv);
-    }
-    return out;
-}
-```
-
-For `[1,3], [2,6], [8,10], [15,18]`: `[2,6]` starts at 2 ≤ 3 and extends the first interval to `[1,6]`; `[8,10]` starts after 6 and is kept; `[15,18]` is kept. Whether `[1,2]` and `[3,4]` should merge (as integer ranges they are adjacent) or `[1,2]` and `[2,3]` should (they touch) is a question to ask; the code above merges touching intervals but not adjacent ones, and `iv[0] <= out.back()[1] + 1` merges adjacent integer ranges as well. Time O(*n* log *n*) for the sort.
-
-::: check
-1. Why does `lo = mid` in a half-open search risk an infinite loop? [^c1-23]
-2. After sorting by start, why is it enough to compare with only the last merged interval? [^c1-24]
-:::
-
-[^c1-23]: With `hi = lo + 1`, `mid` equals `lo`, so the range never shrinks.
-[^c1-24]: Every earlier merged interval ends before the last one starts, so a later interval cannot reach them.
-
 ## [1.14]{.sec}Dynamic programming essentials [Should · ■■■]{.tag} {#s1-14}
 
 ::: bigidea
@@ -202,6 +42,54 @@ int coinChange(const vector<int>& coins, int amount) {
 [Result: 2 (3 + 3). A greedy choice of the largest coin gives 4 + 1 + 1 = 3 coins, which shows why greedy is unsafe here. Time O(amount × coins), space O(amount).]{.result}
 :::
 
+**Top-down and bottom-up.** The recurrence can be evaluated in two ways: *top-down*, as the recursive function with a memo table that stores each result on first computation (the `fib` of [§1.1](#s1-1){.ref}); or *bottom-up*, by filling a table in an order that respects the dependencies, as `coinChange` does. The results are the same; bottom-up avoids recursion depth and allows the space to be trimmed, while top-down is quicker to write when the order of evaluation is awkward.
+
+**The 0/1 knapsack.** Given items with weights `w[i]` and values `v[i]` and a capacity *W*, choose items, each at most once, to maximise the total value. Let `dp[c]` be the best value achievable within capacity *c*. Processing the items one at a time, `dp[c] = max(dp[c], dp[c - w] + v)`. The loop over *c* must run *downwards*: it then reads `dp[c - w]` from before the current item was considered, so each item is used once. A loop running upwards would read a value that already includes the item, which is the unbounded knapsack and the coin-change case.
+
+```cpp
+int knapsack(const vector<int>& w, const vector<int>& v, int W) {
+    vector<int> dp(W + 1, 0);
+    for (size_t i = 0; i < w.size(); ++i)
+        for (int c = W; c >= w[i]; --c)  // downwards: each item once
+            dp[c] = max(dp[c], dp[c - w[i]] + v[i]);
+    return dp[W];
+}
+```
+
+| After item (w, v) | dp[0..7] |
+|---|---|
+| none | 0 0 0 0 0 0 0 0 |
+| (1, 1) | 0 1 1 1 1 1 1 1 |
+| (3, 4) | 0 1 1 4 5 5 5 5 |
+| (4, 5) | 0 1 1 4 5 6 6 9 |
+| (5, 7) | 0 1 1 4 5 7 8 9 |
+
+[For capacity 7 the best value is 9, from the items of weight 3 and 4. Time O(*nW*), space O(*W*).]{.result}
+
+**Two strings.** For the longest common subsequence of strings *s* and *t*, let `d[i][j]` be the answer for their first *i* and *j* characters. Matching last characters extend the diagonal answer by one; otherwise the answer is the larger of dropping a character from either string.
+
+```cpp
+int lcs(const string& s, const string& t) {
+    int n = s.size(), m = t.size();
+    vector<vector<int>> d(n + 1, vector<int>(m + 1, 0));
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= m; ++j)
+            d[i][j] = s[i-1] == t[j-1] ? d[i-1][j-1] + 1
+                                       : max(d[i-1][j], d[i][j-1]);
+    return d[n][m];
+}
+```
+
+| | (empty) | A | C | B | D |
+|---|---|---|---|---|---|
+| (empty) | 0 | 0 | 0 | 0 | 0 |
+| A | 0 | 1 | 1 | 1 | 1 |
+| B | 0 | 1 | 1 | 2 | 2 |
+| C | 0 | 1 | 2 | 2 | 2 |
+| D | 0 | 1 | 2 | 2 | 3 |
+
+[For `ABCD` and `ACBD` the table ends in 3 (for example `ABD`). Time and space O(*nm*). The edit-distance table of the Problem Set has the same shape.]{.result}
+
 When counting *combinations* (order ignored), the loop over coins is the outer loop; when counting *sequences* (order matters), the loop over amounts is the outer loop. Swapping them changes the answer, and this is the standard knapsack bug. For two-string problems, edit distance and longest common subsequence are solved in the Problem Set with a two-dimensional table.
 
 ## [1.15]{.sec}Design-style coding: caches and rate limiters [Must · ■■■]{.tag} {#s1-15}
@@ -216,11 +104,11 @@ A *least-recently-used* (LRU) cache holds at most *c* entries and, when full, ev
 
 No single structure does both jobs: a hash map finds an entry in O(1) but keeps no order, and a list keeps order but finds in O(*n*). Combining them works because the map stores, for each key, the *address of its list node*; and a doubly linked list can unlink a node it has the address of in O(1), since the node knows both neighbours.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 470 190" width="508"><defs><marker id="a7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a7b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
 <text class="sm" x="20" y="14" text-anchor="start">hash map</text><text class="sm" x="190" y="14" text-anchor="start">doubly linked list: most recent at the head side</text><rect class="box" x="20" y="28" width="60" height="24"/><text class="mono" x="50" y="43" text-anchor="middle">k1 ●</text><rect class="box" x="20" y="66" width="60" height="24"/><text class="mono" x="50" y="81" text-anchor="middle">k2 ●</text><rect class="box" x="20" y="104" width="60" height="24"/><text class="mono" x="50" y="119" text-anchor="middle">k3 ●</text><rect class="fill" x="150" y="66" width="56" height="26"/><text class="sm" x="178" y="83" text-anchor="middle">head</text><rect class="box" x="230" y="66" width="56" height="26"/><text class="mono" x="258" y="83" text-anchor="middle">k3</text><rect class="box" x="310" y="66" width="56" height="26"/><text class="mono" x="338" y="83" text-anchor="middle">k1</text><rect class="box" x="390" y="66" width="56" height="26"/><text class="mono" x="418" y="83" text-anchor="middle">k2</text><rect class="fill" x="460" y="66" width="0" height="0"/><line class="ln" x1="206" y1="75" x2="230" y2="75" marker-end="url(#a7)"/><line class="lg" x1="230" y1="85" x2="206" y2="85" marker-end="url(#a7)"/><line class="ln" x1="286" y1="75" x2="310" y2="75" marker-end="url(#a7)"/><line class="lg" x1="310" y1="85" x2="286" y2="85" marker-end="url(#a7)"/><line class="ln" x1="366" y1="75" x2="390" y2="75" marker-end="url(#a7)"/><line class="lg" x1="390" y1="85" x2="366" y2="85" marker-end="url(#a7)"/><path class="acc" d="M80,40 C120,40 340,50 338,66" marker-end="url(#a7b)"/><path class="acc" d="M80,78 C120,110 380,120 418,92" marker-end="url(#a7b)"/><path class="acc" d="M80,116 C100,130 200,120 258,92" marker-end="url(#a7b)"/><text class="sm" x="20" y="160" text-anchor="start">get(k3) is a hit and already first. get(k2) unlinks k2 and relinks it after head: four pointer writes, O(1).</text><text class="sm" x="20" y="176" text-anchor="start">Eviction removes the node before the tail (here k2 is the least recent). The map entry must be erased too.</text><text class="sm" x="418" y="108" text-anchor="middle">least recent</text>
 </svg>
-<figcaption><b>Figure 1.12</b> LRU cache: the map finds a node in O(1); the list orders nodes by recency and lets us unlink one in O(1) because the node holds both neighbours.</figcaption>
+<figcaption><b>Figure 1.19</b> LRU cache: the map finds a node in O(1); the list orders nodes by recency and lets us unlink one in O(1) because the node holds both neighbours.</figcaption>
 </figure>
 
 ```cpp
@@ -283,11 +171,11 @@ public:
 
 A *token bucket* limits the average rate to *r* tokens per second while allowing bursts of at most *B* tokens. The bucket holds up to *B* tokens, and tokens arrive at *r* per second. A packet of size *s* may pass if the bucket holds at least *s* tokens, which it then removes; otherwise the packet is dropped (policing) or delayed (shaping). In router terms, *r* is the committed information rate and *B* the committed burst size.
 
-@<figure>
+<figure>
 <svg viewBox="0 0 440 180" width="475"><defs><marker id="a8" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
 <path class="box" style="fill:none" d="M180,40 L180,130 L260,130 L260,40" /><rect class="hl" x="181" y="85" width="78" height="44"/><line class="dash lg" x1="170" y1="40" x2="270" y2="40"/><text class="sm" x="278" y="44" text-anchor="start">capacity B (burst)</text><text class="lbl" x="220" y="112" text-anchor="middle">tokens</text><line class="ln" x1="220" y1="6" x2="220" y2="38" marker-end="url(#a8)"/><text class="sm" x="230" y="20" text-anchor="start">refill: r tokens per second</text><line class="ln" x1="30" y1="150" x2="170" y2="150" marker-end="url(#a8)"/><text class="sm" x="100" y="143" text-anchor="middle">packet of size s</text><line class="ln" x1="270" y1="150" x2="400" y2="150" marker-end="url(#a8)"/><text class="sm" x="335" y="143" text-anchor="middle">pass if tokens ≥ s</text><text class="sm" x="220" y="170" text-anchor="middle">else drop (or delay)</text><text class="sm" x="10" y="70" text-anchor="start">on each packet:</text><text class="mono" x="10" y="83" text-anchor="start">tokens = min(B, tokens + r·Δt)</text><text class="mono" x="10" y="96" text-anchor="start">pass: tokens −= s</text>
 </svg>
-<figcaption><b>Figure 1.13</b> A token bucket. The long-run rate is r and the largest burst is B, because the level can never exceed the capacity.</figcaption>
+<figcaption><b>Figure 1.20</b> A token bucket. The long-run rate is r and the largest burst is B, because the level can never exceed the capacity.</figcaption>
 </figure>
 
 We do not run a timer. Instead, on each packet we compute how many tokens would have arrived since the last update, add them, and cap the total at *B*. The state is only the current level and the last timestamp. Two details matter. First, time must come from a monotonic clock, because wall-clock time can jump backwards. Secondly, floating-point accumulation drifts, so we use integers: the level is stored in *micro-tokens* (tokens × 10^6), and with a clock in microseconds the refill over Δt µs is exactly `r × Δt` micro-tokens.
@@ -345,7 +233,52 @@ bool tb_allow(Bucket *b, uint64_t size, uint64_t now_us) {
 | token bucket | two numbers | bursts up to *B*, exact average | traffic policing, API limits |
 | leaky bucket | queue and a drain rate | smooth output, no bursts | traffic shaping |
 
+A token bucket with equal-sized packets can be run with a single stored time instead of a level. The *generic cell rate algorithm* keeps the theoretical arrival time `tat` of the next conforming packet: a packet is accepted if it is not earlier than `tat` by more than the burst allowance `burst_us`, and each accepted packet pushes `tat` forward by one packet interval.
+
+```c
+bool gcra_allow(uint64_t *tat, uint64_t now,
+                uint64_t interval, uint64_t burst) {
+    uint64_t t = *tat > now ? *tat : now;      /* never in the past */
+    if (t > now + burst) return false;         /* too early */
+    *tat = t + interval;
+    return true;
+}
+```
+
+With `interval` = 1000 µs (1000 packets per second) and `burst` = 2000 µs, four packets arriving at time 0 give `tat` = 1000, 2000, 3000 and then a refusal: the first packet is on time, and the burst allowance admits two more, so three back-to-back packets pass, which is 1 + `burst`/`interval`. One 64-bit variable replaces the level and the timestamp, and no multiplication by the packet size is needed; for variable-size packets the interval becomes size / rate.
+
 A fixed-window counter of five requests per ten seconds accepts five requests at second 9 and five more at second 11, ten in two seconds. A sliding log and a token bucket reject the excess; both are asked as follow-ups in the Problem Set.
+
+::: lab
+`LAB 1.15 · 10 MIN` Test the token bucket on the trace of the worked example. Save the `Bucket` code of this section together with this driver as `tb.c`, and compile with the sanitisers on, which catch overflow and invalid shifts.
+
+```c
+#include <stdio.h>
+int main(void) {
+    Bucket b;
+    tb_init(&b, 1000, 1500, 0);  /* 1000 bytes/s, burst 1500 bytes */
+    struct { uint64_t t_us, size; } ev[] = {
+        {0, 1500}, {500000, 600}, {700000, 600},
+        {2700000, 1500}, {2700000, 1} };
+    for (int i = 0; i < 5; i++)
+        printf("t=%.1fs size=%4llu -> %s\n", ev[i].t_us / 1e6,
+               (unsigned long long)ev[i].size,
+               tb_allow(&b, ev[i].size, ev[i].t_us) ? "pass" : "drop");
+    return 0;
+}
+```
+
+```
+$ gcc -fsanitize=address,undefined -g -o tb tb.c && ./tb
+t=0.0s size=1500 -> pass
+t=0.5s size= 600 -> drop
+t=0.7s size= 600 -> pass
+t=2.7s size=1500 -> pass
+t=2.7s size=   1 -> drop
+```
+
+**What you should notice:** the second packet is dropped although the bucket held 500 tokens, and the third passes 0.2 s later; the fourth empties the bucket and the fifth, in the same instant, is dropped. Change the burst to 1000 and rerun: the first 1500-byte packet is dropped at once, because no packet larger than the bucket can ever pass.
+:::
 
 ::: lens
 [MICROSOFT · AMAZON · CISCO · JUNIPER]{.co}
@@ -361,11 +294,11 @@ A finite-state machine replaces tangled conditionals by a table that gives the n
 
 A *finite-state machine* (FSM) has a set of states, a set of events (or input symbols), a start state and a transition function from (state, event) to the next state; an event with no entry is illegal. Protocols such as TCP, link-state adjacency formation and DHCP are specified this way, and Juniper and Broadcom interviews ask for one in C. *Recognise:* "validate a sequence of events", "parse a protocol", "valid number" (a number grammar is an FSM over characters).
 
-@<figure>
+<figure>
 <svg viewBox="0 0 480 126" width="518"><defs><marker id="a9" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
 <rect class="box" x="20" y="40" width="56" height="28" rx="14"/><text class="lbl" x="48" y="58" text-anchor="middle">CLOSED</text><rect class="box" x="120" y="40" width="56" height="28" rx="14"/><text class="lbl" x="148" y="58" text-anchor="middle">SYN&#95;SENT</text><rect class="box" x="220" y="40" width="56" height="28" rx="14"/><text class="lbl" x="248" y="58" text-anchor="middle">ESTAB</text><rect class="box" x="320" y="40" width="56" height="28" rx="14"/><text class="lbl" x="348" y="58" text-anchor="middle">FIN&#95;WAIT</text><rect class="box" x="420" y="40" width="56" height="28" rx="14"/><text class="lbl" x="448" y="58" text-anchor="middle">CLOSED</text><line class="ln" x1="76" y1="54" x2="120" y2="54" marker-end="url(#a9)"/><text class="sm" x="98.0" y="36" text-anchor="middle">send SYN</text><text class="sm" x="98.0" y="82" text-anchor="middle"></text><line class="ln" x1="176" y1="54" x2="220" y2="54" marker-end="url(#a9)"/><text class="sm" x="198.0" y="36" text-anchor="middle">rcv SYN+ACK /</text><text class="sm" x="198.0" y="82" text-anchor="middle">send ACK</text><line class="ln" x1="276" y1="54" x2="320" y2="54" marker-end="url(#a9)"/><text class="sm" x="298.0" y="36" text-anchor="middle">send FIN</text><text class="sm" x="298.0" y="82" text-anchor="middle"></text><line class="ln" x1="376" y1="54" x2="420" y2="54" marker-end="url(#a9)"/><text class="sm" x="398.0" y="36" text-anchor="middle">rcv ACK+FIN /</text><text class="sm" x="398.0" y="82" text-anchor="middle">send ACK</text><path class="acc dash" d="M248,68 Q248,110 48,68" /><text class="sm" x="150" y="112" text-anchor="middle">illegal event in any state: report error and keep state</text>
 </svg>
-<figcaption><b>Figure 1.14</b> A reduced connection state machine (handshake and teardown only). A table indexed by state and event replaces nested conditionals.</figcaption>
+<figcaption><b>Figure 1.21</b> A reduced connection state machine (handshake and teardown only). A table indexed by state and event replaces nested conditionals.</figcaption>
 </figure>
 
 A two-dimensional array indexed by state and event is the compact form. Entries of −1 mark illegal transitions; the driver loop reads the table and stops at the first illegal event.
@@ -398,6 +331,38 @@ int run_fsm(const Event *ev, size_t n, size_t *bad) {
 ```
 
 For the events (send SYN, receive SYN+ACK, send FIN) the machine moves CLOSED → SYN_SENT → ESTAB → FIN_WAIT and returns FIN_WAIT. For (send SYN, send FIN) the second event is illegal in SYN_SENT, so the function returns −1 with `*bad = 1`. When actions must accompany transitions, the table cells hold function pointers instead of states, which is how production protocol code is written. Table size is *states* × *events*, so the transition lookup is O(1).
+
+**A byte-stream parser.** An FSM is also the natural form of a parser that is fed one byte at a time, as a serial driver is. The framing used on many point-to-point links marks a frame boundary with the flag byte `0x7E`; a data byte equal to the flag or to the escape byte `0x7D` is sent as `0x7D` followed by the byte XOR `0x20`, so the flag never occurs inside a frame. Three states suffice: idle (hunting for a flag), body, and escaped (the next byte is stuffed).
+
+```c
+typedef struct {
+    enum { IDLE, BODY, ESC } st;
+    uint8_t buf[256];
+    size_t len;
+} Parser;
+
+/* Feed one byte; returns 1 when a frame is in p->buf[0..p->len). */
+int feed(Parser *p, uint8_t b) {
+    switch (p->st) {
+    case IDLE:
+        if (b == 0x7E) { p->st = BODY; p->len = 0; }
+        return 0;
+    case BODY:
+        if (b == 0x7E) { p->st = IDLE; return p->len > 0; }   /* end flag */
+        if (b == 0x7D) { p->st = ESC; return 0; }
+        break;
+    case ESC:
+        b ^= 0x20;
+        p->st = BODY;
+        break;
+    }
+    if (p->len == sizeof p->buf) p->st = IDLE;   /* overflow: resync */
+    else p->buf[p->len++] = b;
+    return 0;
+}
+```
+
+For the stream `7E 01 7D 5E 02 7E` the parser enters BODY at the first flag, stores `01`, sees the escape `7D`, converts the next byte `5E` to `5E ^ 20 = 7E` and stores it, stores `02`, and on the closing flag returns 1 with the frame `01 7E 02`. Two flags in a row produce an empty frame, which `p->len > 0` filters out, and a missing flag costs one frame but not the following ones because the parser resynchronises at the next flag. The state variable, not a pile of flags, is what makes each of these cases a single line.
 
 ::: check
 1. Why is a table preferable to nested `switch` statements for a protocol with 11 states? [^c1-25]
@@ -451,6 +416,40 @@ int main(void) {
 | 15–32 | write code in small named pieces, narrating intent |
 | 32–38 | dry-run and edge cases |
 | 38–45 | complexity, trade-offs and follow-ups |
+
+::: example
+**What a good ten minutes sounds like.** The question is "delete a node with a given value from a singly linked list, in C". A concise version of the exchange follows; the candidate's statements are the point, not the interviewer's.
+
+1. *Clarify.* "Is the list singly linked with a head pointer? May the value occur more than once? Should I delete the first occurrence or all? I will assume the first, and return the new head."
+2. *Example.* "For 3 → 5 → 7 and key 5 the result is 3 → 7. For key 3 the head changes, and for key 9 nothing changes."
+3. *Brute force.* "Walk with a trailing pointer to the previous node; special-case the head. That is O(*n*) time and O(1) space, which is optimal, since every node may have to be examined."
+4. *Improve.* "The head special case is easy to get wrong, so I will hold the address of the link to rewrite instead, a `Node **`."
+5. *Code.* The five-line function of [§1.6](#s1-6){.ref}, narrated: "`pp` starts at the head variable; I advance it to the link whose target has the key; then I rewrite that link and free the node after saving it."
+6. *Test.* "Empty list: `*pp` is null, nothing happens. One node, key present: the head variable becomes null. Key at the tail: the previous node's link becomes null. Key absent: unchanged."
+7. *Evaluate.* "O(*n*) time, O(1) space. If we must delete all occurrences, I do not advance `pp` after a deletion."
+
+[Result: every step is stated aloud, the edge cases are named before the interviewer asks, and the follow-up is anticipated.]{.result}
+:::
+
+::: lab
+`LAB 1.17 · 2–3 DAYS` **Pillar project: a mini-FIB.** Build a longest-prefix-match lookup engine and measure it. The project joins the pieces of this pillar and gives a concrete talking point for an interview: "I built a forwarding table lookup and compared four methods."
+
+<figure>
+<svg viewBox="0 0 440 160" width="475"><defs><marker id="a14" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
+<rect class="box" x="10" y="20" width="80" height="26" rx="2"/><text class="lbl" x="50.0" y="36" text-anchor="middle">routes.txt</text><rect class="box" x="120" y="20" width="70" height="26" rx="2"/><text class="lbl" x="155.0" y="36" text-anchor="middle">parser</text><rect class="box" x="220" y="20" width="90" height="26" rx="2"/><text class="lbl" x="265.0" y="36" text-anchor="middle">binary trie</text><rect class="box" x="340" y="20" width="80" height="26" rx="2"/><text class="lbl" x="380.0" y="36" text-anchor="middle">lookup(ip)</text><rect class="box" x="10" y="90" width="80" height="26" rx="2"/><text class="lbl" x="50.0" y="106" text-anchor="middle">queries.txt</text><rect class="box" x="220" y="90" width="90" height="26" rx="2"/><text class="lbl" x="265.0" y="106" text-anchor="middle">route cache</text><line class="ln" x1="90" y1="33" x2="120" y2="33" marker-end="url(#a14)"/><line class="ln" x1="190" y1="33" x2="220" y2="33" marker-end="url(#a14)"/><line class="ln" x1="340" y1="33" x2="310" y2="33" marker-end="url(#a14)"/><line class="ln" x1="90" y1="103" x2="215" y2="103" marker-end="url(#a14)"/><line class="ln" x1="265" y1="90" x2="265" y2="48" marker-end="url(#a14)"/><text class="sm" x="380" y="106" text-anchor="middle">hits/s, hit ratio</text><text class="sm" x="380" y="118" text-anchor="middle">(stretch goal)</text><text class="sm" x="10" y="150" text-anchor="start">stages 1-5: parser with tests, linear scan, trie, per-length hash, benchmark table; stage 6: LRU route cache</text>
+</svg>
+<figcaption><b>Figure 1.22</b> Architecture of the mini-FIB project. Queries are answered through the cache first, then the trie; the benchmark compares all lookup methods on the same inputs.</figcaption>
+</figure>
+
+1. *Parser.* Read lines `prefix/len next_hop` with the validating parsers of [§1.4](#s1-4){.ref}; reject malformed lines with a line number. Write unit tests with the `CHECK` harness above, including /0, /32 and host bits set beyond the prefix length.
+2. *Linear scan.* The baseline: for each query, test every prefix with the mask and keep the longest. It is the oracle for the later steps.
+3. *Binary trie.* The code of [§1.9](#s1-9){.ref}; compare every answer with the oracle on a million random queries.
+4. *Per-length hash.* The 33 hash tables of [§1.9](#s1-9){.ref}'s alternative, probing from /32 downwards.
+5. *Benchmark.* Generate a table of 10^4 to 10^6 prefixes with a realistic length mix (many /24, fewer /16 and /8) and report lookups per second for each method in a table.
+6. *Stretch.* Put an LRU cache of recent destinations in front of the trie ([§1.15](#s1-15){.ref}) and report the hit ratio; add prefix deletion with pruning.
+
+**What you should notice:** the oracle catches every off-by-one in the masks, which is why it is written first; and the ranking of the methods depends on the table, because the hash method is fast when few prefix lengths occur and the trie when many do. Check the program with `valgrind --leak-check=full` or the sanitisers before showing it.
+:::
 
 ::: check
 1. What are the first two edge cases to try on a linked-list function? [^c1-27]

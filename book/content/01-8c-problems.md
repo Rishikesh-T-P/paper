@@ -134,14 +134,15 @@ Arrivals 1, 0, 2 deliver nothing, then `[d0, d1]`, then `[d2]`. **Complexity.** 
 
 ```cpp
 int minThrows(const vector<int>& jump) {
-  int N = jump.size() - 1;  // jump[c] > 0: to
+  int N = jump.size() - 1;
   vector<int> dist(N + 1, -1);
   queue<int> q;
   dist[1] = 0; q.push(1);
   while (!q.empty()) {
     int u = q.front(); q.pop();
     if (u == N) return dist[u];
-    for (int d = 1; d <= 6 && u + d <= N; ++d) {
+    for (int d = 1; d <= 6 && u + d <= N;
+         ++d) {
       int v = jump[u + d] > 0
               ? jump[u + d] : u + d;
       if (dist[v] < 0) {
@@ -179,7 +180,9 @@ int numIslands(vector<string>& g) {
   };
   for (int r = 0; r < R; ++r)
     for (int c = 0; c < C; ++c)
-      if (g[r][c] == '1') { ++n; fill(r, c); }
+      if (g[r][c] == '1') {
+        ++n; fill(r, c);
+      }
   return n;
 }
 ```
@@ -197,9 +200,11 @@ int numIslands(vector<string>& g) {
 
 ```cpp
 bool canFinish(int n,
-               const vector<vector<int>>& pre) {
+               const vector<vector<int>>&
+               pre) {
   vector<vector<int>> g(n);
-  for (auto& p : pre) g[p[1]].push_back(p[0]);
+  for (auto& p : pre)
+    g[p[1]].push_back(p[0]);
   return (int)topo(n, g).size() == n;
 }
 ```
@@ -440,7 +445,9 @@ void perm(vector<int>& a, int i,
 void comb(const vector<int>& c, int i,
           int rem, vector<int>& path,
           vector<vector<int>>& out) {
-  if (rem == 0) { out.push_back(path); return; }
+  if (rem == 0) {
+    out.push_back(path); return;
+  }
   if (rem < 0 || i == (int)c.size()) return;
   path.push_back(c[i]);
   comb(c, i, rem - c[i], path, out);
@@ -513,7 +520,8 @@ vector<string> mergeRanges(
   }
   vector<string> out;
   for (auto& r : mergeIntervals(v))
-    out.push_back(fmt(r[0]) + "-" + fmt(r[1]));
+    out.push_back(fmt(r[0]) + "-" +
+                  fmt(r[1]));
   return out;
 }
 ```
@@ -800,7 +808,8 @@ class Logger {
 public:
   bool shouldPrint(int t, const string& m) {
     auto it = last.find(m);
-    if (it != last.end() && t - it->second < 10)
+    if (it != last.end() &&
+        t - it->second < 10)
       return false;
     last[m] = t;
     return true;
@@ -840,7 +849,9 @@ public:
     pos.erase(x);
     return true;
   }
-  int getRandom() { return v[rand() % v.size()]; }
+  int getRandom() {
+    return v[rand() % v.size()];
+  }
 };
 ```
 
@@ -860,18 +871,22 @@ bool isNumber(const string& s) {
   size_t i = 0, n = s.size();
   bool dig = false;
   auto D = [&](size_t k) {
-    return k < n && isdigit((unsigned char)s[k]);
+    return k < n &&
+        isdigit((unsigned char)s[k]);
   };
-  if (i < n && (s[i] == '+' || s[i] == '-')) ++i;
+  if (i < n && (s[i] == '+' || s[i] == '-'))
+    ++i;
   while (D(i)) { ++i; dig = true; }
   if (i < n && s[i] == '.') {
     ++i;
     while (D(i)) { ++i; dig = true; }
   }
   if (!dig) return false;
-  if (i < n && (s[i] == 'e' || s[i] == 'E')) {
+  if (i < n && (s[i] == 'e' ||
+                s[i] == 'E')) {
     ++i;
-    if (i < n && (s[i] == '+' || s[i] == '-')) ++i;
+    if (i < n && (s[i] == '+' || s[i] == '-'))
+      ++i;
     if (!D(i)) return false;
     while (D(i)) ++i;
   }

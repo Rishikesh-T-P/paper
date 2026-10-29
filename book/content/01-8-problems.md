@@ -1,3 +1,5 @@
+<style>.p1 .q pre{font-size:6.3pt; padding:2mm}</style>
+
 ::: {.p1}
 ::: pack
 ## Problem Set {#ps1}
@@ -5,7 +7,7 @@
 Every question of this pillar is solved once, here. Difficulty is ■□□ (foundation), ■■□ (typical test) or ■■■ (hardest interviews). The tag **S** means that candidates report this specific question; **T** means that the topic is reported and the wording is ours. Round names are OA (online assessment), TECH-1 and TECH-2 (technical interviews) and HM (hiring manager). Code is C++ for general algorithms and C for networking and systems problems, and each solution is a complete function. The first table lists the problems whose full solutions are already in the teaching sections, so that nothing is solved twice.
 
 | Q | Problem | Tags | Solved in |
-|---|---|---|---|
+|--|------------|--------|---|
 | Q1.1 | Two Sum: indices of two values adding to a target | CISCO · AMAZON · OA · ■□□ · S | [§1.1](#s1-1){.ref} |
 | Q1.2 | Longest substring without repeating characters | CISCO · OA · ■■□ · S | [§1.2](#s1-2){.ref} |
 | Q1.3 | Number of subarrays with sum *k* (negatives allowed) | GOOGLE · MICROSOFT · TECH-1 · ■■□ · T | [§1.2](#s1-2){.ref} |
@@ -125,7 +127,8 @@ vector<vector<int>> threeSum(vector<int> a) {
     if (i && a[i] == a[i-1]) continue;
     int l = i + 1, h = n - 1;
     while (l < h) {
-      long long s = (long long)a[i] + a[l] + a[h];
+      long long s = (long long)a[i]
+                    + a[l] + a[h];
       if (s < 0) ++l;
       else if (s > 0) --h;
       else {
@@ -254,7 +257,8 @@ vector<vector<string>> groupAnagrams(
 ```cpp
 extern "C" bool parse_ipv4(const char*,
                            uint32_t*);
-vector<pair<string,int>> topIPs(istream& in) {
+vector<pair<string,int>>
+topIPs(istream& in) {
   unordered_map<string,int> cnt;
   string t; uint32_t x;
   while (in >> t)
@@ -287,7 +291,7 @@ typedef struct E { int k, v;
                    struct E *next; } E;
 static E *tab[B];
 
-static E **slot(int k) {   /* link to entry */
+static E **slot(int k) {  /* link */
   E **pp = &tab[(unsigned)k % B];
   while (*pp && (*pp)->k != k)
     pp = &(*pp)->next;
@@ -620,7 +624,8 @@ int divide(int a, int b) {
     return INT_MAX;
   bool neg = (a < 0) != (b < 0);
   unsigned long long x = llabs((long long)a),
-                     y = llabs((long long)b), q = 0;
+                     y = llabs((long long)b),
+                     q = 0;
   for (int i = 31; i >= 0; --i)
     if ((x >> i) >= y) {
       x -= y << i;
@@ -649,9 +654,11 @@ vector<pair<uint32_t,int>> rangeToCidr(
     uint32_t a, uint64_t n) {
   vector<pair<uint32_t,int>> out;
   while (n > 0) {
-    uint64_t size = a ? (a & -a) : (1ull << 32);
+    uint64_t size =
+        a ? (a & -a) : (1ull << 32);
     while (size > n) size >>= 1;
-    out.push_back({a, 32 - __builtin_ctzll(size)});
+    int len = 32 - __builtin_ctzll(size);
+    out.push_back({a, len});
     a += size;
     n -= size;
   }
@@ -671,7 +678,8 @@ For 255.0.0.7 and *n* = 10: block 255.0.0.7/32 (alignment 1), then 255.0.0.8/29 
 [30-second answer: add the data as 16-bit big-endian words, fold the carries back into the low 16 bits, and complement the result.]{.short}
 
 ```c
-uint16_t checksum(const uint8_t *p, size_t n) {
+uint16_t checksum(const uint8_t *p,
+                  size_t n) {
   uint32_t sum = 0;
   for (; n > 1; p += 2, n -= 2)
     sum += (uint32_t)p[0] << 8 | p[1];

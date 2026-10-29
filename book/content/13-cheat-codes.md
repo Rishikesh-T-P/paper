@@ -311,21 +311,14 @@ Three more kinds of drill complete the set. *Same subnet?* 172.16.20.30 and 172.
 
 ### Ports and protocol numbers, second page
 
-The ports every candidate knows (FTP, SSH, Telnet, SMTP, DNS, DHCP, HTTP, BGP, HTTPS and so on), the IP protocol numbers up to OSPF and the common EtherTypes are in the Revision Spread of Pillar 3 ([the table](#rv3){.ref}). The table below adds the ports and numbers that networking roles are asked about.
+The ports every candidate knows (FTP, SSH, Telnet, SMTP, DNS, DHCP, HTTP, BGP, HTTPS and so on), the IP protocol numbers up to OSPF and the common EtherTypes are in the Revision Spread of Pillar 3 ([the table](#rv3){.ref}). Further ports sit with their protocols: LDP, HSRP and VRRP in [the Pillar 4 spread](#rv4){.ref}; VXLAN and Geneve in [the Pillar 5 spread](#rv5){.ref}; RADIUS, TACACS+, IKE and NAT-T in [the Pillar 9 spread](#rv9){.ref}; and NETCONF and gNMI in [the Pillar 10 spread](#rv10){.ref}. The table below adds only what none of them holds.
 
 ★ **Good to know, for networking roles.**
 
 | Port or number | Service | Note |
 |----------------|------------------|----------------------------------|
-| TCP 49 | TACACS+ | device administration; RADIUS is UDP 1812 and 1813 |
-| UDP 500, UDP 4500 | IKE, IPsec NAT traversal | ESP is IP protocol 50 and AH is 51 |
-| TCP 646 | LDP | also UDP 646 for hellos |
-| TCP 830 | NETCONF over SSH | gNMI has no old default; many devices use 9339 or 57400 |
 | UDP 3784, 3785 | BFD single-hop control, echo | multi-hop control is UDP 4784 |
-| UDP 4789, UDP 6081 | VXLAN, Geneve | VXLAN adds 50 bytes of overhead |
-| UDP 1985 | HSRP | 224.0.0.2 (v1) and 224.0.0.102 (v2); VRRP is IP protocol 112 |
 | UDP 521 | RIPng | RIP is UDP 520 |
-| TCP/UDP 389, 636 | LDAP, LDAPS | |
 | TCP/UDP 2049 | NFS | |
 | TCP/UDP 5060, 5061 | SIP, SIP over TLS | |
 | UDP 5353 | mDNS | |
@@ -367,11 +360,11 @@ The Cisco administrative-distance table is in the Revision Spread of Pillar 4 ([
 
 | Need | Where | Question |
 |----------------------------------------|--------------------------|--------|
-| Header bit layouts: Ethernet, 802.1Q, ARP, IPv4, IPv6, TCP, UDP | [§3.3](#s3-3){.ref}, [§3.5](#s3-5){.ref}, [§3.6](#s3-6){.ref}, [§3.7](#s3-7){.ref}, [§3.9](#s3-9){.ref}, [§4.2](#s4-2){.ref} | [Q3.3](#ps3){.ref} |
+| Header bit layouts: Ethernet, 802.1Q, ARP, IPv4, IPv6, TCP, UDP, VXLAN, 802.11 | [§3.3](#s3-3){.ref}, [§3.5](#s3-5){.ref}, [§3.6](#s3-6){.ref}, [§3.7](#s3-7){.ref}, [§3.9](#s3-9){.ref}, [§4.2](#s4-2){.ref}, [§5.5](#s5-5){.ref}, [§6.5](#s6-5){.ref} | [Q3.3](#ps3){.ref} |
 | "What happens when you type google.com": the nine-stage ladder and its two-minute version | [§3.11](#s3-11){.ref} | [Q3.45](#ps3){.ref} |
 | Troubleshooting skeleton, the SCALPEL card and the layer command matrix | [§11.2](#s11-2){.ref}, [§11.5](#s11-5){.ref} | [Q11.1](#ps11){.ref} |
 | MTU, MSS and overheads (PPPoE 1492, GRE 24 bytes) | [§3.5](#s3-5){.ref}, [§4.14](#s4-14){.ref} | [Q3.16](#ps3){.ref} |
-| Wi-Fi and cellular standards | [Pillar 6](#ch6){.ref} | |
+| Wi-Fi standards, channels and cellular generations | [§6.3](#s6-3){.ref}, [§6.9](#s6-9){.ref}, [§6.12](#s6-12){.ref} | [Q6.24](#ps6b){.ref} |
 
 ## [A3]{.sec}Online-assessment cheat codes [Must · ■□□]{.tag} {#s13-3}
 

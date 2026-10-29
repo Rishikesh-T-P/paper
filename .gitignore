@@ -1,2 +1,3 @@
 book/dist/*.html
 book/dist/*.png
+book/dist/preview-*

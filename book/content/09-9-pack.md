@@ -114,6 +114,28 @@
 | ROV limit? | Checks only the origin AS, not the path |
 | Type 7 password? | Reversible; use type 8 or 9 secrets |
 | Zero trust in a line? | No implicit trust from location; decide each request with PEP and PDP |
+
+### Self-test
+
+1. Which TLS 1.3 message is the first to be encrypted? (a) ClientHello (b) ServerHello (c) EncryptedExtensions (d) client Finished.
+2. The wildcard mask for 10.8.0.0/13 is (a) 0.7.255.255 (b) 0.8.0.0 (c) 0.0.7.255 (d) 0.255.255.255.
+3. Which feature stops ARP spoofing on an access switch? (a) port security (b) BPDU Guard (c) Dynamic ARP Inspection (d) uRPF.
+4. A VPN shows IKE SA READY but no traffic. The first thing to compare is (a) the DH group of IKE_SA_INIT (b) the traffic selectors of the Child SA (c) the NTP time (d) the VLAN.
+5. TACACS+ runs over (a) UDP 49 (b) TCP 49 (c) UDP 1812 (d) TCP 1812.
+6. SYN cookies store the connection state in (a) a hash table (b) the SYN queue (c) the initial sequence number (d) a DNS record.
+7. A standard ACL goes (a) near the source (b) near the destination (c) on the VTY only (d) outbound on any port.
+8. DNSSEC gives (a) privacy of queries (b) authenticity of the data (c) protection of the client-resolver hop (d) availability.
+9. AH fails through NAT because (a) it uses UDP (b) its check covers the outer IP header (c) it has no SPI (d) it encrypts ports.
+10. ROV validates (a) the AS path (b) the origin AS of a prefix (c) the BGP session (d) the next hop.
+
+**Answers.** 1 c; 2 a (/13 gives 255.248 in the second octet, so 255 − 248 = 7); 3 c; 4 b; 5 b; 6 c; 7 b; 8 b; 9 b; 10 b.
+
+<figure>
+<svg viewBox="0 0 480 190" width="480"><defs><marker id="ibk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="abk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z"/></marker></defs><text class="lbl" x="90" y="14" text-anchor="middle">Client</text><text class="lbl" x="390" y="14" text-anchor="middle">Server</text><line class="lg" x1="90" y1="20" x2="90" y2="180" /><line class="lg" x1="390" y1="20" x2="390" y2="180" /><line class="ln" x1="92" y1="34" x2="388" y2="34" marker-end="url(#ibk)"/><text class="sm" x="240" y="31" text-anchor="middle">1  ..........................................</text><line class="ln" x1="388" y1="54" x2="92" y2="54" marker-end="url(#ibk)"/><text class="sm" x="240" y="51" text-anchor="middle">2  ..........................................</text><line class="ln" x1="388" y1="74" x2="92" y2="74" marker-end="url(#ibk)"/><text class="sm" x="240" y="71" text-anchor="middle">3  ..........................................</text><line class="ln" x1="388" y1="94" x2="92" y2="94" marker-end="url(#ibk)"/><text class="sm" x="240" y="91" text-anchor="middle">4  ..........................................</text><line class="ln" x1="388" y1="114" x2="92" y2="114" marker-end="url(#ibk)"/><text class="sm" x="240" y="111" text-anchor="middle">5  ..........................................</text><line class="ln" x1="388" y1="134" x2="92" y2="134" marker-end="url(#ibk)"/><text class="sm" x="240" y="131" text-anchor="middle">6  ..........................................</text><line class="ln" x1="92" y1="154" x2="388" y2="154" marker-end="url(#ibk)"/><text class="sm" x="240" y="151" text-anchor="middle">7  ..........................................</text></svg>
+<figcaption><b>Figure 9.21</b> Self-test: name the seven numbered messages and mark where encryption begins. The answer is in the TLS 1.3 ladder of this chapter.</figcaption>
+</figure>
+
+**Answer to the figure.** 1 ClientHello; 2 ServerHello (encryption begins after it); 3 EncryptedExtensions; 4 Certificate; 5 CertificateVerify; 6 server Finished; 7 client Finished.
 :::
 :::
 

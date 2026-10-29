@@ -169,26 +169,54 @@ Browsers and operating systems ship a *trust store* of root certificates. A root
 
 Validation checks the six conditions in the figure. *Revocation* handles keys that leak before expiry. A *certificate revocation list* (CRL) is a signed list of serial numbers, large and slow to fetch. The *Online Certificate Status Protocol* (OCSP) asks the CA about one certificate, but leaks browsing to the CA and adds a round trip; hence *OCSP stapling*, in which the server fetches a signed, time-stamped response and attaches it to the handshake. The *must-staple* flag makes stapling mandatory. *Certificate Transparency* requires CAs to log every certificate in public append-only logs, whose signed timestamps (SCTs) appear in the certificate, so that a mis-issued certificate for campus.example can be detected by its owner. *Pinning*, in which an application accepts only a specific key, defends against rogue CAs but breaks easily when keys rotate; browsers have abandoned it for CT. *ACME*, the protocol of Let's Encrypt, automates issuance: the applicant proves control of a domain by serving a token over HTTP or by publishing a DNS record, receives a certificate valid for 90 days, and renews it by script. In *mutual TLS* (mTLS) the client also presents a certificate, which is how service-to-service traffic and managed devices authenticate.
 
+::: example
+**Reading a certificate.** `openssl x509 -in leaf.crt -noout -text` prints the fields of the table above. The lines that matter for the Campus Net leaf are:
+
+```
+Issuer: O = Campus Net, CN = Campus Net Issuing CA
+    Not Before: Oct 29 13:37:50 2026 GMT
+    Not After : Jan 27 13:37:50 2027 GMT
+Subject: CN = www.campus.example
+    Public Key Algorithm: id-ecPublicKey   (ASN1 OID: prime256v1)
+    CA:FALSE
+    Digital Signature
+    TLS Web Server Authentication
+    DNS:www.campus.example
+Signature Algorithm: ecdsa-with-SHA256
+```
+
+1. The issuer is the intermediate, not the root: the chain has three certificates.
+2. The validity window is 90 days, so renewal must be automated (ACME).
+3. `CA:FALSE` forbids this certificate from signing others, and the key usage limits it to signing handshakes for a web server.
+4. Only the SAN `www.campus.example` is valid; a request for `campus.example` would fail the name check.
+
+[Result: five lines decide whether a client accepts the certificate: issuer chain, dates, SAN, CA flag and usage.]{.result}
+:::
+
 ::: lab
 `LAB 9.1 · 30 MIN` Build a two-level CA for Campus Net and verify a server certificate. **Use only machines you own; unauthorised access to a computer system is an offence under sections 43 and 66 of the Indian IT Act 2000, and the attack labs of this chapter must never be run on a college or public network.**
 
 ```
 openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
-  -keyout root.key -out root.crt -days 365 -subj "/O=Campus Net/CN=Campus Net Root CA"
-# intermediate: CSR, then sign with the root using basicConstraints CA:TRUE,pathlen:0
-# leaf: CSR for www.campus.example, sign with the intermediate, SAN in the extension file
+  -keyout root.key -out root.crt -days 365 \
+  -subj "/O=Campus Net/CN=Campus Net Root CA"
+# intermediate: CSR, signed by the root (basicConstraints CA:TRUE,pathlen:0)
+# leaf: CSR for www.campus.example, signed by the intermediate, SAN in extfile
 openssl verify -CAfile root.crt leaf.crt
 openssl verify -CAfile root.crt -untrusted int.crt leaf.crt
-openssl s_server -accept 8446 -cert leaf.crt -cert_chain int.crt -key leaf.key -www &
+openssl s_server -accept 8446 -cert leaf.crt -cert_chain int.crt \
+  -key leaf.key -www &
 openssl s_client -connect 127.0.0.1:8446 -servername www.campus.example \
   -CAfile root.crt -verify_hostname www.campus.example
 ```
 
 ```
-error 20 at 0 depth lookup: unable to get local issuer certificate     (first verify)
-leaf.crt: OK                                                            (with -untrusted int.crt)
- 0 s:CN = www.campus.example        i:O = Campus Net, CN = Campus Net Issuing CA
- 1 s:O = Campus Net, CN = Campus Net Issuing CA   i:O = Campus Net, CN = Campus Net Root CA
+error 20 at 0 depth lookup: unable to get local issuer certificate
+leaf.crt: OK                          (second command, with -untrusted)
+ 0 s:CN = www.campus.example
+   i:O = Campus Net, CN = Campus Net Issuing CA
+ 1 s:O = Campus Net, CN = Campus Net Issuing CA
+   i:O = Campus Net, CN = Campus Net Root CA
 Verification: OK
 ```
 

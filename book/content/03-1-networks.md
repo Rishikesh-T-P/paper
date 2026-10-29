@@ -122,8 +122,8 @@ Two terms follow from these devices. A *collision domain* is the set of ports wh
 <line class="ln" x1="360" y1="109" x2="290" y2="150" />
 <line class="ln" x1="360" y1="109" x2="350" y2="150" />
 <line class="ln" x1="375" y1="109" x2="430" y2="134" />
-<rect class="box" x="100" y="91" width="40" height="18" rx="1" /><line class="ln" x1="108" y1="97" x2="132" y2="97" marker-end="url(#dm)"/><line class="ln" x1="132" y1="104" x2="108" y2="104" marker-end="url(#dm)"/><text class="sm" x="120" y="123" text-anchor="middle" >Switch S1</text>
-<rect class="box" x="340" y="91" width="40" height="18" rx="1" /><line class="ln" x1="348" y1="97" x2="372" y2="97" marker-end="url(#dm)"/><line class="ln" x1="372" y1="104" x2="348" y2="104" marker-end="url(#dm)"/><text class="sm" x="360" y="123" text-anchor="middle" >Switch S2</text>
+<rect class="box" x="100" y="91" width="40" height="18" rx="1" /><line class="ln" x1="108" y1="97" x2="132" y2="97" marker-end="url(#dm)"/><line class="ln" x1="132" y1="104" x2="108" y2="104" marker-end="url(#dm)"/><text class="sm" x="96" y="103" text-anchor="end" >Switch S1</text>
+<rect class="box" x="340" y="91" width="40" height="18" rx="1" /><line class="ln" x1="348" y1="97" x2="372" y2="97" marker-end="url(#dm)"/><line class="ln" x1="372" y1="104" x2="348" y2="104" marker-end="url(#dm)"/><text class="sm" x="336" y="103" text-anchor="end" >Switch S2</text>
 <rect class="box" x="29" y="150" width="22" height="12" rx="1" /><text class="sm" x="40" y="173" text-anchor="middle" >PC1</text>
 <rect class="box" x="89" y="150" width="22" height="12" rx="1" /><text class="sm" x="100" y="173" text-anchor="middle" >PC2</text>
 <rect class="box" x="149" y="150" width="22" height="12" rx="1" /><text class="sm" x="160" y="173" text-anchor="middle" >PC3</text>

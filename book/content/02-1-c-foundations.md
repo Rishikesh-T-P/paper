@@ -22,7 +22,7 @@
 12. [2.12 Undefined behaviour]{} [MUST]{}
 13. [2.13 Writing the library: memcpy to itoa]{} [MUST]{}
 14. [2.14 Parsing an IPv4 header]{} [MUST]{}
-15. [2.15 The gotcha gallery: 32 output traps]{} [MUST]{}
+15. [2.15 The gotcha gallery: 36 output traps]{} [MUST]{}
 16. [2.16 Python: the data model]{} [SHOULD]{}
 17. [2.17 Python: comprehensions and generators]{} [SHOULD]{}
 18. [2.18 Python: struct, re, subprocess, files, exceptions]{} [MUST]{}
@@ -273,3 +273,5 @@ With `p[0] = 'A'` uncommented, the plain build prints `Segmentation fault`. The 
 
 [^c2-6]: 8, because the parameter is a pointer; the length 10 is ignored.
 [^c2-7]: Not necessarily: three characters were copied and no terminator was written, so `d` is terminated only if its fourth byte happened to be zero.
+
+:::

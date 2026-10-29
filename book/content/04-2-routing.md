@@ -27,6 +27,19 @@ C        10.1.12.0/30 is directly connected, GigabitEthernet0/2
 L        10.1.12.1/32 is directly connected, GigabitEthernet0/2
 ```
 
+<figure>
+<svg viewBox="0 0 480 130" width="480">
+  <text class="mono" x="10" y="20">O</text><text class="mono" x="40" y="20">10.1.1.0/24</text><text class="mono" x="120" y="20">[110/20]</text><text class="mono" x="180" y="20">via 10.1.12.2,</text><text class="mono" x="270" y="20">00:04:10,</text><text class="mono" x="340" y="20">GigabitEthernet0/2</text>
+  <path class="lg" d="M14,26 L14,50"/><text class="sm" x="10" y="60">source code</text><text class="sm" x="10" y="70">O = OSPF</text>
+  <path class="lg" d="M70,26 L70,84"/><text class="sm" x="50" y="94">prefix and mask</text><text class="sm" x="50" y="104">(what is matched)</text>
+  <path class="lg" d="M140,26 L140,50"/><text class="sm" x="118" y="60">AD / metric</text><text class="sm" x="118" y="70">trust / cost</text>
+  <path class="lg" d="M220,26 L220,84"/><text class="sm" x="196" y="94">next hop</text><text class="sm" x="196" y="104">(recursive lookup)</text>
+  <path class="lg" d="M300,26 L300,50"/><text class="sm" x="286" y="60">age</text>
+  <path class="lg" d="M390,26 L390,84"/><text class="sm" x="360" y="94">exit interface</text><text class="sm" x="360" y="104">(Layer 2 rewrite)</text>
+</svg>
+<figcaption><b>Figure 4.6d</b> One line of the routing table, token by token.</figcaption>
+</figure>
+
 Read each line from the left. The code names the source (`C` connected, `L` local address of the router itself as a /32, `S` static, `O` OSPF, `B` BGP, `*` candidate default). Next come the prefix, then `[AD/metric]`, then the next hop, the age and the exit interface. The "gateway of last resort" is the default route.
 
 <figure>
@@ -41,6 +54,34 @@ Read each line from the left. The code names the source (`C` connected, `L` loca
 </svg>
 <figcaption><b>Figure 4.7</b> The route-selection order. Steps 2 and 3 matter only among candidates for the same prefix and mask.</figcaption>
 </figure>
+
+<figure>
+<svg viewBox="0 0 480 150" width="480">
+  <defs><marker id="f44" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1A1D23"/></marker></defs>
+  <text class="sm" x="10" y="12">Before: primary link up</text>
+  <circle class="box" cx="60" cy="60" r="14"/><path class="ln" d="M52,52 L68,68 M68,52 L52,68"/><text class="lbl" x="60" y="90" text-anchor="middle">BR1</text>
+  <rect class="box" x="230" y="30" width="80" height="22" rx="10"/><text class="lbl" x="270" y="45" text-anchor="middle">ISP-A</text>
+  <rect class="box" x="230" y="72" width="80" height="22" rx="10"/><text class="lbl" x="270" y="87" text-anchor="middle">ISP-B</text>
+  <path class="acc" d="M74,54 L230,42" marker-end="url(#f44)"/><text class="sm" x="150" y="40">OSPF default, AD 110</text>
+  <path class="lg dash" d="M74,66 L230,83"/><text class="sm" x="120" y="86">floating static, AD 250 (idle)</text>
+  <text class="sm" x="10" y="118">After the ISP-A link fails:</text>
+  <path class="lg" d="M270,100 L270,112"/><text class="sm" x="280" y="124">the OSPF default is withdrawn, the static route is installed, and traffic uses ISP-B.</text>
+</svg>
+<figcaption><b>Figure 4.7b</b> A floating static route as a standby. The route in the table changes from O*E2 to S* without any protocol exchange.</figcaption>
+</figure>
+
+A destination that is covered by a *summary* static route can still be reached while the specific routes exist, and `Null0` prevents a loop: if a router advertises 10.0.0.0/8 but holds specifics for only part of it, a packet for an unused address would be sent to the default route and might return. The line `ip route 10.0.0.0 255.0.0.0 Null0` makes it drop instead; because the specifics are longer, they still win.
+
+```
+BR1(config)# ip route 10.0.0.0 255.0.0.0 Null0
+BR1(config)# ipv6 route 2001:db8:9::/48 2001:db8:12::2
+BR1(config)# ip route 172.16.0.0 255.255.0.0 10.1.12.2 10 name BACKUP-VIA-R2
+BR1# show ip route 10.1.1.9
+Routing entry for 10.1.1.0/24
+  Known via "static", distance 1, metric 0
+  Routing Descriptor Blocks:
+  * 10.1.12.2
+```
 
 A *static route* is configured by hand. Pointing it at a next-hop address (`ip route 10.9.0.0 255.255.0.0 10.1.12.2`) needs a *recursive lookup* to find the exit interface; pointing it at an interface alone is acceptable only on point-to-point links, since on Ethernet the router would ARP for every destination. A *default route* is the prefix 0.0.0.0/0, which matches everything with the shortest possible prefix, so it is used only when nothing else matches. A static route to `Null0` discards traffic, and is used to anchor a summary. The IPv6 forms are `ipv6 route 2001:db8:9::/48 2001:db8:12::2` and `ipv6 route ::/0 ...`. Equal-cost paths are installed together (ECMP, four by default on many IOS releases) and the load is spread per flow.
 
@@ -67,6 +108,32 @@ O*E2  0.0.0.0/0 [110/1] via 192.0.2.1
 BR1# show ip route 0.0.0.0                  ! after the primary link fails
 S*    0.0.0.0/0 [250/0] via 203.0.113.9     <-- floating route installed
 ```
+
+When two or more routes of the same prefix, AD and metric exist, the router installs all of them (up to `maximum-paths`) and shares traffic by a per-flow hash, so that packets of one TCP connection stay in order. This is *equal-cost multipath* (ECMP). A static route can be given a lower or higher AD to engineer which is used: `ip route 172.16.0.0 255.255.0.0 10.1.12.2 10` is installed at AD 10, so it beats an OSPF route (110) for 172.16.0.0/16 but loses to a connected route. The same lever is used for protocols (`distance 105 ...`).
+
+::: example
+**A routing table with eight entries and seven lookups.** Table of R1 after convergence:
+
+| Prefix | Source | AD/metric |
+|---|---|---|
+| 0.0.0.0/0 | OSPF E2 | 110/1 |
+| 10.0.0.0/8 | static to Null0 | 1/0 |
+| 10.1.0.0/16 | OSPF | 110/20 |
+| 10.1.1.0/24 | connected | 0/0 |
+| 10.1.1.0/25 | static | 1/0 |
+| 10.1.2.0/24 | EIGRP | 90/3072 |
+| 10.1.2.0/24 | OSPF | 110/30 |
+| 192.168.0.0/16 | eBGP | 20/0 |
+
+1. 10.1.1.10 matches the /24, /16, /8 and the /25 (0 to 127): the **/25 static** wins.
+2. 10.1.1.200 is outside the /25, so the **connected /24** wins.
+3. 10.1.2.5: the same /24 appears from EIGRP and OSPF; AD 90 beats 110, so **EIGRP**.
+4. 10.1.9.9 matches only the /16 and /8: **OSPF /16**.
+5. 10.50.0.1 matches only the /8: it goes to **Null0** (discarded), even though a default route exists, because the /8 is longer than the default.
+6. 192.168.5.5: **eBGP**; and 8.8.8.8 matches only the default, so **OSPF E2 default**.
+
+[Result: specifics always beat defaults; AD arbitrated only for 10.1.2.0/24.]{.result}
+:::
 
 ::: trap
 *Claim:* a /16 connected route beats a /24 static route because connected has AD 0. *Why it is wrong:* AD is consulted only between routes for the same prefix and mask. *Correct statement:* the longest prefix is tested first, so a /24 static is used for traffic it matches whatever the AD of the shorter /16.
@@ -123,6 +190,27 @@ Hello and dead timers are 10 s and 40 s on broadcast and point-to-point links, a
 <figcaption><b>Figure 4.8</b> The OSPF neighbour state machine. A neighbour is adjacent only at Full; on a multi-access segment, 2-Way is the normal final state between two routers that are neither DR nor BDR.</figcaption>
 </figure>
 
+<figure>
+<svg viewBox="0 0 480 220" width="480">
+  <defs><marker id="l45" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1A1D23"/></marker></defs>
+  <text class="lbl" x="110" y="14" text-anchor="middle">R1</text><text class="lbl" x="370" y="14" text-anchor="middle">R2</text>
+  <line class="lg" x1="110" y1="20" x2="110" y2="215"/><line class="lg" x1="370" y1="20" x2="370" y2="215"/>
+  <line class="ln" x1="112" y1="32" x2="368" y2="44" marker-end="url(#l45)"/><text class="sm" x="240" y="30" text-anchor="middle">Hello (no neighbours)</text>
+  <line class="ln" x1="368" y1="58" x2="112" y2="70" marker-end="url(#l45)"/><text class="sm" x="240" y="56" text-anchor="middle">Hello (lists R1)</text>
+  <text class="sm" x="8" y="64">Init, then 2-Way</text>
+  <line class="ln" x1="112" y1="88" x2="368" y2="100" marker-end="url(#l45)"/><text class="sm" x="240" y="86" text-anchor="middle">DBD I, M, MS bits set (claims master)</text>
+  <line class="ln" x1="368" y1="114" x2="112" y2="126" marker-end="url(#l45)"/><text class="sm" x="240" y="112" text-anchor="middle">DBD (R2 is master, higher RID)</text>
+  <text class="sm" x="8" y="108">ExStart</text>
+  <line class="ln" x1="112" y1="142" x2="368" y2="150" marker-end="url(#l45)"/><text class="sm" x="240" y="140" text-anchor="middle">DBD: LSA headers (sequence numbers)</text>
+  <text class="sm" x="8" y="148">Exchange</text>
+  <line class="ln" x1="112" y1="166" x2="368" y2="174" marker-end="url(#l45)"/><text class="sm" x="240" y="164" text-anchor="middle">LSR: send me these LSAs</text>
+  <line class="ln" x1="368" y1="186" x2="112" y2="194" marker-end="url(#l45)"/><text class="sm" x="240" y="184" text-anchor="middle">LSU: full LSAs</text>
+  <line class="ln" x1="112" y1="204" x2="368" y2="210" marker-end="url(#l45)"/><text class="sm" x="240" y="214" text-anchor="middle">LSAck</text>
+  <text class="sm" x="8" y="188">Loading, then Full</text>
+</svg>
+<figcaption><b>Figure 4.8b</b> The packets of an OSPF adjacency, which Wireshark shows with the filter <span class="mono">ospf</span>. Bits in the DBD: I = initial, M = more, MS = master.</figcaption>
+</figure>
+
 States, in order: *Down*; *Attempt* (non-broadcast networks only); *Init* (a hello has been heard, but it does not yet list our RID); *2-Way* (hellos are bidirectional; DR and BDR are elected here); *ExStart* (the two choose a master and initial sequence number); *Exchange* (DBDs list the LSA headers each holds); *Loading* (missing LSAs are fetched with LSR and delivered by LSU); *Full*. For two routers to become neighbours, the following must match: area ID, subnet and mask, hello and dead timers, authentication, stub-area flags and network type compatibility; the router IDs must differ. To reach Full, the interface MTU must also agree, since the MTU is carried in the DBD.
 
 ::: example
@@ -154,6 +242,31 @@ On a broadcast segment (Ethernet) with *n* routers, full adjacency among all wou
 
 [Result: DR R4 then R2; BDR R2 then R5; R3 is never DR or BDR.]{.result}
 :::
+
+| Network type | Default on | DR election | Hello / dead | Notes |
+|---|---|---|---|---|
+| Broadcast | Ethernet | yes | 10 / 40 | multicast hellos |
+| Point-to-point | serial, tunnels | no | 10 / 40 | no DR; faster adjacency |
+| Non-broadcast (NBMA) | Frame Relay, legacy | yes | 30 / 120 | neighbours configured by hand |
+| Point-to-multipoint | configured | no | 30 / 120 | each neighbour a /32 route |
+| Loopback | loopback | n/a | n/a | advertised as a /32 host route |
+
+Both ends of a link must agree on the *behaviour* implied by the type, for example both using or both skipping the DR election, although the hello timers can differ only if the dead timers are adjusted too (the timers are compared, not the type). A broadcast type on one end and point-to-point on the other forms an adjacency that does not work correctly, because one end expects the DR and the other does not.
+
+<figure>
+<svg viewBox="0 0 480 120" width="480">
+  <defs><marker id="d45" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1A1D23"/></marker><marker id="e45" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#21705A"/></marker></defs>
+  <line class="ln" x1="20" y1="95" x2="460" y2="95"/><text class="sm" x="20" y="110">one Ethernet segment</text>
+  <rect class="box" x="30" y="50" width="70" height="26" rx="2"/><text class="lbl" x="65" y="67" text-anchor="middle">DROTHER</text>
+  <rect class="box" x="130" y="50" width="70" height="26" rx="2"/><text class="lbl" x="165" y="67" text-anchor="middle">DROTHER</text>
+  <rect class="hl" x="260" y="50" width="60" height="26" rx="2"/><text class="lbl" x="290" y="67" text-anchor="middle">DR</text>
+  <rect class="box" x="350" y="50" width="60" height="26" rx="2"/><text class="lbl" x="380" y="67" text-anchor="middle">BDR</text>
+  <line class="ln" x1="65" y1="76" x2="65" y2="95"/><line class="ln" x1="165" y1="76" x2="165" y2="95"/><line class="ln" x1="290" y1="76" x2="290" y2="95"/><line class="ln" x1="380" y1="76" x2="380" y2="95"/>
+  <path class="ln" d="M65,50 C65,20 270,20 285,50" marker-end="url(#d45)"/><text class="sm" x="170" y="20" text-anchor="middle">1 LSU to 224.0.0.6</text>
+  <path class="acc" d="M300,50 C310,10 150,6 70,50" marker-end="url(#e45)"/><text class="sm" x="380" y="30">2 DR re-floods to 224.0.0.5</text>
+</svg>
+<figcaption><b>Figure 4.8c</b> DR and BDR. A DROTHER sends to the DR and BDR group (224.0.0.6); the DR re-floods to all (224.0.0.5), so each LSA crosses the segment twice instead of n times.</figcaption>
+</figure>
 
 The cost of an interface is the reference bandwidth divided by the interface bandwidth, with a minimum of 1. The default reference is 100 Mb/s, so Fast Ethernet is 1, and both Gigabit and 10 Gigabit Ethernet are also 1, because the quotient is truncated. The command `auto-cost reference-bandwidth 100000` (100 Gb/s) gives 1 Gb/s a cost of 100 and 10 Gb/s a cost of 10; it must be the same on every router in the domain.
 
@@ -248,6 +361,82 @@ O*IA  0.0.0.0/0 [110/2] via 10.1.12.2, GigabitEthernet0/1
 [Result: R1's database shrinks to type 1 and 2 LSAs plus one default; traffic to everything else leaves through the ABR.]{.result}
 :::
 
+::: example
+**An LSA inventory before and after a stub conversion.** Take Figure 4.10, with an extra internal prefix 10.2.0.0/24 in area 2 and the external prefix 172.16.0.0/16 injected by R4.
+
+| Router | Type 1 | Type 2 | Type 3 | Type 4 | Type 5 |
+|---|---|---|---|---|---|
+| R1 (area 1), normal | 1, 2 | none | area 0 and 2 prefixes (via R2) | R4 | 172.16.0.0/16 |
+| R1 (area 1), stub | 1, 2 | none | same, plus default | none | none |
+| R1 (area 1), totally stubby | 1, 2 | none | default only | none | none |
+| R3 (ABR, areas 0 and 2) | its own LSAs per area | if multi-access | area-1 and area-2 prefixes | R4 | 172.16.0.0/16 |
+
+1. In the normal state R1 must run SPF on a database that includes every inter-area prefix, so every flap in area 2 reaches R1.
+2. As a stub, the type 4 and 5 LSAs vanish and R2 originates a default (type 3, cost 1 by default).
+3. As totally stubby, a single default replaces all type 3 LSAs: the area survives any change elsewhere.
+
+```
+R2# show ip ospf database
+            Router Link States (Area 1)
+Link ID     ADV Router    Age   Seq#        Link count
+1.1.1.1     1.1.1.1       412   0x80000007  2
+2.2.2.2     2.2.2.2       403   0x80000009  2
+            Summary Net Link States (Area 1)
+0.0.0.0     2.2.2.2       380   0x80000001                <-- the default injected into the stub
+            Type-5 AS External Link States
+172.16.0.0  4.4.4.4       951   0x80000003
+```
+
+[Result: the database of the stub router shrinks from every prefix in the domain to its own area's LSAs plus one default; this is the mechanism behind the flapping-routes answer in Q4.26.]{.result}
+:::
+
+::: example
+**An NSSA with its own ASBR.** Campus Net's engineering branch (area 2) has a small partner network attached through R5, which redistributes 172.20.0.0/16 into OSPF. A stub area cannot contain an ASBR, because type 5 LSAs are forbidden there, so area 2 is made an NSSA.
+
+1. R5 (ASBR) originates the prefix as a **type 7** LSA, flooded only inside area 2.
+2. The NSSA ABR (R3) translates it into a **type 5** LSA and floods that into area 0, so the rest of the domain sees an ordinary external route, `O E2`.
+3. Inside area 2 the same route shows as `O N2`.
+
+```
+R3(config-router)# area 2 nssa
+R5(config-router)# redistribute static subnets
+R5# show ip route ospf | include 172.20
+O N2  172.20.0.0/16 [110/20] via 10.2.0.1
+R1# show ip route ospf | include 172.20
+O E2  172.20.0.0/16 [110/20] via 10.1.12.2
+```
+
+[Result: R1 never saw a type 7; the NSSA ABR is the only place it exists in translated form.]{.result}
+:::
+
+::: example
+**Summarising at the ABR.** Area 3 holds 200 customer routes in 10.3.0.0/16. Without summarisation each of them becomes a type 3 LSA in area 0 and beyond.
+
+```
+R3(config-router)# area 3 range 10.3.0.0 255.255.0.0
+R3(config-router)# area 3 range 10.3.0.0 255.255.0.0 cost 50
+R3(config)# ip route 10.3.0.0 255.255.0.0 Null0
+```
+
+1. The ABR now advertises only 10.3.0.0/16 (type 3) into area 0, so a flap of one /24 inside area 3 stays in area 3.
+2. The summary is kept as long as at least one component prefix is up; its cost is the highest of the components, unless a fixed cost is set.
+3. The Null0 route stops a loop for addresses inside the /16 that have no specific route (the ABR discards instead of following its default route).
+
+[Result: backbone routers hold one LSA instead of 200, and area 3's instability is invisible to them.]{.result}
+:::
+
+Authentication of OSPF messages is configured per interface or per area. Modern IOS-XE supports SHA keychains (`ip ospf authentication key-chain`), and older MD5 uses `ip ospf message-digest-key 1 md5 SECRET`. Authentication failures keep the neighbour in Down or Init because the hellos are discarded. For IPv6, the equivalent is:
+
+```
+ipv6 unicast-routing
+interface GigabitEthernet0/2
+ ipv6 address 2001:db8:12::1/64
+ ipv6 ospf 1 area 0
+ ipv6 ospf authentication ipsec spi 256 sha1 <key>
+ipv6 router ospf 1
+ router-id 1.1.1.1
+```
+
 Routes carry a code that shows how they were learnt: `O` (intra-area), `O IA` (inter-area, from a type 3), `O E1` and `O E2` (external, type 5) and `O N1`/`O N2` (NSSA). A path's preference is `O`, then `O IA`, then `E1`, then `E2`, regardless of cost. An E2 route carries only the external cost, which is the default and is what is compared by all routers; an E1 route adds the internal cost to the ASBR, and is preferred when there are several ASBRs at different distances.
 
 Three techniques contain flapping. *Summarisation* at the ABR (`area 3 range 10.3.0.0 255.255.0.0`) or at the ASBR (`summary-address`) hides detail so that one flapping /24 inside the range does not trigger SPF elsewhere. A *stub area* removes external LSAs. *Throttling* (`timers throttle spf 50 200 5000`) delays repeated SPF runs, and BFD detects failures in milliseconds so that timers can stay conservative. OSPFv3 uses the same states and algorithm for IPv6, but runs per link rather than per subnet, uses link-local addresses as next hops, sends to ff02::5 and ff02::6, and moves addresses out of the router and network LSAs into new LSA types (8, the link LSA, and 9, the intra-area-prefix LSA).
@@ -267,6 +456,21 @@ BR1(config-if)# ip ospf network point-to-point
 
 ::: trap
 *Claim:* a router with priority 255 becomes DR as soon as it is configured. *Why it is wrong:* the DR election is not preemptive, so the current DR stays until it fails or OSPF is cleared. *Correct statement:* priority matters at election time; to force a change, clear the process (`clear ip ospf process`) after setting priorities. Similarly, 2-Way between two DROTHERs is correct and not a fault.
+:::
+
+::: example
+**The six-fault adjacency challenge.** A pre-built Campus Net lab has six independent faults; each appears as a neighbour that is missing or stuck. For each, the fastest diagnostic and the fix are below.
+
+| Symptom | Evidence | Cause | Fix |
+|---|---|---|---|
+| No neighbour, interface up | `show ip ospf interface` says hello 10, dead 40 on one side and 5, 20 on the other | hello/dead mismatch | match `ip ospf hello-interval` and `dead-interval` |
+| No neighbour | `%OSPF-4-ERRRCV: mismatch area ID` | area mismatch | `ip ospf 1 area N` the same on both |
+| Stuck in EXSTART | `debug ip ospf adj`: smaller interface MTU | MTU mismatch | equalise `ip mtu` |
+| No neighbour, passive | `show ip protocols`: interface listed as passive | passive interface | `no passive-interface` |
+| Neighbour flaps in 2-Way/Down | log: duplicate router ID | two routers share a RID | set unique `router-id`, `clear ip ospf process` |
+| Down or Init, hellos dropped | `debug ip ospf events`: mismatched authentication | wrong key or type | correct the key-chain |
+
+[Result: in each case one `show` or `debug` line identifies the fault; always read the debug before changing configuration.]{.result}
 :::
 
 ::: lens

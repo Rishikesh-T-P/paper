@@ -31,7 +31,7 @@ The commonest invocation is `tcpdump -i eth0 -nn -s 0 -w file.pcap 'filter'`.
 | `ether host aa:bb:cc:dd:ee:ff` | MAC address |
 | `vlan 10` | frames tagged with VLAN 10 |
 | `greater 1400`, `less 64` | frame length |
-| `tcp[tcpflags] & (tcp-syn\|tcp-ack) == tcp-syn` | SYN set, ACK clear: a connection attempt, not the reply |
+| <code>tcp[tcpflags] & (tcp-syn&#124;tcp-ack) == tcp-syn</code> | SYN set, ACK clear: a connection attempt, not the reply |
 | `tcp[tcpflags] & (tcp-rst) != 0` | resets |
 | `icmp[icmptype] == icmp-echo` | pings only |
 | `ip[8] < 5` | TTL below 5 |
@@ -177,7 +177,7 @@ The two kinds of filter use different languages and must not be confused. A *cap
 | `tcp.flags.syn == 1 && tcp.flags.ack == 0` | connection attempts |
 | `tcp.flags.reset == 1` | resets |
 | `tcp.analysis.retransmission` | retransmitted segments |
-| `tcp.analysis.fast_retransmission \|\| tcp.analysis.duplicate_ack` | loss recovery |
+| <code>tcp.analysis.fast_retransmission &#124;&#124; tcp.analysis.duplicate_ack</code> | loss recovery |
 | `tcp.analysis.zero_window` | receiver buffer full |
 | `tcp.stream == 3` | one TCP conversation |
 | `dns.flags.rcode != 0` | DNS errors |

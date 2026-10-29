@@ -77,8 +77,8 @@ Linux treats nearly everything as a *file*: a document, a terminal, a pipe, a de
 | `2>` | send stderr to a file | `ping x 2> err.txt` |
 | `2>&1` | make stderr follow stdout | `cmd > all.log 2>&1` |
 | `2>/dev/null` | discard stderr | `find / -name x 2>/dev/null` |
-| `\|` | stdout of left becomes stdin of right | `ss -tan \| wc -l` |
-| `&&` / `\|\|` | run next only if previous succeeded / failed | `make && ./run` |
+| <code>&#124;</code> | stdout of left becomes stdin of right | <code>ss -tan &#124; wc -l</code> |
+| `&&` / <code>&#124;&#124;</code> | run next only if previous succeeded / failed | `make && ./run` |
 | `;` and `&` | run in sequence / run in background | `sleep 9 &` |
 
 Every command returns an *exit status* in `$?`: 0 means success and anything else means failure, which is why `&&` and `||` work. The *pipeline* is the central idea. Consider the standard question "which five clients hit the web server most?", answered by `awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -5`. Each stage is a separate process; the kernel connects them with pipes (small in-memory buffers), and a slow reader makes the writer wait, so no stage needs the whole file in memory (Figure 8.2).
@@ -267,7 +267,7 @@ for i in {1..5}; do ...; done                                         # brace ex
 |---|---|---|
 | Unquoted `$var` | breaks on spaces; dangerous with `rm` | `"$var"` |
 | `[ $x == y ]` with empty `x` | "unary operator expected" | `[[ $x == y ]]` |
-| `cmd \| grep x` hides `cmd` failure | script continues after failure | `set -o pipefail` |
+| <code>cmd &#124; grep x</code> hides `cmd` failure | script continues after failure | `set -o pipefail` |
 | `cd dir; rm *` | deletes in the wrong place if `cd` fails | `cd dir && rm *`, or `set -e` |
 | `for f in $(ls)` | splits on spaces | `for f in *` or `find -print0` |
 | `while read` in a pipeline | variables lost (subshell) | redirect: `done < file` |

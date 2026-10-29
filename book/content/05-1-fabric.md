@@ -1,0 +1,268 @@
+::: {.chapter .p5}
+::: opener
+[Part I · Pillar 5]{.part-label}
+
+[5]{.num}
+
+# Data Centre and Cloud Networking {#ch5}
+
+[One request crosses a dozen layers of encapsulation inside a provider; we learn what every hop does and why.]{.promise}
+
+1. [5.1 Why data centres broke the campus model]{} [MUST]{}
+2. [5.2 Clos networks and spine-leaf arithmetic]{} [MUST]{}
+3. [5.3 ECMP and flow hashing]{} [MUST]{}
+4. [5.4 The eBGP underlay, BFD and unnumbered links]{} [MUST]{}
+5. [5.5 Overlays: VXLAN]{} [MUST]{}
+6. [5.6 EVPN: a control plane for the overlay]{} [SHOULD]{}
+7. [5.7 SDN, OpenFlow and P4]{} [SHOULD]{}
+8. [5.8 Router and switch internals]{} [MUST]{}
+9. [5.9 Load balancers]{} [MUST]{}
+10. [5.10 Anycast and content delivery networks]{} [SHOULD]{}
+11. [5.11 AWS: the Virtual Private Cloud]{} [MUST]{}
+12. [5.12 Azure: the virtual network]{} [SHOULD]{}
+13. [5.13 Hybrid connectivity: Direct Connect, ExpressRoute and VPN]{} [SHOULD]{}
+14. [5.14 The life of a request in the cloud]{} [MUST]{}
+:::
+
+The routing and switching of [Pillar 4](#ch4){.ref} serve a building full of people. This chapter serves a building full of machines, and nearly every assumption changes: the traffic runs between servers, the topology is regular, the devices are cheap and numerous, and the tenants are virtual. We keep the book's fictional organisation, **Campus Net**, and give it two additions. First, the university builds a small data centre of its own: two spines, four leaves (L1 to L4) and a pair of border leaves that attach to the existing border routers BR1 and BR2 ([§4.7](#s4-7){.ref}). Secondly, it rents cloud capacity: a VPC in AWS with the range 10.0.0.0/16 and a hub virtual network in Azure with 10.100.0.0/16, both reached from the campus over private circuits.
+
+The chapter has three movements. Sections 5.1 to 5.4 build the physical fabric and the routing that runs on it; sections 5.5 to 5.7 add virtual networks on top of that fabric; sections 5.8 to 5.10 look inside a forwarding device and at the services that sit in front of servers. Sections 5.11 to 5.14 then show how a public cloud packages all of this as a product. Subnetting ([§3.4](#s3-4){.ref}), the TCP congestion mechanisms ([§3.9](#s3-9){.ref}), BGP itself ([§4.7](#s4-7){.ref}) and the longest-prefix-match algorithm ([§1.9](#s1-9){.ref}) are taught in their home sections; here we use them.
+
+## [5.1]{.sec}Why data centres broke the campus model [Must · ■□□]{.tag} {#s5-1}
+
+::: bigidea
+Server-to-server traffic now exceeds client-to-server traffic, and a spanning-tree hierarchy can neither carry it nor survive its failures, so data centres replaced the tree with a routed mesh in which every path is equally short and every link forwards.
+:::
+
+Traffic that enters or leaves a data centre is termed *north-south*; traffic between servers inside it is termed *east-west*. A campus is mostly north-south: laptops talk to servers and to the Internet. A data centre is the opposite, because one user request fans out into many internal calls (a front end asks a profile service, a recommendation service, a cache and a database), and because storage replication, backups and distributed computation move bulk data between machines. This is the reason for the change of design: published accounts from the large operators, such as Google's *Jupiter Rising* paper, describe internal traffic as a large multiple of external traffic, so the internal network, not the Internet link, is the bottleneck.
+
+The campus design of [Pillar 4](#ch4){.ref} has five properties that fail under this load. (i) *Capacity.* A three-tier tree funnels traffic through a few aggregation and core switches, and spanning tree ([§4.3](#s4-3){.ref}) blocks redundant links to prevent loops, so a large fraction of the cabling carries nothing. (ii) *Latency.* The number of switches between two servers depends on where they sit, from one switch in the same rack to five across the tree, which makes performance unpredictable. (iii) *Failure scope.* A layer-2 domain is one broadcast domain, so a loop or a broadcast storm takes down everything in it, and spanning-tree reconvergence takes seconds. (iv) *Scale of state.* Every switch in a VLAN learns every MAC address, and thousands of virtual machines overflow the MAC tables. (v) *Segments.* A VLAN identifier has 12 bits, so there are at most 4,094 usable VLANs, too few for thousands of tenants.
+
+The remedy is to give up large layer-2 domains. The data centre is built as a regular, routed mesh (§5.2) in which every link forwards and equal paths are used together (§5.3), the routing protocol is one that scales and isolates failures (§5.4), and tenants are given virtual layer-2 and layer-3 networks that are carried *over* this fabric (§5.5 and §5.6).
+
+::: example
+**Campus Net replaces a two-tier tree with a leaf-spine fabric.** The hall has 40 racks. In the tree design each rack switch has two 10 Gb/s uplinks, one to each of two aggregation switches, and spanning tree blocks one of the two.
+
+1. Physical uplink capacity is 40 racks × 2 × 10 Gb/s = 800 Gb/s.
+2. Spanning tree leaves one forwarding uplink per rack: 40 × 10 = 400 Gb/s usable, so 50% of the cabling is idle.
+3. Rewire the same cables as a leaf-spine fabric: each rack switch becomes a leaf, the two aggregation switches become spines, and the leaf-to-spine links are routed (layer 3) instead of switched. Both uplinks of every leaf now forward, giving 800 Gb/s.
+4. Capacity can now grow without new tiers: a third and fourth spine, with one more uplink per leaf for each, double it again to 1.6 Tb/s.
+5. Path length is now uniform: two servers in different racks always cross exactly three switches (leaf, spine, leaf), where the tree needed up to five.
+
+[Result: the same cables carry twice the traffic (800 against 400 Gb/s), and the fabric grows by adding spines.]{.result}
+:::
+
+<figure>
+<svg viewBox="0 0 480 182" width="480"><defs></defs><text class="lbl" x="115" y="12" text-anchor="middle">Three-tier tree with spanning tree</text><text class="lbl" x="365" y="12" text-anchor="middle">Spine-leaf, all links forwarding</text><circle class="box" cx="115" cy="36" r="11"/><line class="ln" x1="107.3" y1="28.3" x2="122.7" y2="43.7"/><line class="ln" x1="107.3" y1="43.7" x2="122.7" y2="28.3"/><text class="sm" x="115" y="60" text-anchor="middle">core</text><rect class="box" x="38" y="77" width="44" height="18" rx="0"/><text class="lbl" x="60" y="89" text-anchor="middle">agg</text><line class="ln" x1="115" y1="47" x2="60" y2="77"/><rect class="box" x="148" y="77" width="44" height="18" rx="0"/><text class="lbl" x="170" y="89" text-anchor="middle">agg</text><line class="ln" x1="115" y1="47" x2="170" y2="77"/><rect class="fill" x="8" y="138" width="34" height="16" rx="0"/><text class="sm" x="25" y="149" text-anchor="middle">acc</text><line class="ln" x1="25" y1="138" x2="60" y2="95"/><line class="lg dash" x1="25" y1="138" x2="170" y2="95"/><rect class="fill" x="63" y="138" width="34" height="16" rx="0"/><text class="sm" x="80" y="149" text-anchor="middle">acc</text><line class="ln" x1="80" y1="138" x2="60" y2="95"/><line class="lg dash" x1="80" y1="138" x2="170" y2="95"/><rect class="fill" x="133" y="138" width="34" height="16" rx="0"/><text class="sm" x="150" y="149" text-anchor="middle">acc</text><line class="ln" x1="150" y1="138" x2="170" y2="95"/><line class="lg dash" x1="150" y1="138" x2="60" y2="95"/><rect class="fill" x="188" y="138" width="34" height="16" rx="0"/><text class="sm" x="205" y="149" text-anchor="middle">acc</text><line class="ln" x1="205" y1="138" x2="170" y2="95"/><line class="lg dash" x1="205" y1="138" x2="60" y2="95"/><path class="acc" d="M94.0,113.0 l7,7 M94.0,120.0 l7,-7 M121.5,113.0 l7,7 M121.5,120.0 l7,-7 M101.5,113.0 l7,7 M101.5,120.0 l7,-7 M129.0,113.0 l7,7 M129.0,120.0 l7,-7 "/><text class="sm" x="115" y="172" text-anchor="middle">4 of 8 access uplinks forward</text><rect class="box" x="268" y="26" width="34" height="16" rx="0"/><rect class="box" x="318" y="26" width="34" height="16" rx="0"/><rect class="box" x="368" y="26" width="34" height="16" rx="0"/><rect class="box" x="418" y="26" width="34" height="16" rx="0"/><text class="lbl" x="285" y="37" text-anchor="middle">S1</text><text class="lbl" x="335" y="37" text-anchor="middle">S2</text><text class="lbl" x="385" y="37" text-anchor="middle">S3</text><text class="lbl" x="435" y="37" text-anchor="middle">S4</text><rect class="fill" x="247" y="138" width="30" height="16" rx="0"/><text class="sm" x="262" y="149" text-anchor="middle">leaf</text><rect class="fill" x="285" y="138" width="30" height="16" rx="0"/><text class="sm" x="300" y="149" text-anchor="middle">leaf</text><rect class="fill" x="323" y="138" width="30" height="16" rx="0"/><text class="sm" x="338" y="149" text-anchor="middle">leaf</text><rect class="fill" x="361" y="138" width="30" height="16" rx="0"/><text class="sm" x="376" y="149" text-anchor="middle">leaf</text><rect class="fill" x="399" y="138" width="30" height="16" rx="0"/><text class="sm" x="414" y="149" text-anchor="middle">leaf</text><rect class="fill" x="437" y="138" width="30" height="16" rx="0"/><text class="sm" x="452" y="149" text-anchor="middle">leaf</text><line class="ln" x1="285" y1="42" x2="262" y2="138" style="stroke-width:.5"/><line class="ln" x1="285" y1="42" x2="300" y2="138" style="stroke-width:.5"/><line class="ln" x1="285" y1="42" x2="338" y2="138" style="stroke-width:.5"/><line class="ln" x1="285" y1="42" x2="376" y2="138" style="stroke-width:.5"/><line class="ln" x1="285" y1="42" x2="414" y2="138" style="stroke-width:.5"/><line class="ln" x1="285" y1="42" x2="452" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="262" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="300" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="338" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="376" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="414" y2="138" style="stroke-width:.5"/><line class="ln" x1="335" y1="42" x2="452" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="262" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="300" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="338" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="376" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="414" y2="138" style="stroke-width:.5"/><line class="ln" x1="385" y1="42" x2="452" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="262" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="300" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="338" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="376" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="414" y2="138" style="stroke-width:.5"/><line class="ln" x1="435" y1="42" x2="452" y2="138" style="stroke-width:.5"/><text class="sm" x="365" y="172" text-anchor="middle">24 of 24 leaf uplinks forward</text><line class="lg dash" x1="240" y1="22" x2="240" y2="160"/></svg>
+<figcaption><b>Figure 5.1</b> The same racks wired two ways. Left: spanning tree blocks one uplink per access switch (crosses), so half of the cabling carries nothing. Right: a routed fabric uses every link at once.</figcaption>
+</figure>
+
+The table summarises the change. Note that every row of the right-hand column is a consequence of one decision, namely to route in the fabric rather than switch.
+
+| Problem in a campus tree | Data-centre answer | Where taught |
+|---|---|---|
+| Blocked links, 50% idle | Layer-3 links, all forwarding, ECMP | §5.2, §5.3 |
+| Variable hop count | Equal-length leaf-spine-leaf paths | §5.2 |
+| Slow, large failure domain | Per-link BGP and BFD, sub-second | §5.4 |
+| MAC table and VLAN limits | Overlay with 24-bit segment identifier and a BGP control plane | §5.5, §5.6 |
+| Manual box-by-box configuration | Central controllers and automation | §5.7, Pillar 10 |
+
+::: trap
+*Claim:* "Spine-leaf removes spanning tree entirely." *Why it is wrong:* the fabric links no longer run it, but the host-facing ports of a leaf may still run spanning-tree guards (BPDU guard, loop protection) because a misconfigured server or a cabling mistake can still create a loop at the edge. *Correct statement:* spanning tree is no longer used for loop prevention between switches; at the edge it survives as a safety device.
+:::
+
+::: check
+1. Define east-west traffic and give two sources of it. [^c51-1]
+2. In Campus Net's tree, what fraction of the uplink capacity does spanning tree waste, and why? [^c51-2]
+3. How many switches separate two servers in different racks of a leaf-spine fabric? [^c51-3]
+:::
+
+[^c51-1]: Traffic between servers in the same data centre; for example request fan-out to internal services and storage replication.
+[^c51-2]: Half, because each rack has two uplinks and the protocol must block one of them to keep the topology a tree.
+[^c51-3]: Three: the source leaf, one spine and the destination leaf.
+
+## [5.2]{.sec}Clos networks and spine-leaf arithmetic [Must · ■■□]{.tag} {#s5-2}
+
+::: bigidea
+A folded Clos network connects every leaf to every spine, so any two leaves are exactly two hops apart, capacity grows by adding spines, and the size of the fabric follows from three port counts.
+:::
+
+In 1953 Charles Clos analysed telephone switches built from small switching elements in several stages, and showed how to obtain a large non-blocking switch from small ones. A data-centre *folded Clos* uses the same idea with the input and output stages folded onto one set of devices. The lower tier consists of *leaf* switches (also called top-of-rack or ToR switches), which have server-facing ports and uplinks; the upper tier consists of *spine* switches, which connect only to leaves. Every leaf has one link to every spine and there are no leaf-to-leaf or spine-to-spine links. Consequently any leaf-to-leaf path is leaf, spine, leaf, and there are as many equal-cost paths as there are spines (Figure 5.2).
+
+Three quantities describe a fabric. The *oversubscription ratio* of a leaf is its server-facing bandwidth divided by its uplink bandwidth; a ratio of 1:1 means the leaf can send everything it receives upwards, and 3:1 means that, if all servers transmit at once, each gets a third of its line rate. The *bisection bandwidth* is the bandwidth between the two halves of the network when it is cut into two equal parts in the worst way; it measures how well any server can talk to any other. The *radix* (port count) of the spine limits how many leaves can attach. Note that oversubscription is a property of the *design*, chosen to save money because servers rarely transmit at line rate together; it is not the same as *blocking*, which is a property of the topology. A Clos network is not blocking in the fabric itself, whatever the leaf ratio.
+
+<figure>
+<svg viewBox="0 0 480 190" width="480"><defs></defs><rect class="box" x="20" y="20" width="40" height="18" rx="0"/><text class="lbl" x="40" y="32" text-anchor="middle">S1</text><rect class="box" x="80" y="20" width="40" height="18" rx="0"/><text class="lbl" x="100" y="32" text-anchor="middle">S2</text><rect class="box" x="140" y="20" width="40" height="18" rx="0"/><text class="lbl" x="160" y="32" text-anchor="middle">S3</text><rect class="box" x="210" y="20" width="40" height="18" rx="0"/><text class="lbl" x="230" y="32" text-anchor="middle">S8</text><text class="lbl" x="195" y="32" text-anchor="middle">···</text><rect class="box" x="28" y="110" width="44" height="18" rx="0"/><text class="lbl" x="50" y="122" text-anchor="middle">L1</text><rect class="box" x="103" y="110" width="44" height="18" rx="0"/><text class="lbl" x="125" y="122" text-anchor="middle">L2</text><rect class="box" x="178" y="110" width="44" height="18" rx="0"/><text class="lbl" x="200" y="122" text-anchor="middle">L3</text><rect class="box" x="253" y="110" width="44" height="18" rx="0"/><text class="lbl" x="275" y="122" text-anchor="middle">L64</text><text class="lbl" x="237" y="122" text-anchor="middle">···</text><line class="lg" x1="40" y1="38" x2="50" y2="110"/><line class="lg" x1="40" y1="38" x2="125" y2="110"/><line class="lg" x1="40" y1="38" x2="200" y2="110"/><line class="lg" x1="40" y1="38" x2="275" y2="110"/><line class="lg" x1="100" y1="38" x2="50" y2="110"/><line class="lg" x1="100" y1="38" x2="125" y2="110"/><line class="lg" x1="100" y1="38" x2="200" y2="110"/><line class="lg" x1="100" y1="38" x2="275" y2="110"/><line class="lg" x1="160" y1="38" x2="50" y2="110"/><line class="lg" x1="160" y1="38" x2="125" y2="110"/><line class="lg" x1="160" y1="38" x2="200" y2="110"/><line class="lg" x1="160" y1="38" x2="275" y2="110"/><line class="lg" x1="230" y1="38" x2="50" y2="110"/><line class="lg" x1="230" y1="38" x2="125" y2="110"/><line class="lg" x1="230" y1="38" x2="200" y2="110"/><line class="lg" x1="230" y1="38" x2="275" y2="110"/><line class="ln" x1="40" y1="38" x2="50" y2="110"/><line class="ln" x1="100" y1="38" x2="50" y2="110"/><line class="ln" x1="160" y1="38" x2="50" y2="110"/><line class="ln" x1="230" y1="38" x2="50" y2="110"/><text class="acct" x="10" y="75" text-anchor="start">8 × 100G</text><text class="sm" x="10" y="86" text-anchor="start">per leaf</text><line class="ln" x1="50" y1="128" x2="50" y2="152"/><rect class="fill" x="28" y="152" width="44" height="14" rx="0"/><text class="sm" x="50" y="162" text-anchor="middle">servers</text><line class="ln" x1="125" y1="128" x2="125" y2="152"/><rect class="fill" x="103" y="152" width="44" height="14" rx="0"/><text class="sm" x="125" y="162" text-anchor="middle">servers</text><line class="ln" x1="200" y1="128" x2="200" y2="152"/><rect class="fill" x="178" y="152" width="44" height="14" rx="0"/><text class="sm" x="200" y="162" text-anchor="middle">servers</text><line class="ln" x1="275" y1="128" x2="275" y2="152"/><rect class="fill" x="253" y="152" width="44" height="14" rx="0"/><text class="sm" x="275" y="162" text-anchor="middle">servers</text><text class="sm" x="160" y="180" text-anchor="middle">48 × 25G per leaf</text><text class="sm" x="135" y="12" text-anchor="middle">spine: 64 × 100G ports, 8 spines</text><rect class="box" x="318" y="14" width="160" height="160" rx="0"/><text class="lbl" x="326" y="30" text-anchor="start">Sizing rules</text><text class="sm" x="326" y="44" text-anchor="start">Oversubscription =</text><text class="sm" x="326" y="58" text-anchor="start">  down ÷ up</text><text class="sm" x="326" y="72" text-anchor="start">  = (48 × 25) ÷ (8 × 100)</text><text class="sm" x="326" y="86" text-anchor="start">  = 1200 ÷ 800 = 1.5 : 1</text><text class="sm" x="326" y="100" text-anchor="start">Spines = uplinks per leaf = 8</text><text class="sm" x="326" y="114" text-anchor="start">Leaves ≤ spine ports = 64</text><text class="sm" x="326" y="128" text-anchor="start">Servers ≤ 64 × 48 = 3,072</text><text class="sm" x="326" y="142" text-anchor="start">Bisection ≈ 32 × 800G</text><text class="sm" x="326" y="156" text-anchor="start">  = 25.6 Tb/s</text></svg>
+<figcaption><b>Figure 5.2</b> A two-tier fabric with its port budget. Every leaf has one link to every spine, so the number of spines equals the uplinks per leaf, and the number of leaves is limited by the ports on a spine.</figcaption>
+</figure>
+
+::: example
+**Size the fabric.** A leaf has 48 server ports of 25 Gb/s and 8 uplinks of 100 Gb/s. A spine has 64 ports of 100 Gb/s. How large is the fabric, and what changes for a 1:1 design?
+
+1. Oversubscription: server bandwidth 48 × 25 = 1,200 Gb/s; uplink bandwidth 8 × 100 = 800 Gb/s; ratio 1,200 ÷ 800 = 1.5 : 1.
+2. Spines: each leaf needs one link to every spine, so the number of spines equals the uplinks per leaf, which is 8.
+3. Leaves: each spine has 64 ports and gives one to every leaf, so at most 64 leaves.
+4. Servers: 64 leaves × 48 ports = 3,072 servers.
+5. Bisection bandwidth: cut the 64 leaves into two groups of 32; the traffic that crosses is limited by the uplinks of one group, 32 × 800 = 25,600 Gb/s = 25.6 Tb/s. The 1,536 servers in a half could offer 32 × 1,200 = 38.4 Tb/s, so the ratio is again 1.5.
+6. For 1:1 there are two routes. Either give each leaf 12 uplinks of 100 Gb/s (12 spines, and each leaf now needs 60 ports), or keep 8 uplinks and populate only 32 server ports (32 × 25 = 800 Gb/s). The first keeps 3,072 servers and costs four more spines; the second halves the servers per leaf.
+
+[Result: 1.5 : 1, 8 spines, up to 64 leaves and 3,072 servers; 1 : 1 needs 12 uplinks per leaf.]{.result}
+:::
+
+When 64 leaves are not enough, a third tier is added. Group leaves and spines into *pods*, and connect the spines of different pods through a layer of *super-spines*. Take a pod of 32 leaves and 4 spines. Each leaf has 4 uplinks (one per spine); each spine uses 32 ports down to the leaves and 32 ports up. The super-spines are arranged in 4 *planes*, one per spine position: the first spine of every pod connects to the 32 super-spines of plane 1, and so on. A 64-port super-spine has one port for each of up to 64 pods. The fabric then holds 64 pods × 32 leaves = 2,048 leaves, hence 2,048 × 48 = 98,304 servers, using 128 super-spines. A rule of thumb for identical k-port switches follows from the same argument: a two-tier fabric at 1:1 supports k²/2 server ports (k leaves, each with k/2 down) and a three-tier fabric supports k³/4. With k = 64 these are 2,048 and 65,536. The large operators build exactly this, calling the planes by their own names (Meta's *fabric* design, Google's Jupiter); the principle is the same.
+
+::: trap
+*Claim:* "A 1:1 leaf makes the whole fabric non-blocking." *Why it is wrong:* oversubscription is measured at one tier. If there are fewer spines or slower spine ports than the leaf uplinks require, the next tier throttles traffic, and a single flow can never exceed one link anyway. *Correct statement:* a fabric is non-blocking only if every tier has as much capacity going up as coming down, and a single flow is still limited to the speed of one path.
+:::
+
+::: lens
+[GOOGLE · MICROSOFT · ARISTA · JUNIPER]{.co}
+
+Expect "size this fabric" with port counts given, and "why not three tiers of chassis switches?". A strong answer states the formulas (oversubscription = down ÷ up; spines = uplinks per leaf; leaves ≤ spine ports; servers = leaves × server ports), gives the 1:1 variant, and then names the costs of going to five stages: more hops, more cables and a harder failure analysis. Candidates report that *Jupiter Rising* (SIGCOMM 2015) is the paper to read; forty-five minutes on its abstract, the Clos figures and the discussion of centralised control are enough for an interview.
+:::
+
+::: check
+1. A leaf has 24 × 10G server ports and 4 × 40G uplinks. What is the oversubscription? [^c52-1]
+2. With 32-port spines, how many leaves can the fabric hold? [^c52-2]
+3. Why is oversubscription not the same as blocking? [^c52-3]
+:::
+
+[^c52-1]: 240 ÷ 160 = 1.5 : 1.
+[^c52-2]: 32, one spine port per leaf.
+[^c52-3]: Oversubscription is a chosen ratio at one tier; blocking is a topological property, and a Clos fabric with enough spine capacity is non-blocking.
+
+## [5.3]{.sec}ECMP and flow hashing [Must · ■■□]{.tag} {#s5-3}
+
+::: bigidea
+A fabric has many equal paths, and a router uses them all by hashing each flow's header fields to pick one next hop, so a flow stays in order while different flows spread across the paths.
+:::
+
+*Equal-cost multipath* (ECMP) lets a router install several next hops for one prefix, all with the same routing cost ([§4.4](#s4-4){.ref}). Which next hop carries a given packet is decided by a hash. The router takes a set of header fields, typically the *5-tuple* (source address, destination address, protocol, source port, destination port), computes a hash with a hardware function such as CRC16 or CRC32 plus a configurable *seed*, and uses the result to index the list of next hops (Figure 5.3). Every packet of one TCP connection has the same 5-tuple, hence the same hash, hence the same path, so the segments arrive in order; different connections have different tuples and spread across the paths. If the router balanced individual packets instead, consecutive segments would take paths with different queueing delays and arrive out of order, which TCP interprets as loss (three duplicate acknowledgements trigger a spurious fast retransmit, see [§3.9](#s3-9){.ref}).
+
+<figure>
+<svg viewBox="0 0 480 122" width="480"><defs><marker id="a53" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="b53" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="accf"/></marker></defs><rect class="box" x="5" y="22" width="112" height="70" rx="0"/><text class="sm" x="12" y="36" text-anchor="start">source IP</text><text class="sm" x="12" y="47" text-anchor="start">destination IP</text><text class="sm" x="12" y="58" text-anchor="start">protocol</text><text class="sm" x="12" y="69" text-anchor="start">source port</text><text class="sm" x="12" y="80" text-anchor="start">destination port</text><text class="lbl" x="61" y="14" text-anchor="middle">5-tuple</text><line class="ln" x1="117" y1="57" x2="138" y2="57" marker-end="url(#a53)"/><rect class="box" x="140" y="37" width="76" height="40" rx="0"/><text class="lbl" x="178" y="54" text-anchor="middle">hash</text><text class="sm" x="178" y="66" text-anchor="middle">CRC32 + seed</text><line class="ln" x1="216" y1="57" x2="238" y2="57" marker-end="url(#a53)"/><rect class="box" x="240" y="37" width="56" height="40" rx="0"/><text class="lbl" x="268" y="54" text-anchor="middle">h mod N</text><text class="sm" x="268" y="66" text-anchor="middle">N = 4</text><line class="ln" x1="296" y1="57" x2="318" y2="57" marker-end="url(#a53)"/><rect class="box" x="320" y="24" width="78" height="17" rx="0"/><text class="mono" x="329" y="36" text-anchor="start">0</text><text class="sm" x="360" y="36" text-anchor="middle">S1 · swp1</text><rect class="box" x="320" y="41" width="78" height="17" rx="0"/><text class="mono" x="329" y="53" text-anchor="start">1</text><text class="sm" x="360" y="53" text-anchor="middle">S2 · swp2</text><rect class="hl" x="320" y="58" width="78" height="17" rx="0"/><text class="mono" x="329" y="70" text-anchor="start">2</text><text class="sm" x="360" y="70" text-anchor="middle">S3 · swp3</text><rect class="box" x="320" y="75" width="78" height="17" rx="0"/><text class="mono" x="329" y="87" text-anchor="start">3</text><text class="sm" x="360" y="87" text-anchor="middle">S4 · swp4</text><text class="lbl" x="359" y="16" text-anchor="middle">next-hop table</text><path class="acc" d="M398,66 L430,66" marker-end="url(#b53)"/><text class="sm" x="452" y="62" text-anchor="middle">egress</text><text class="sm" x="452" y="72" text-anchor="middle">port</text><text class="sm" x="240" y="112" text-anchor="middle">Every packet of a flow carries the same 5-tuple, hence the same hash, hence the same next hop.</text></svg>
+<figcaption><b>Figure 5.3</b> The ECMP decision. The hash is computed in hardware from header fields; the remainder indexes a small table of equal-cost next hops (here index 2, spine S3).</figcaption>
+</figure>
+
+::: example
+**Six flows, four spines.** Use a deliberately weak toy hash, h = (source port + destination port) mod 4, with next hops S1 to S4 numbered 0 to 3 and 10 Gb/s per uplink. All flows go to port 443 (443 mod 4 = 3).
+
+1. The flows are listed with their rates: A (source port 40001, 1 Gb/s), B (40002, 8), C (40003, 1), D (40004, 1), E (40006, 9), F (40009, 2).
+2. Source ports mod 4 are 1, 2, 3, 0, 2, 1. Adding 3 and reducing mod 4 gives hashes 0, 1, 2, 3, 1, 0.
+3. Load per spine: S1 (index 0) carries A + F = 3 Gb/s; S2 (index 1) carries B + E = 17 Gb/s; S3 carries C = 1 Gb/s; S4 carries D = 1 Gb/s.
+4. Total demand is 22 Gb/s on 40 Gb/s of uplink, yet S2 is asked for 17 Gb/s on a 10 Gb/s link: two large flows ("elephants") collided, and the other flows ("mice") sharing that link suffer queueing and loss.
+5. Now S3 fails. With a naive "hash mod N", N changes from 4 to 3, and a flow keeps its index only if h mod 4 = h mod 3, which for uniformly distributed h happens for 3 of the 12 residues; about 75% of all flows change path, including flows that were on healthy spines.
+6. With *resilient* (consistent) hashing the hash selects one of a fixed number of buckets, say 16, and each bucket is assigned to a member. When S3 fails only its four buckets are reassigned, so 4 of 16 = 25% of flows move (Figure 5.4).
+
+[Result: balance depends on the flow mix, not only on the count of flows; a resilient table limits the disruption of a failure to the flows that had to move.]{.result}
+:::
+
+<figure>
+<svg viewBox="0 0 480 118" width="480"><defs></defs><text class="lbl" x="5" y="22" text-anchor="start">before</text><text class="lbl" x="5" y="62" text-anchor="start">after S3</text><text class="sm" x="5" y="74" text-anchor="start">fails</text><rect class="box" x="60" y="8" width="26" height="22" rx="0"/><text class="lbl" x="73" y="22" text-anchor="middle">S1</text><text class="sm" x="73" y="42" text-anchor="middle">0</text><rect class="box" x="60" y="50" width="26" height="22" rx="0"/><text class="lbl" x="73" y="64" text-anchor="middle">S1</text><rect class="box" x="86" y="8" width="26" height="22" rx="0"/><text class="lbl" x="99" y="22" text-anchor="middle">S2</text><text class="sm" x="99" y="42" text-anchor="middle">1</text><rect class="box" x="86" y="50" width="26" height="22" rx="0"/><text class="lbl" x="99" y="64" text-anchor="middle">S2</text><rect class="box" x="112" y="8" width="26" height="22" rx="0"/><text class="lbl" x="125" y="22" text-anchor="middle">S3</text><text class="sm" x="125" y="42" text-anchor="middle">2</text><rect class="hl" x="112" y="50" width="26" height="22" rx="0"/><text class="lbl" x="125" y="64" text-anchor="middle">S1</text><rect class="box" x="138" y="8" width="26" height="22" rx="0"/><text class="lbl" x="151" y="22" text-anchor="middle">S4</text><text class="sm" x="151" y="42" text-anchor="middle">3</text><rect class="box" x="138" y="50" width="26" height="22" rx="0"/><text class="lbl" x="151" y="64" text-anchor="middle">S4</text><rect class="box" x="164" y="8" width="26" height="22" rx="0"/><text class="lbl" x="177" y="22" text-anchor="middle">S1</text><text class="sm" x="177" y="42" text-anchor="middle">4</text><rect class="box" x="164" y="50" width="26" height="22" rx="0"/><text class="lbl" x="177" y="64" text-anchor="middle">S1</text><rect class="box" x="190" y="8" width="26" height="22" rx="0"/><text class="lbl" x="203" y="22" text-anchor="middle">S2</text><text class="sm" x="203" y="42" text-anchor="middle">5</text><rect class="box" x="190" y="50" width="26" height="22" rx="0"/><text class="lbl" x="203" y="64" text-anchor="middle">S2</text><rect class="box" x="216" y="8" width="26" height="22" rx="0"/><text class="lbl" x="229" y="22" text-anchor="middle">S3</text><text class="sm" x="229" y="42" text-anchor="middle">6</text><rect class="hl" x="216" y="50" width="26" height="22" rx="0"/><text class="lbl" x="229" y="64" text-anchor="middle">S2</text><rect class="box" x="242" y="8" width="26" height="22" rx="0"/><text class="lbl" x="255" y="22" text-anchor="middle">S4</text><text class="sm" x="255" y="42" text-anchor="middle">7</text><rect class="box" x="242" y="50" width="26" height="22" rx="0"/><text class="lbl" x="255" y="64" text-anchor="middle">S4</text><rect class="box" x="268" y="8" width="26" height="22" rx="0"/><text class="lbl" x="281" y="22" text-anchor="middle">S1</text><text class="sm" x="281" y="42" text-anchor="middle">8</text><rect class="box" x="268" y="50" width="26" height="22" rx="0"/><text class="lbl" x="281" y="64" text-anchor="middle">S1</text><rect class="box" x="294" y="8" width="26" height="22" rx="0"/><text class="lbl" x="307" y="22" text-anchor="middle">S2</text><text class="sm" x="307" y="42" text-anchor="middle">9</text><rect class="box" x="294" y="50" width="26" height="22" rx="0"/><text class="lbl" x="307" y="64" text-anchor="middle">S2</text><rect class="box" x="320" y="8" width="26" height="22" rx="0"/><text class="lbl" x="333" y="22" text-anchor="middle">S3</text><text class="sm" x="333" y="42" text-anchor="middle">10</text><rect class="hl" x="320" y="50" width="26" height="22" rx="0"/><text class="lbl" x="333" y="64" text-anchor="middle">S4</text><rect class="box" x="346" y="8" width="26" height="22" rx="0"/><text class="lbl" x="359" y="22" text-anchor="middle">S4</text><text class="sm" x="359" y="42" text-anchor="middle">11</text><rect class="box" x="346" y="50" width="26" height="22" rx="0"/><text class="lbl" x="359" y="64" text-anchor="middle">S4</text><rect class="box" x="372" y="8" width="26" height="22" rx="0"/><text class="lbl" x="385" y="22" text-anchor="middle">S1</text><text class="sm" x="385" y="42" text-anchor="middle">12</text><rect class="box" x="372" y="50" width="26" height="22" rx="0"/><text class="lbl" x="385" y="64" text-anchor="middle">S1</text><rect class="box" x="398" y="8" width="26" height="22" rx="0"/><text class="lbl" x="411" y="22" text-anchor="middle">S2</text><text class="sm" x="411" y="42" text-anchor="middle">13</text><rect class="box" x="398" y="50" width="26" height="22" rx="0"/><text class="lbl" x="411" y="64" text-anchor="middle">S2</text><rect class="box" x="424" y="8" width="26" height="22" rx="0"/><text class="lbl" x="437" y="22" text-anchor="middle">S3</text><text class="sm" x="437" y="42" text-anchor="middle">14</text><rect class="hl" x="424" y="50" width="26" height="22" rx="0"/><text class="lbl" x="437" y="64" text-anchor="middle">S1</text><rect class="box" x="450" y="8" width="26" height="22" rx="0"/><text class="lbl" x="463" y="22" text-anchor="middle">S4</text><text class="sm" x="463" y="42" text-anchor="middle">15</text><rect class="box" x="450" y="50" width="26" height="22" rx="0"/><text class="lbl" x="463" y="64" text-anchor="middle">S4</text><text class="sm" x="60" y="92" text-anchor="start">bucket index (the hash selects a bucket, not a member)</text><text class="sm" x="60" y="108" text-anchor="start">Only the four shaded buckets move: 4 of 16 = 25% of flows. Hash mod N would have moved about 75%.</text></svg>
+<figcaption><b>Figure 5.4</b> Resilient hashing. A fixed table of 16 buckets is filled with the members; when S3 fails, only its own buckets are reassigned, so flows on healthy spines are not reshuffled.</figcaption>
+</figure>
+
+ECMP balances flows, so it is exactly as good as the flow population is uniform. Real traffic is not: a few elephant flows (backups, shuffles) carry most bytes. Operators therefore add refinements. *Weighted* ECMP gives members unequal shares, for example when one spine has fewer links after a failure. *Flowlet switching* splits a flow at idle gaps longer than the path-delay difference and rehashes each burst, which balances better without reordering. *Packet spraying* sends packets of one flow over all paths and is used only where the receiver tolerates reordering, as in some RDMA fabrics. On Linux the sysctl `net.ipv4.fib_multipath_hash_policy` selects the inputs: 0 hashes the addresses only, 1 the 5-tuple, and 2 the inner headers of encapsulated traffic. In BGP the number of installed paths is limited by `maximum-paths`.
+
+<figure>
+<svg viewBox="0 0 480 180" width="480"><defs><marker id="a54" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="accf"/></marker></defs><rect class="box" x="210" y="8" width="60" height="20" rx="0"/><text class="lbl" x="240" y="21" text-anchor="middle">L (seed 7)</text><rect class="box" x="120" y="54" width="60" height="20" rx="0"/><text class="lbl" x="150" y="67" text-anchor="middle">S1 (seed 7)</text><rect class="box" x="300" y="54" width="60" height="20" rx="0"/><text class="lbl" x="330" y="67" text-anchor="middle">S2 (seed 7)</text><line class="ln" x1="230" y1="28" x2="150" y2="54"/><line class="ln" x1="250" y1="28" x2="330" y2="54"/><rect class="box" x="52" y="120" width="56" height="20" rx="0"/><text class="lbl" x="80" y="133" text-anchor="middle">T1</text><rect class="box" x="162" y="120" width="56" height="20" rx="0"/><text class="lbl" x="190" y="133" text-anchor="middle">T2</text><rect class="box" x="262" y="120" width="56" height="20" rx="0"/><text class="lbl" x="290" y="133" text-anchor="middle">T3</text><rect class="box" x="372" y="120" width="56" height="20" rx="0"/><text class="lbl" x="400" y="133" text-anchor="middle">T4</text><line class="ln" x1="135" y1="74" x2="80" y2="120"/><line class="lg dash" x1="165" y1="74" x2="190" y2="120"/><line class="lg dash" x1="315" y1="74" x2="290" y2="120"/><line class="ln" x1="345" y1="74" x2="400" y2="120"/><text class="sm" x="115" y="100" text-anchor="end">index 0</text><text class="sm" x="335" y="100" text-anchor="start">index 1</text><text class="sm" x="176" y="40" text-anchor="end">index 0</text><text class="sm" x="304" y="40" text-anchor="start">index 1</text><path class="acc" d="M190,126 L190,126"/><text class="acct" x="190" y="150" text-anchor="middle">idle</text><text class="acct" x="290" y="150" text-anchor="middle">idle</text><text class="sm" x="240" y="170" text-anchor="middle">Flows reaching S1 already satisfy h mod 2 = 0, so S1 repeats the choice and never uses T2.</text></svg>
+<figcaption><b>Figure 5.5</b> Hash polarisation. With the same hash function and seed at both tiers the second decision carries no new information; half of the second-tier links stay idle. A per-device seed breaks the correlation.</figcaption>
+</figure>
+
+A subtle failure is *hash polarisation*. If every tier of the fabric uses the same hash function, the same fields and the same seed, then the decision at the second tier repeats the decision at the first. In Figure 5.5 every flow that reached spine S1 chose its first uplink because h mod 2 = 0; S1 computes the same h and again chooses index 0, so its second link is never used. Polarisation appears as a few links at 100% and their neighbours idle, and it is cured by giving each device its own seed, or by hashing different fields at different tiers.
+
+::: trap
+*Claim:* "ECMP load-balances packets." *Why it is wrong:* per-packet balancing reorders segments of one connection and triggers spurious retransmissions. *Correct statement:* ECMP balances flows; individual flows are limited to one path and the balance is statistical.
+:::
+
+::: check
+1. Why does every packet of one connection take the same path under ECMP? [^c53-1]
+2. What fraction of flows moves when one of four members fails under mod-N hashing, and under resilient hashing? [^c53-2]
+3. Name the symptom of polarisation. [^c53-3]
+:::
+
+[^c53-1]: The 5-tuple, and therefore the hash, is the same for every packet of the connection.
+[^c53-2]: About 75% under mod-N and 25% under resilient hashing.
+[^c53-3]: Some links saturated while parallel links stay idle, because later tiers repeat the earlier choice.
+
+## [5.4]{.sec}The eBGP underlay, BFD and unnumbered links [Must · ■■□]{.tag} {#s5-4}
+
+::: bigidea
+In a large fabric each switch runs eBGP to its neighbours, because BGP offers simple per-link policy, bounded failure scope and no flooding, and fast failure detection is added with BFD.
+:::
+
+The *underlay* is the routed network that carries every packet between the fabric's switches; the *overlay* (§5.5) is the virtual network carried on top of it. Pillar 4 taught OSPF and IS-IS ([§4.5](#s4-5){.ref}), which would also work here, but RFC 7938 documents why the large operators chose BGP instead. A link-state protocol floods every change to every switch and every switch runs the shortest-path calculation, so thousands of devices produce heavy churn; BGP sends an update only to a neighbour, which limits the effect of a failure to the paths that used it. BGP has a rich policy model (communities, route maps) for draining a device for maintenance, it uses TCP and so needs no extra protocol, and one protocol covers both the fabric and the edge to the outside world. The cost is a more careful design: every switch needs an AS number, and the usual loop-prevention rule must work with it.
+
+The standard plan gives all the spines one AS number and each leaf its own. Campus Net's fabric uses private numbers: spines in AS 65100, and leaves L1 to L4 in AS 65101 to 65104 (Campus Net's border routers remain in AS 65000, [§4.7](#s4-7){.ref}). When L1 advertises its server subnet 10.1.1.0/24, spine S1 receives it with AS_PATH 65101 and passes it on to L4 with AS_PATH 65100 65101 (Figure 5.6). The shared spine AS has two useful effects. A route can only go *up* to a spine and *down* to a leaf: if L4 tried to advertise it back up to S2, S2 would see its own AS number 65100 in the path and discard it, which prevents "valleys" and the path-hunting that would follow a failure. The leaves, conversely, must have *different* AS numbers; two leaves sharing an AS would reject each other's routes for the same reason, and the fix would be `allowas-in` on the leaves, which weakens the loop protection.
+
+<figure>
+<svg viewBox="0 0 480 172" width="480"><defs><marker id="a56" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="accf"/></marker></defs><rect class="box" x="115" y="10" width="90" height="26" rx="0"/><text class="lbl" x="160" y="23" text-anchor="middle">S1</text><text class="sm" x="160" y="32" text-anchor="middle">AS 65100</text><rect class="box" x="275" y="10" width="90" height="26" rx="0"/><text class="lbl" x="320" y="23" text-anchor="middle">S2</text><text class="sm" x="320" y="32" text-anchor="middle">AS 65100</text><rect class="box" x="30" y="118" width="80" height="26" rx="0"/><text class="lbl" x="70" y="131" text-anchor="middle">L1</text><text class="sm" x="70" y="140" text-anchor="middle">AS 65101</text><line class="lg" x1="160" y1="36" x2="70" y2="118"/><line class="lg" x1="320" y1="36" x2="70" y2="118"/><rect class="box" x="150" y="118" width="80" height="26" rx="0"/><text class="lbl" x="190" y="131" text-anchor="middle">L2</text><text class="sm" x="190" y="140" text-anchor="middle">AS 65102</text><line class="lg" x1="160" y1="36" x2="190" y2="118"/><line class="lg" x1="320" y1="36" x2="190" y2="118"/><rect class="box" x="250" y="118" width="80" height="26" rx="0"/><text class="lbl" x="290" y="131" text-anchor="middle">L3</text><text class="sm" x="290" y="140" text-anchor="middle">AS 65103</text><line class="lg" x1="160" y1="36" x2="290" y2="118"/><line class="lg" x1="320" y1="36" x2="290" y2="118"/><rect class="box" x="370" y="118" width="80" height="26" rx="0"/><text class="lbl" x="410" y="131" text-anchor="middle">L4</text><text class="sm" x="410" y="140" text-anchor="middle">AS 65104</text><line class="lg" x1="160" y1="36" x2="410" y2="118"/><line class="lg" x1="320" y1="36" x2="410" y2="118"/><path class="acc" d="M70,118 L160,36 L410,118" marker-end="url(#a56)"/><text class="sm" x="70" y="160" text-anchor="middle">10.1.1.0/24</text><text class="sm" x="410" y="160" text-anchor="middle">10.1.4.0/24</text><rect class="hl" x="10" y="58" width="92" height="28" rx="0"/><text class="sm" x="56" y="70" text-anchor="middle">on S1 from L1:</text><text class="mono" x="56" y="81" text-anchor="middle">AS_PATH 65101</text><rect class="hl" x="320" y="68" width="150" height="28" rx="0"/><text class="sm" x="395" y="80" text-anchor="middle">on L4 from S1:</text><text class="mono" x="395" y="91" text-anchor="middle">AS_PATH 65100 65101</text></svg>
+<figcaption><b>Figure 5.6</b> An eBGP fabric. Spines share one ASN and each leaf has its own. The route to L1's subnet reaches L4 with the path 65100 65101; S2 would refuse any path that already contains 65100, which keeps routes from bouncing back up.</figcaption>
+</figure>
+
+Two details make ECMP work. By default BGP installs several paths only if their AS_PATH attributes are identical in the relevant parts; with the plan above the two paths from L4 to L1 are both "65100 65101", so `maximum-paths 8` is enough. If the spines had different AS numbers the paths would differ in content though not in length, and the command `bestpath as-path multipath-relax` is needed. Secondly, private AS numbers are scarce: the 2-byte private range 64512 to 65534 holds only 1,023 numbers, which a large fabric exhausts, so big operators use the 4-byte private range 4200000000 to 4294967294.
+
+Convergence is the other half of the design. A BGP hold timer is 180 s by default, so a neighbour that fails silently would be believed for three minutes. *Bidirectional Forwarding Detection* (BFD, RFC 5880) is a lightweight hello protocol, run in hardware, that tells BGP when a path is dead. With a transmit interval of 300 ms and a multiplier of 3 a failure is detected after 3 × 300 ms = 900 ms.
+
+| Mechanism | Detection time | Notes |
+|---|---|---|
+| Interface goes down | milliseconds | only if the physical signal is lost |
+| BFD, 300 ms × 3 | 0.9 s | independent of the physical layer |
+| BGP keepalive and hold, tuned to 3 s / 9 s | up to 9 s | common data-centre setting |
+| BGP default hold timer | up to 180 s | the default; far too slow |
+
+The last refinement removes IP addresses from the links. In *BGP unnumbered* the two ends of a link do not carry IPv4 addresses; the session runs over the IPv6 link-local addresses, which every IPv6 interface has automatically, and IPv4 routes are carried with an IPv6 next hop (RFC 5549, now RFC 8950). A fabric of 64 leaves and 8 spines has 512 links; numbering each with a /31 would consume 1,024 addresses and make 512 subnets to track, whereas unnumbered links need only one loopback address per switch. In FRR the whole neighbour configuration is two lines.
+
+```
+router bgp 65101
+ bgp router-id 10.0.0.1
+ neighbor swp1 interface remote-as external
+ neighbor swp2 interface remote-as external
+ neighbor swp1 bfd
+ neighbor swp2 bfd
+ address-family ipv4 unicast
+  redistribute connected
+  maximum-paths 8
+```
+
+::: lab
+`LAB 5.4 · 3 H`  Containerlab with FRR images: two spines (AS 65100) and four leaves (AS 65101 to 65104), loopbacks 10.0.0.1 to 10.0.0.4 on the leaves, one server subnet per leaf. Configure the block above on every leaf and the mirror image on the spines, then verify.
+
+```
+leaf4# show bgp summary
+leaf4# show ip route 10.1.1.0/24
+```
+
+```
+Neighbor   V   AS     State/PfxRcd
+swp1(S1)   4   65100  6
+swp2(S2)   4   65100  6
+
+B>* 10.1.1.0/24 [20/0] via fe80::a8bb:ccff:fe00:100, swp1, weight 1
+  *                    via fe80::a8bb:ccff:fe00:200, swp2, weight 1
+```
+
+**What you should notice:** each leaf has exactly two sessions, and the route to another leaf's subnet has two next hops (ECMP). Shut one spine-facing port and the route falls to one next hop within about a second when BFD is on; remove the `bfd` lines and the failure of a link whose carrier stays up takes the full hold time to notice.
+:::
+
+::: trap
+*Claim:* "Two leaves in the same AS will simply peer through the spines." *Why it is wrong:* the receiving leaf sees its own AS in the AS_PATH and discards the update as a loop. *Correct statement:* give each leaf (or each rack pair) its own AS number, or enable `allowas-in` knowingly and accept the weaker protection.
+:::
+
+::: lens
+[GOOGLE · MICROSOFT · AMAZON · ARISTA · JUNIPER]{.co}
+
+"Why eBGP and not OSPF in the data centre?" wants three reasons from the text above (smaller failure scope, policy and drain control, one protocol to the edge), the ASN plan and the reason for the shared spine AS, and BFD for sub-second failover. Backbone roles at Amazon and Microsoft also ask about IS-IS and MPLS, taught in [§4.10](#s4-10){.ref}.
+:::
+
+::: check
+1. Why do spines share one AS number? [^c54-1]
+2. How long does BFD with 300 ms and a multiplier of 3 take to detect a failure? [^c54-2]
+3. What does BGP unnumbered use in place of an IPv4 address on the link? [^c54-3]
+:::
+
+[^c54-1]: A route may then only travel up and down, because a spine rejects any path that already contains its own AS; this prevents valley paths.
+[^c54-2]: 900 ms.
+[^c54-3]: The IPv6 link-local address, with IPv4 prefixes advertised over an IPv6 next hop.
+
+:::

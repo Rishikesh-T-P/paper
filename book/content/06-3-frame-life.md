@@ -14,7 +14,7 @@ An 802.11 frame has the same three-part shape as any link-layer frame, a header,
 The first two bytes, the *Frame Control* field, describe the frame. Reading bit 0 first (the first bit sent):
 
 | Bits | Field | Meaning |
-|---|---|---|
+|------|--------------------|------------------------------------------------------------|
 | 0–1 | Protocol version | always 0 |
 | 2–3 | Type | 0 management, 1 control, 2 data |
 | 4–7 | Subtype | the particular frame within the type |
@@ -41,7 +41,7 @@ The first two bytes, the *Frame Control* field, describe the frame. Reading bit 
 Wireshark and `tcpdump` combine type and subtype into one number, (type × 16) + subtype, which is the value used in the display filter `wlan.fc.type_subtype`. The ones worth memorising are in the next table.
 
 | Type | Frame (subtype) | Code | Purpose |
-|---|---|---|---|
+|-----------|--------------------------------------|--------------|----------------------------------------|
 | Management | Association Request / Response (0 / 1) | 0x00 / 0x01 | join the BSS; response carries status and AID |
 | Management | Reassociation Request / Response (2 / 3) | 0x02 / 0x03 | move to another AP of the ESS |
 | Management | Probe Request / Response (4 / 5) | 0x04 / 0x05 | active scan |
@@ -60,7 +60,7 @@ Wireshark and `tcpdump` combine type and subtype into one number, (type × 16) +
 A frame has up to four address fields, because a frame relayed by an AP involves up to four parties: the original source, the final destination, and the two radios that carry it across one hop. The *receiver address* (RA) and *transmitter address* (TA) are the radio-hop endpoints and are always Address 1 and Address 2. The *source address* (SA) and *destination address* (DA) are the end systems. The To DS and From DS bits tell which role each field plays.
 
 | To DS | From DS | Address 1 | Address 2 | Address 3 | Address 4 | Typical case |
-|---|---|---|---|---|---|---|
+|------|-------|------------|------------|------------|------------|------------------------------|
 | 0 | 0 | RA = DA | TA = SA | BSSID | not present | IBSS, management frames |
 | 1 | 0 | RA = BSSID | TA = SA | DA | not present | station to AP |
 | 0 | 1 | RA = DA | TA = BSSID | SA | not present | AP to station |
@@ -75,7 +75,7 @@ The *Duration/ID* field (2 bytes) holds the number of microseconds the exchange 
 The short control frames show how compact the format can be: an ACK or CTS is only Frame Control, Duration, a receiver address and the FCS, 14 bytes; an RTS adds the transmitter address, 20 bytes. A management frame has a 24-byte header, a fixed part and a sequence of *information elements* (IEs), each coded as one byte of element ID, one byte of length and the value. A beacon's body is as follows.
 
 | Field or IE | Size | Content in the example |
-|---|---|---|
+|--------------------------|--------|--------------------------------------------------|
 | Timestamp | 8 B | the AP's microsecond clock, for synchronisation |
 | Beacon interval | 2 B | 100 TU (1 TU = 1,024 µs, so 102.4 ms) |
 | Capability information | 2 B | ESS bit, privacy bit, short preamble |
@@ -110,8 +110,9 @@ int main(void) {
     uint8_t wire[2][2] = { {0x08, 0x41}, {0x80, 0x00} };
     for (int i = 0; i < 2; i++) {
         uint16_t fc = wire[i][0] | (wire[i][1] << 8);   /* little-endian */
-        printf("fc=0x%04x ver=%u type=%u subtype=%u tods=%u fromds=%u retry=%u prot=%u\n",
-               fc, fc & 3, (fc >> 2) & 3, (fc >> 4) & 15,
+        printf("fc=0x%04x ver=%u type=%u subtype=%u ", fc,
+               fc & 3, (fc >> 2) & 3, (fc >> 4) & 15);
+        printf("tods=%u fromds=%u retry=%u prot=%u\n",
                (fc >> 8) & 1, (fc >> 9) & 1, (fc >> 11) & 1, (fc >> 14) & 1);
     }
     return 0;
@@ -168,7 +169,7 @@ A station connects to a network in five phases: it discovers the AP, performs an
 The table gives a typical capture for a WPA2-Personal client, as a monitor-mode sniffer would see it. Times are indicative.
 
 | # | Frame | From → to | Key fields | Why it matters |
-|---|---|---|---|---|
+|----|------------------|------------|------------------------------|------------------------------|
 | 1 | Beacon | AP → broadcast | SSID, RSN (CCMP, PSK), TIM, capabilities | passive discovery; repeated every 102.4 ms |
 | 2 | Probe Request | STA → broadcast | SSID (wildcard or named), rates | active scan; may use a random MAC |
 | 3 | Probe Response | AP → STA | as beacon, without TIM | answers only the prober |

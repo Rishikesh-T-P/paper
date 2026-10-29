@@ -29,7 +29,7 @@ Every topology and lab in this chapter belongs to one fictional organisation, **
 
 ## [4.1]{.sec}Inside the box: planes and the CLI [Should · ■□□]{.tag} {#s4-1}
 
-A router or switch performs three jobs that run at three different speeds. The *management plane* (the CLI, SSH, SNMP, NETCONF) is how humans and tools configure it. The *control plane* (OSPF, BGP, spanning tree, ARP) runs on the CPU and builds tables. The *data plane* (the forwarding hardware) uses those tables to move transit packets at line rate, without involving the CPU. The tables are the routing information base (RIB) and the forwarding information base (FIB); how the FIB is held in TCAM is taught in [§5.2](#s5-2){.ref}. Here it is enough to know that a packet *addressed to the router* (an OSPF hello, an SSH session) is punted to the CPU, whereas a *transit* packet never leaves the fast path.
+A router or switch performs three jobs that run at three different speeds. The *management plane* (the CLI, SSH, SNMP, NETCONF) is how humans and tools configure it. The *control plane* (OSPF, BGP, spanning tree, ARP) runs on the CPU and builds tables. The *data plane* (the forwarding hardware) uses those tables to move transit packets at line rate, without involving the CPU. The tables are the routing information base (RIB) and the forwarding information base (FIB); how the FIB is held in TCAM is taught in [§5.8](#s5-8){.ref}. Here it is enough to know that a packet *addressed to the router* (an OSPF hello, an SSH session) is punted to the CPU, whereas a *transit* packet never leaves the fast path.
 
 <figure>
 <svg viewBox="0 0 480 150" width="480">

@@ -55,14 +55,18 @@ import hashlib, hmac
 def prf(key, label, data, bits):
     out, i = b"", 0
     while len(out) * 8 < bits:
-        out += hmac.new(key, label + b"\x00" + data + bytes([i]), hashlib.sha1).digest(); i += 1
+        msg = label + b"\x00" + data + bytes([i])
+        out += hmac.new(key, msg, hashlib.sha1).digest()
+        i += 1
     return out[:bits // 8]
 pmk = hashlib.pbkdf2_hmac("sha1", b"packet123", b"IITLab", 4096, 32)
 aa, spa = bytes.fromhex("0211223344aa"), bytes.fromhex("0211223344bb")
 an, sn = bytes(range(0x00, 0x20)), bytes(range(0x80, 0xA0))
-ptk = prf(pmk, b"Pairwise key expansion",
-          min(aa, spa) + max(aa, spa) + min(an, sn) + max(an, sn), 384)
-print("PMK", pmk[:8].hex()); print("KCK", ptk[:16].hex()); print("TK ", ptk[32:48].hex())
+data = min(aa, spa) + max(aa, spa) + min(an, sn) + max(an, sn)
+ptk = prf(pmk, b"Pairwise key expansion", data, 384)
+print("PMK", pmk[:8].hex())
+print("KCK", ptk[:16].hex())
+print("TK ", ptk[32:48].hex())
 ```
 
 ```

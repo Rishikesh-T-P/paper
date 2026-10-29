@@ -156,6 +156,30 @@ The twenty-two patterns below are the reusable shapes of the pillar. The templat
 
 A twenty-third card, bit tricks, is used heavily at Qualcomm and Broadcom: its bug is `1 << 31` on a signed `int`, and its home is [§1.5](#s1-5){.ref}. The shortest-path row has a networking tie, which interviewers like as a bridge question: Dijkstra is the SPF of OSPF and IS-IS ([§4.5](#s4-5){.ref}), and Bellman–Ford is the distance-vector idea of RIP.
 
+### Problems that smell like networking
+
+Network-company rounds dress ordinary algorithms in network clothes, and the disguise is the decoder. Each row names the task, the algorithm underneath and the question that solves it.
+
+| The task as stated | The algorithm beneath | Solved in |
+|---|---|---|
+| route lookup; most specific firewall rule; delete a prefix | binary trie, deepest marked node | [Q1.19](#ps1){.ref}, [Q1.75](#ps1){.ref}, [Q1.74](#ps1){.ref}, [Q1.76](#ps1){.ref} |
+| validate, convert or restore an IP string | single-scan validator; backtracking | [Q1.5](#ps1){.ref}, [Q1.39](#ps1){.ref}, [Q1.22](#ps1){.ref} |
+| same subnet; network and broadcast of an address | mask and compare | [Q1.6](#ps1){.ref}, [Q1.7](#ps1){.ref} |
+| merge address ranges; ranges to the fewest CIDR blocks | sort and merge; align and split | [Q1.94](#ps1){.ref}, [Q1.51](#ps1){.ref} |
+| rate limiting, with bursts | token bucket; sliding window | [Q1.27](#ps1){.ref}, [Q1.101](#ps1){.ref}, [Q1.102](#ps1){.ref} |
+| an ARP or route cache with expiry | hash map and doubly linked list | [Q1.26](#ps1){.ref}, [Q1.99](#ps1){.ref} |
+| SPF, and "cheapest route" | Dijkstra | [Q1.20](#ps1){.ref}, [Q1.85](#ps1){.ref} |
+| a routing loop; a link whose failure splits the network | cycle detection; bridges | [Q1.12](#ps1){.ref}, [Q1.87](#ps1){.ref}, [Q1.89](#ps1){.ref} |
+| reorder packets by sequence number | min-heap | [Q1.81](#ps1){.ref} |
+| the Internet checksum | 16-bit one's-complement sum | [Q1.52](#ps1){.ref} |
+| allocate VLAN identifiers or ports | bitmap | [Q1.53](#ps1){.ref} |
+| peak simultaneous flows; top sources by bytes in a huge log | sweep line; heap of size *k* | [Q1.95](#ps1){.ref}, [Q1.80](#ps1){.ref}, [Q1.37](#ps1){.ref} |
+| validate a sequence of TCP events | table-driven state machine | [Q1.28](#ps1){.ref} |
+
+### Which practice list
+
+Four public lists are in common use: Blind 75 (the shortest), NeetCode 150 (the same families, more depth), the Striver SDE and A2Z sheets (broad, many topics), and Sean Prashad's list grouped by pattern. They overlap heavily, so one should be chosen and finished. For this book's readers the order is: the pattern families of the NeetCode list for breadth, then the networking problems of the table above, which no public list collects, and then the C output traps of [§2.15](#s2-15){.ref}, because Qualcomm, Broadcom and Arista examine C directly. Re-solve a problem from a blank page on the third and fourteenth day after the first attempt ([the calendar](#s15-2){.ref}), and retire it once it is solved without hints in under 25 minutes.
+
 ### The Big-O and edge-case cards
 
 The data-structure, sorting and graph tables, the recurrences and the landmark numbers (log<sub>2</sub> 10<sup>6</sup> ≈ 20, `INT_MAX` ≈ 2.1 × 10<sup>9</sup>) are in the Revision Spread of Pillar 1 ([Big-O](#rv1){.ref}), as is the edge-case checklist with its networking inputs. They are not reprinted. Before saying "done", run that checklist aloud.

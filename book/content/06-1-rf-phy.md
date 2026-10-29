@@ -118,7 +118,7 @@ To keep the symbols apart in time, the transmitter copies the last part of each 
 The table below lists the numerology of the Wi-Fi generations. The 802.11a/g/n/ac OFDM symbol is 3.2 µs plus a 0.8 µs guard (0.4 µs in the short-GI option) on 312.5 kHz subcarriers, while 802.11ax made the symbol four times longer (12.8 µs, 78.125 kHz spacing) to tolerate outdoor echoes and to make resource units finer.
 
 | Generation | Subcarrier spacing | Useful symbol | Guard intervals | Data subcarriers in 20 MHz |
-|---|---|---|---|---|
+|----------------|----------------|--------------|------------------|----------------------|
 | 802.11a/g | 312.5 kHz | 3.2 µs | 0.8 µs | 48 (plus 4 pilots) |
 | 802.11n | 312.5 kHz | 3.2 µs | 0.8 or 0.4 µs | 52 |
 | 802.11ac | 312.5 kHz | 3.2 µs | 0.8 or 0.4 µs | 52 |
@@ -152,7 +152,7 @@ Each combination of modulation and coding rate is an MCS index. For a given widt
 :::
 
 | MCS | Modulation | Coding | 20 MHz, 1 stream | 80 MHz, 1 stream | Typical SNR needed |
-|---|---|---|---|---|---|
+|-----|------------|--------|--------------|--------------|----------------|
 | 0 | BPSK | 1/2 | 8.6 Mb/s | 36.0 Mb/s | 5 dB |
 | 2 | QPSK | 3/4 | 25.8 | 108.1 | 12 dB |
 | 4 | 16-QAM | 3/4 | 51.6 | 216.2 | 18 dB |

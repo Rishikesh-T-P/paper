@@ -309,6 +309,20 @@ For example, eight /24 blocks from 192.168.24.0 form 192.168.24.0/21, because 24
 
 Three more kinds of drill complete the set. *Same subnet?* 172.16.20.30 and 172.16.31.1 under 255.255.240.0: yes, both lie in 172.16.16.0 to 172.16.31.255. 10.0.5.250 and 10.0.6.2 under 255.255.254.0: no, the blocks are 10.0.4.0 and 10.0.6.0. 192.168.1.62 and 192.168.1.65 under 255.255.255.192: no, because 64 divides them. *Wildcard:* the wildcard of /26 is 0.0.0.63 and of /21 is 0.0.7.255. *Summary:* 192.168.9.0/26 to 192.168.9.192/26 (four blocks, start 0) is 192.168.9.0/24.
 
+### Latency and serialisation numbers
+
+Delay questions are arithmetic on three quantities: the time to put the bits on the wire (L / R), the time for the signal to cross the distance (*d* / *v*), and the queue between them. The formulas are in the Revision Spread of Pillar 3 ([Formulas](#rv3){.ref}); the table prints their results for the frame sizes and rates that MCQs and design questions use, so that no arithmetic is needed under pressure.
+
+★ **Serialisation time of a frame.** Time = 8 × bytes / rate.
+
+| Frame | 1 Gb/s | 10 Gb/s | 100 Gb/s |
+|------|------|------|------|
+| 64 bytes (minimum Ethernet) | 512 ns | 51.2 ns | 5.12 ns |
+| 1,500 bytes (standard MTU) | 12 µs | 1.2 µs | 120 ns |
+| 9,000 bytes (jumbo) | 72 µs | 7.2 µs | 720 ns |
+
+★ **Conversions to know cold.** 1 byte = 8 bits, so 1 Gb/s = 125 MB/s. Light in fibre travels at about 2 × 10<sup>8</sup> m/s, which is 5 µs per kilometre one way, or 1 ms of round-trip time for every 100 km. A 10 Gb/s link at 100 ms of round-trip time has a bandwidth-delay product of 125 MB. Hence a path of 1,000 km cannot have a round-trip time below 10 ms, whatever its bandwidth.
+
 ### Ports and protocol numbers, second page
 
 The ports every candidate knows (FTP, SSH, Telnet, SMTP, DNS, DHCP, HTTP, BGP, HTTPS and so on), the IP protocol numbers up to OSPF and the common EtherTypes are in the Revision Spread of Pillar 3 ([the table](#rv3){.ref}). Further ports sit with their protocols: LDP, HSRP and VRRP in [the Pillar 4 spread](#rv4){.ref}; VXLAN and Geneve in [the Pillar 5 spread](#rv5){.ref}; RADIUS, TACACS+, IKE and NAT-T in [the Pillar 9 spread](#rv9){.ref}; and NETCONF and gNMI in [the Pillar 10 spread](#rv10){.ref}. The table below adds only what none of them holds.

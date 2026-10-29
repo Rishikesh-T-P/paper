@@ -77,9 +77,9 @@ The matching paper is [Mock 1](#s14-11){.ref}; the OA habits are in [A3](#s13-3)
 :::
 
 ::: break
-## [III.2]{.sec}Qualcomm playbook [Reports 2020 to 2025]{.tag} {#s14-2}
+## [III.2]{.sec}Qualcomm playbook [Reports from 2020]{.tag} {#s14-2}
 
-Reports between 2020 and 2025 describe a written or online test, one or two technical interviews and an HR round in which 'Why Qualcomm?' and 'Tell me about yourself' are standard. The test is sectioned, with aptitude, C and computer-science fundamentals; most questions are on C and object-oriented programming. Match this playbook with [Mock 3](#s14-13){.ref}.
+Reports from 2020 describe a written or online test, one or two technical interviews and an HR round in which 'Why Qualcomm?' and 'Tell me about yourself' are standard. The test is sectioned, with aptitude, C and computer-science fundamentals; most questions are on C and object-oriented programming. Match this playbook with [Mock 3](#s14-13){.ref}.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -134,9 +134,9 @@ The matching paper is [Mock 3](#s14-13){.ref}; the C traps are indexed in [A3](#
 :::
 
 ::: break
-## [III.3]{.sec}Google playbook [Reports 2023 to 2026]{.tag} {#s14-3}
+## [III.3]{.sec}Google playbook [Reports 2023 to 2025]{.tag} {#s14-3}
 
-Reports from 2023 to 2026 describe a phone screen with one or two LeetCode-style problems, three or four technical interviews, a Googleyness and leadership round and team matching. The network-engineer and systems-engineer tracks add networking, troubleshooting and scripting rounds, including a basic Python question in a shared document. There is no common online assessment in the reports; a coding mock is [Mock 6](#s14-16){.ref}.
+Reports from 2023 to 2025 describe a phone screen with one or two LeetCode-style problems, three or four technical interviews, a Googleyness and leadership round and team matching. The network-engineer and systems-engineer tracks add networking, troubleshooting and scripting rounds, including a basic Python question in a shared document. There is no common online assessment in the reports; a coding mock is [Mock 6](#s14-16){.ref}.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -247,9 +247,9 @@ The matching paper is [Mock 6](#s14-16){.ref}.
 :::
 
 ::: break
-## [III.5]{.sec}Amazon (Network Development Engineer) playbook [Reports 2024 to 2025]{.tag} {#s14-5}
+## [III.5]{.sec}Amazon (Network Development Engineer) playbook [Reports from 2024]{.tag} {#s14-5}
 
-Reports from 2024 and 2025 describe a résumé screen, a phone screen that is almost entirely troubleshooting, and a loop of four or five interviews: networking depth (BGP, OSPF, TCP/IP, MTU and MSS), Python automation, Leadership Principles and a bar-raiser. Amazon's own tests vary by team and year. Match this playbook with [Mock 6](#s14-16){.ref} for any coding screen.
+Reports from 2024 describe a résumé screen, a phone screen that is almost entirely troubleshooting, and a loop of four or five interviews: networking depth (BGP, OSPF, TCP/IP, MTU and MSS), Python automation, Leadership Principles and a bar-raiser. Amazon's own tests vary by team and year. Match this playbook with [Mock 6](#s14-16){.ref} for any coding screen.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -361,9 +361,9 @@ The matching paper is [Mock 2](#s14-12){.ref}.
 :::
 
 ::: break
-## [III.7]{.sec}Arista playbook [Reports 2020 to 2025]{.tag} {#s14-7}
+## [III.7]{.sec}Arista playbook [Reports, years mostly unstated]{.tag} {#s14-7}
 
-Reports from 2020 to 2025 describe a HackerRank test in C or C++ of about 90 minutes (four or five coding problems, or a mix with MCQs), two technical interviews on a shared editor (CoderPad) covering C debugging, data structures, networking and Linux, and an HR round. Match this playbook with [Mock 4](#s14-14){.ref}.
+Reports, whose years are mostly not stated, describe a HackerRank test in C or C++ of about 90 minutes (four or five coding problems, or a mix with MCQs), two technical interviews on a shared editor (CoderPad) covering C debugging, data structures, networking and Linux, and an HR round. Match this playbook with [Mock 4](#s14-14){.ref}.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -417,9 +417,9 @@ The matching paper is [Mock 4](#s14-14){.ref}.
 :::
 
 ::: break
-## [III.8]{.sec}Nokia playbook [Reports 2021 to 2025]{.tag} {#s14-8}
+## [III.8]{.sec}Nokia playbook [Reports from 2021]{.tag} {#s14-8}
 
-Reports from 2021 to 2025 describe an AMCAT test (English, quantitative and logical sections, then two simple programs in C or C++), two or three technical interviews and an HR round. Roles in network R&D add 4G and 5G basics. Match this playbook with [Mock 5](#s14-15){.ref}.
+Reports from 2021 describe an AMCAT test (English, quantitative and logical sections, then two simple programs in C or C++), two or three technical interviews and an HR round. Roles in network R&D add 4G and 5G basics. Match this playbook with [Mock 5](#s14-15){.ref}.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -473,9 +473,9 @@ The matching paper is [Mock 5](#s14-15){.ref}.
 :::
 
 ::: break
-## [III.9]{.sec}Broadcom playbook [Reports 2019 to 2025]{.tag} {#s14-9}
+## [III.9]{.sec}Broadcom playbook [Reports, years unstated]{.tag} {#s14-9}
 
-Reports from 2019 to 2025 describe two or three technical rounds that lean heavily on C, a hiring-manager round, and sometimes a full onsite day. Little is published about a formal online test. Practise coding in C with [Mock 4](#s14-14){.ref}.
+Reports, whose years are not stated, describe two or three technical rounds that lean heavily on C, a hiring-manager round, and sometimes a full onsite day. Little is published about a formal online test. Practise coding in C with [Mock 4](#s14-14){.ref}.
 
 | Round | Commonly reported content | What it tests, and where to read |
 |-------|-------------------|-------------------------|
@@ -530,9 +530,9 @@ The matching paper is [Mock 4](#s14-14){.ref}.
 
 ## [III.10]{.sec}The top-30 must-solve list [Must · ■■□]{.tag} {#s14-10}
 
-The thirty questions below are those that the most companies name, drawn from the Problem Sets and ordered from the data structures and C that every company uses to the networking that most of them use. Solve each once, aloud and timed, before the last week; the count in the last column is the number of the nine companies whose tags name the question. Where a question's tags name no company but its topic is in the reports for several, the Problem Set says so.
+The thirty questions below cover the topics that recur across the reports of the nine companies: caches, list reversal, structure padding, the OSI model, the handshake, subnetting, OSPF, BGP and the google.com walk-through, among others. They run from the data structures and C that every company examines to the networking that most of them examine. Solve each once, aloud and timed, before the last week. The tags of one question name only the companies for which it was reported, so the last two columns are a lower bound on how widely its topic is asked.
 
-| # | Question | Named by | Companies |
+| # | Question | Companies named in its tags | Count |
 |--|------------------------------------------|--------------------|--|
 | 1 | [Q1.1](#ps1){.ref} Two Sum: indices of two values adding to a target | Cisco, Amazon | 2 |
 | 2 | [Q1.2](#ps1){.ref} Longest substring without repeating characters | Cisco | 1 |

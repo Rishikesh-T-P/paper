@@ -108,7 +108,7 @@
 ### Q12.52 What was the hardest bug in your project and how did you find it?
 [JUNIPER · ARISTA · BROADCOM · TECH-1 · ■■□ · T]{.meta}
 
-[30-second answer, model: the utilisation graph showed impossible negative spikes. The cause was the 32-bit counter `ifInOctets`, which wraps after 2<sup>32</sup> bytes: at 1 Gb/s that is 34 seconds, so at a 30-second poll one wrap goes unnoticed and the next delta is negative. I found it by printing consecutive raw values near a spike. I fixed it with the 64-bit `ifHCInOctets` and, for old devices, by computing deltas modulo 2<sup>32</sup>.]{.short}
+[30-second answer, model: the utilisation graph showed impossible negative spikes. The cause was the 32-bit counter `ifInOctets`, which wraps after 2<sup>32</sup> bytes: at 1 Gb/s that is 34 seconds, so at a 30-second poll the counter often wraps between two readings and the raw difference is negative. I found it by printing consecutive raw values near a spike. I fixed it with the 64-bit `ifHCInOctets` and, for old devices, by computing deltas modulo 2<sup>32</sup>.]{.short}
 
 **Check.** 2<sup>32</sup> × 8 / 10<sup>9</sup> = 34.4 s at 1 Gb/s; 343.6 s at 100 Mb/s. **Probes.** "What if the counter wraps twice between polls?" (poll faster than the wrap time; at 100 Gb/s even 64-bit counters last years). **Method.** Symptom, hypothesis, raw data, cause, fix, test.
 :::

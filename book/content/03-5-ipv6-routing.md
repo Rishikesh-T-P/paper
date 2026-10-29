@@ -156,23 +156,23 @@ Hosts in the same /64 need to choose the remaining 64 bits, the *interface ident
 Because EUI-64 exposes the hardware address and lets one be tracked between networks, modern systems use random, changing identifiers (*privacy extensions*) for global addresses. *Stateless address autoconfiguration* (SLAAC) lets a host build an address without a server: it forms a link-local address, checks for a duplicate (*DAD*, duplicate address detection), sends a Router Solicitation, receives a Router Advertisement carrying the prefix, and combines prefix and identifier. Two flags in the advertisement send the host to DHCPv6: M (managed) means "get the address by stateful DHCPv6", and O (other) means "build the address by SLAAC, but get DNS and other options by stateless DHCPv6". The prefix itself carries an A flag that permits SLAAC.
 
 <figure>
-<svg viewBox="0 0 480 164" width="480">
+<svg viewBox="0 0 480 172" width="480">
 <defs><marker id="sla" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="inkf" d="M0,0 L8,4 L0,8 z" style="fill:#1A1D23"/></marker><marker id="slb" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path class="accf" d="M0,0 L8,4 L0,8 z" style=""/></marker></defs>
 <text class="lbl" x="110" y="12" text-anchor="middle" >Host</text>
-<line class="lg" x1="110" y1="18" x2="110" y2="152" stroke-dasharray="2 2"/>
+<line class="lg" x1="110" y1="18" x2="110" y2="160" stroke-dasharray="2 2"/>
 <text class="lbl" x="370" y="12" text-anchor="middle" >Router</text>
-<line class="lg" x1="370" y1="18" x2="370" y2="152" stroke-dasharray="2 2"/>
+<line class="lg" x1="370" y1="18" x2="370" y2="160" stroke-dasharray="2 2"/>
 <line class="lg" x1="110" y1="48" x2="370" y2="56" marker-end="url(#sla)"/>
 <line class="ln" x1="110" y1="84" x2="370" y2="92" marker-end="url(#sla)"/>
 <text class="lbl" x="240.0" y="82.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">RS</text>
-<line class="acc" x1="370" y1="112" x2="110" y2="120" marker-end="url(#slb)"/>
-<text class="lbl" x="240.0" y="110.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">RA</text>
+<line class="acc" x1="370" y1="122" x2="110" y2="130" marker-end="url(#slb)"/>
+<text class="lbl" x="240.0" y="120.0" text-anchor="middle" style="font-size:7.6px;paint-order:stroke;stroke:#fff;stroke-width:3px">RA</text>
 <text class="sm" x="8" y="28" text-anchor="start" >1  link-local fe80::21a:2bff:fe3c:4d5e</text>
 <text class="sm" x="8" y="40" text-anchor="start" >   DAD: NS from :: to ff02::1:ff3c:4d5e (silence = unique)</text>
 <text class="sm" x="112" y="70" text-anchor="start" >2  Router Solicitation to ff02::2</text>
-<text class="sm" x="368" y="104" text-anchor="end" >3  Router Advertisement from fe80::1 to ff02::1</text>
-<text class="sm" x="368" y="132" text-anchor="end" >   prefix 2001:db8:1::/64 (A=1), M=0, O=0, router lifetime</text>
-<text class="sm" x="8" y="150" text-anchor="start" >4  host forms 2001:db8:1:0:21a:2bff:fe3c:4d5e (or a random privacy ID), repeats DAD</text>
+<text class="sm" x="368" y="106" text-anchor="end" >3  Router Advertisement from fe80::1 to ff02::1</text>
+<text class="sm" x="368" y="146" text-anchor="end" >   prefix 2001:db8:1::/64 (A=1), M=0, O=0, router lifetime</text>
+<text class="sm" x="8" y="162" text-anchor="start" >4  host forms 2001:db8:1:0:21a:2bff:fe3c:4d5e (or a random privacy ID), repeats DAD</text>
 </svg>
 <figcaption><b>Figure 3.22</b> SLAAC. The host needs no server: it derives a link-local address, checks it for duplicates (DAD), asks for a router, and combines the advertised /64 prefix with its own interface identifier.</figcaption>
 </figure>

@@ -23,7 +23,7 @@ The function below parses a dotted-quad IPv4 address into a host-order 32-bit in
 bool parse_ipv4(const char *s, uint32_t *out) {
     uint32_t addr = 0;
     for (int part = 0; part < 4; part++) {
-        if (*s < '0' || *s > '9') return false;          /* empty octet or junk */
+        if (*s < '0' || *s > '9') return false;  /* empty octet or junk */
         const char *start = s;
         int val = 0, digits = 0;
         while (*s >= '0' && *s <= '9') {
@@ -31,14 +31,14 @@ bool parse_ipv4(const char *s, uint32_t *out) {
             if (++digits > 3 || val > 255) return false;
             s++;
         }
-        if (digits > 1 && *start == '0') return false;   /* leading zero */
+        if (digits > 1 && *start == '0') return false;  /* leading zero */
         addr = (addr << 8) | (uint32_t)val;
         if (part < 3) {
             if (*s != '.') return false;
             s++;
         }
     }
-    if (*s != '\0') return false;                         /* trailing junk */
+    if (*s != '\0') return false;  /* trailing junk */
     *out = addr;
     return true;
 }
@@ -56,8 +56,9 @@ bool parse_ipv4(const char *s, uint32_t *out) {
 The reverse conversion extracts each byte with a shift and a mask, using `%u` with an explicit cast because `uint32_t` is not guaranteed to be `unsigned int`:
 
 ```c
-void format_ipv4(uint32_t a, char buf[16]) {            /* 15 characters + NUL */
-    snprintf(buf, 16, "%u.%u.%u.%u", (unsigned)(a >> 24), (unsigned)((a >> 16) & 255),
+void format_ipv4(uint32_t a, char buf[16]) {  /* 15 characters + NUL */
+    snprintf(buf, 16, "%u.%u.%u.%u",
+             (unsigned)(a >> 24), (unsigned)((a >> 16) & 255),
              (unsigned)((a >> 8) & 255), (unsigned)(a & 255));
 }
 ```
@@ -125,9 +126,14 @@ As macros for C, with arguments in parentheses and `1u` to avoid signed overflow
 #define TOGGLE_BIT(x, n) ((x) ^=  (1u << (n)))
 #define TEST_BIT(x, n)   (((x) >> (n)) & 1u)
 
-static unsigned popcount(uint32_t x) { unsigned c = 0; while (x) { x &= x - 1; c++; } return c; }
+static unsigned popcount(uint32_t x) {
+    unsigned c = 0;
+    while (x) { x &= x - 1; c++; }
+    return c;
+}
 static uint32_t swap32(uint32_t x) {
-    return (x >> 24) | ((x >> 8) & 0x0000FF00u) | ((x << 8) & 0x00FF0000u) | (x << 24);
+    return (x >> 24) | ((x >> 8) & 0x0000FF00u) |
+           ((x << 8) & 0x00FF0000u) | (x << 24);
 }
 ```
 
@@ -137,17 +143,18 @@ A prefix length *p* means that the top *p* bits are the network part. The mask h
 
 ```c
 static uint32_t mask_of(unsigned p) {            /* p in 0..32 */
-    return p ? 0xFFFFFFFFu << (32 - p) : 0u;     /* shift by 32 would be UB */
+    return p ? 0xFFFFFFFFu << (32 - p) : 0u;  /* shift by 32 would be UB */
 }
 bool same_subnet(uint32_t a, uint32_t b, unsigned p) {
     uint32_t m = mask_of(p);
     return (a & m) == (b & m);
 }
-void describe(uint32_t ip, unsigned p, uint32_t *net, uint32_t *bc, uint64_t *hosts) {
-    uint32_t m = mask_of(p);                     /* p <= 30 for a host range */
+void describe(uint32_t ip, unsigned p,
+              uint32_t *net, uint32_t *bc, uint64_t *hosts) {
+    uint32_t m = mask_of(p);  /* p <= 30 for a host range */
     *net = ip & m;
     *bc = *net | ~m;
-    *hosts = (1ull << (32 - p)) - 2;             /* usable: net + 1 .. bc - 1 */
+    *hosts = (1ull << (32 - p)) - 2;  /* usable: net + 1 .. bc - 1 */
 }
 ```
 
@@ -155,8 +162,8 @@ void describe(uint32_t ip, unsigned p, uint32_t *net, uint32_t *bc, uint64_t *ho
 *Claim:* `0xFFFFFFFFu << (32 - p)` is correct for every prefix length. *Why it is wrong:* for *p* = 0 the shift count is 32, which equals the width of the type, and the C standard leaves that undefined (x86 silently reduces the count modulo 32 and returns the unshifted value). *Correct statement:* special-case *p* = 0 as in `mask_of`.
 :::
 
-<figure>
-<svg viewBox="0 0 480 142" width="480">
+@<figure>
+<svg viewBox="0 0 450 142" width="486">
 <text class="sm" x="10" y="41" text-anchor="start">IP</text>
 <rect class="lg" x="70" y="30" width="11" height="16"/>
 <text class="mono" x="75.5" y="42" text-anchor="middle">0</text>
@@ -379,7 +386,7 @@ void describe(uint32_t ip, unsigned p, uint32_t *net, uint32_t *bc, uint64_t *ho
 <text class="mono" x="423.5" y="108" text-anchor="middle">0</text>
 <rect class="hl" x="429" y="96" width="11" height="16"/>
 <rect class="lg" x="429" y="96" width="11" height="16"/>
-<text class="mono" x="434.5" y="108" text-anchor="middle">0</text><text class="sm" x="70" y="18" text-anchor="start">10</text><text class="sm" x="164" y="18" text-anchor="start">20</text><text class="sm" x="258" y="18" text-anchor="start">30</text><text class="sm" x="352" y="18" text-anchor="start">40</text><line class="ln" x1="70" y1="86" x2="440" y2="86"/><text class="sm" x="70" y="130" text-anchor="start">network 10.20.28.0 ; broadcast = network OR NOT mask = 10.20.31.255 ; shaded = host bits (10)</text>
+<text class="mono" x="434.5" y="108" text-anchor="middle">0</text><text class="sm" x="70" y="18" text-anchor="start">10</text><text class="sm" x="164" y="18" text-anchor="start">20</text><text class="sm" x="258" y="18" text-anchor="start">30</text><text class="sm" x="352" y="18" text-anchor="start">40</text><line class="ln" x1="70" y1="86" x2="440" y2="86"/><text class="sm" x="70" y="130" text-anchor="start">network 10.20.28.0; broadcast = network OR NOT mask = 10.20.31.255; shaded = host bits</text>
 </svg>
 <figcaption><b>Figure 1.3</b> The same-subnet test in bits. AND with the mask keeps the 22 network bits and clears the 10 host bits.</figcaption>
 </figure>
@@ -425,7 +432,7 @@ typedef struct Node { int val; struct Node *next; } Node;
 
 Node *push_front(Node *head, int v) {
     Node *n = malloc(sizeof *n);
-    if (!n) return head;               /* allocation failed: list unchanged */
+    if (!n) return head;  /* allocation failed: list unchanged */
     n->val = v; n->next = head;
     return n;                          /* the new head */
 }
@@ -435,9 +442,9 @@ Node *push_front(Node *head, int v) {
 
 To delete a node we must re-point the link that leads to it. For a middle node that link is the previous node's `next`; for the first node it is the `head` variable itself, which is why a naive version needs a special case for the head. If we hold a pointer to the link (a `Node **`), both cases are the same.
 
-<figure>
-<svg viewBox="0 0 480 130" width="480"><defs><marker id="a4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a4b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<text class="sm" x="10" y="14" text-anchor="start">head</text><rect class="box" x="10" y="20" width="40" height="24"/><text class="mono" x="30" y="35" text-anchor="middle">head</text><rect class="box" x="100" y="20" width="60" height="24"/><line class="ln" x1="133.0" y1="20" x2="133.0" y2="44"/><text class="mono" x="116.5" y="35.0" text-anchor="middle">A</text><rect class="box" x="210" y="20" width="60" height="24"/><line class="ln" x1="243.0" y1="20" x2="243.0" y2="44"/><text class="mono" x="226.5" y="35.0" text-anchor="middle">B</text><rect class="box" x="320" y="20" width="60" height="24"/><line class="ln" x1="353.0" y1="20" x2="353.0" y2="44"/><text class="mono" x="336.5" y="35.0" text-anchor="middle">C</text><line class="ln" x1="50" y1="32" x2="100" y2="32" marker-end="url(#a4)"/><line class="ln" x1="133" y1="32" x2="210" y2="32" marker-end="url(#a4)"/><line class="ln" x1="243" y1="32" x2="320" y2="32" marker-end="url(#a4)"/><text class="sm" x="395" y="35" text-anchor="middle">NULL</text><line class="ln" x1="353" y1="32" x2="375" y2="32" marker-end="url(#a4)"/><path class="acc" d="M133,44 Q200,78 320,44" marker-end="url(#a4b)"/><text class="sm" x="240" y="84" text-anchor="middle">*pp = (*pp)->next   bypasses B</text><rect class="box" x="115" y="95" width="36" height="22"/><text class="mono" x="133" y="110" text-anchor="middle">pp</text><line class="ln" x1="133" y1="95" x2="133" y2="46" marker-end="url(#a4)"/>
+@<figure>
+<svg viewBox="0 0 420 130" width="454"><defs><marker id="a4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a4b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<rect class="box" x="10" y="20" width="40" height="24"/><text class="mono" x="30" y="35" text-anchor="middle">head</text><rect class="box" x="100" y="20" width="60" height="24"/><line class="ln" x1="133.0" y1="20" x2="133.0" y2="44"/><text class="mono" x="116.5" y="35.0" text-anchor="middle">A</text><rect class="box" x="210" y="20" width="60" height="24"/><line class="ln" x1="243.0" y1="20" x2="243.0" y2="44"/><text class="mono" x="226.5" y="35.0" text-anchor="middle">B</text><rect class="box" x="320" y="20" width="60" height="24"/><line class="ln" x1="353.0" y1="20" x2="353.0" y2="44"/><text class="mono" x="336.5" y="35.0" text-anchor="middle">C</text><line class="ln" x1="50" y1="32" x2="100" y2="32" marker-end="url(#a4)"/><line class="ln" x1="133" y1="32" x2="210" y2="32" marker-end="url(#a4)"/><line class="ln" x1="243" y1="32" x2="320" y2="32" marker-end="url(#a4)"/><text class="sm" x="395" y="35" text-anchor="middle">NULL</text><line class="ln" x1="353" y1="32" x2="375" y2="32" marker-end="url(#a4)"/><path class="acc" d="M133,44 Q200,78 320,44" marker-end="url(#a4b)"/><text class="sm" x="240" y="84" text-anchor="middle">&#42;pp = (&#42;pp)->next  bypasses B</text><rect class="box" x="115" y="95" width="36" height="22"/><text class="mono" x="133" y="110" text-anchor="middle">pp</text><line class="ln" x1="133" y1="95" x2="133" y2="46" marker-end="url(#a4)"/>
 </svg>
 <figcaption><b>Figure 1.4</b> The pointer-to-pointer idiom. pp holds the address of the link that points at the current node (head, or the next field of the predecessor), so the head needs no special case.</figcaption>
 </figure>
@@ -452,8 +459,9 @@ Node *delete_value(Node *head, int key) {          /* first match only */
 Node *delete_all(Node *head, int key) {            /* every match */
     Node **pp = &head;
     while (*pp) {
-        if ((*pp)->val == key) { Node *dead = *pp; *pp = dead->next; free(dead); }
-        else pp = &(*pp)->next;                     /* advance only if nothing was removed */
+        if ((*pp)->val == key) {
+            Node *dead = *pp; *pp = dead->next; free(dead);
+        } else pp = &(*pp)->next;  /* advance only if nothing was removed */
     }
     return head;
 }
@@ -469,9 +477,9 @@ For `3 → 5 → 3 → 7` and key 3, `delete_all` removes the head (the link `he
 
 Three pointers walk the list: `prev` (the already reversed part), `head` (the current node) and `next`, saved before the current `next` field is overwritten. The classic bug is to overwrite first and so lose the rest of the list.
 
-<figure>
-<svg viewBox="0 0 480 170" width="480"><defs><marker id="a3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a3b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<text class="sm" x="10" y="24" text-anchor="start">before:  prev = NULL, curr = 1</text><rect class="box" x="80" y="30" width="60" height="24"/><line class="ln" x1="113.0" y1="30" x2="113.0" y2="54"/><text class="mono" x="96.5" y="45.0" text-anchor="middle">1</text><rect class="box" x="190" y="30" width="60" height="24"/><line class="ln" x1="223.0" y1="30" x2="223.0" y2="54"/><text class="mono" x="206.5" y="45.0" text-anchor="middle">2</text><rect class="box" x="300" y="30" width="60" height="24"/><line class="ln" x1="333.0" y1="30" x2="333.0" y2="54"/><text class="mono" x="316.5" y="45.0" text-anchor="middle">3</text><text class="sm" x="30" y="45" text-anchor="middle">NULL</text><line class="ln" x1="113" y1="42" x2="190" y2="42" marker-end="url(#a3)"/><line class="ln" x1="223" y1="42" x2="300" y2="42" marker-end="url(#a3)"/><text class="sm" x="375" y="45" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="42" x2="355" y2="42" marker-end="url(#a3)"/><path class="accf" d="M96,56 l-4,7 l8,0 z"/><text class="lbl" x="96" y="73" text-anchor="middle">curr</text><path class="accf" d="M20,56 l-4,7 l8,0 z"/><text class="lbl" x="20" y="73" text-anchor="middle">prev</text><text class="sm" x="10" y="104" text-anchor="start">after one iteration:  curr = 2, prev = 1</text><rect class="box" x="80" y="110" width="60" height="24"/><line class="ln" x1="113.0" y1="110" x2="113.0" y2="134"/><text class="mono" x="96.5" y="125.0" text-anchor="middle">1</text><rect class="box" x="190" y="110" width="60" height="24"/><line class="ln" x1="223.0" y1="110" x2="223.0" y2="134"/><text class="mono" x="206.5" y="125.0" text-anchor="middle">2</text><rect class="box" x="300" y="110" width="60" height="24"/><line class="ln" x1="333.0" y1="110" x2="333.0" y2="134"/><text class="mono" x="316.5" y="125.0" text-anchor="middle">3</text><text class="sm" x="30" y="125" text-anchor="middle">NULL</text><path class="acc" d="M113,122 L52,122" marker-end="url(#a3b)"/><line class="ln" x1="223" y1="122" x2="300" y2="122" marker-end="url(#a3)"/><text class="sm" x="375" y="125" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="122" x2="355" y2="122" marker-end="url(#a3)"/><path class="accf" d="M96,136 l-4,7 l8,0 z"/><text class="lbl" x="96" y="153" text-anchor="middle">prev</text><path class="accf" d="M206,136 l-4,7 l8,0 z"/><text class="lbl" x="206" y="153" text-anchor="middle">curr</text>
+@<figure>
+<svg viewBox="0 0 400 170" width="432"><defs><marker id="a3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a3b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<text class="sm" x="10" y="24" text-anchor="start">before:  prev = NULL, curr = 1</text><rect class="box" x="80" y="30" width="60" height="24"/><line class="ln" x1="113.0" y1="30" x2="113.0" y2="54"/><text class="mono" x="96.5" y="45.0" text-anchor="middle">1</text><rect class="box" x="190" y="30" width="60" height="24"/><line class="ln" x1="223.0" y1="30" x2="223.0" y2="54"/><text class="mono" x="206.5" y="45.0" text-anchor="middle">2</text><rect class="box" x="300" y="30" width="60" height="24"/><line class="ln" x1="333.0" y1="30" x2="333.0" y2="54"/><text class="mono" x="316.5" y="45.0" text-anchor="middle">3</text><text class="sm" x="30" y="45" text-anchor="middle">NULL</text><line class="ln" x1="113" y1="42" x2="190" y2="42" marker-end="url(#a3)"/><line class="ln" x1="223" y1="42" x2="300" y2="42" marker-end="url(#a3)"/><text class="sm" x="375" y="45" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="42" x2="355" y2="42" marker-end="url(#a3)"/><path class="accf" d="M96,56 l-4,7 l8,0 z"/><text class="lbl" x="96" y="73" text-anchor="middle">curr</text><path class="accf" d="M20,56 l-4,7 l8,0 z"/><text class="lbl" x="20" y="73" text-anchor="middle">prev</text><text class="sm" x="10" y="104" text-anchor="start">after one iteration:  curr = 2, prev = 1</text><rect class="box" x="80" y="110" width="60" height="24"/><line class="ln" x1="113.0" y1="110" x2="113.0" y2="134"/><text class="mono" x="96.5" y="125.0" text-anchor="middle">1</text><rect class="box" x="190" y="110" width="60" height="24"/><line class="ln" x1="223.0" y1="110" x2="223.0" y2="134"/><text class="mono" x="206.5" y="125.0" text-anchor="middle">2</text><rect class="box" x="300" y="110" width="60" height="24"/><line class="ln" x1="333.0" y1="110" x2="333.0" y2="134"/><text class="mono" x="316.5" y="125.0" text-anchor="middle">3</text><text class="sm" x="30" y="125" text-anchor="middle">NULL</text><path class="acc" d="M120,134 Q70,154 40,130" marker-end="url(#a3b)"/><line class="ln" x1="223" y1="122" x2="300" y2="122" marker-end="url(#a3)"/><text class="sm" x="375" y="125" text-anchor="middle">NULL</text><line class="ln" x1="333" y1="122" x2="355" y2="122" marker-end="url(#a3)"/><path class="accf" d="M96,136 l-4,7 l8,0 z"/><text class="lbl" x="96" y="153" text-anchor="middle">prev</text><path class="accf" d="M206,136 l-4,7 l8,0 z"/><text class="lbl" x="206" y="153" text-anchor="middle">curr</text>
 </svg>
 <figcaption><b>Figure 1.5</b> One step of in-place reversal. The accent arrow is the single pointer rewritten; next was saved first so that the rest of the list is not lost.</figcaption>
 </figure>
@@ -502,17 +510,21 @@ The loop ends with `head == NULL` and `prev` pointing at the old tail, which is 
 Two pointers moving at speeds one and two give the middle node and detect cycles. For the middle, when `fast` reaches the end `slow` is halfway. For a cycle, `fast` closes on `slow` by one node per step, so inside a cycle they must meet.
 
 ```c
-Node *middle(Node *head) {                 /* second middle when the length is even */
+Node *middle(Node *head) {  /* second middle when the length is even */
     Node *slow = head, *fast = head;
-    while (fast && fast->next) { slow = slow->next; fast = fast->next->next; }
+    while (fast && fast->next) {
+        slow = slow->next; fast = fast->next->next;
+    }
     return slow;
 }
 Node *cycle_start(Node *head) {            /* NULL if there is no cycle */
     Node *slow = head, *fast = head;
-    while (fast && fast->next) {           /* test fast before fast->next */
+    while (fast && fast->next) {  /* test fast before fast->next */
         slow = slow->next; fast = fast->next->next;
         if (slow == fast) {
-            for (slow = head; slow != fast; slow = slow->next, fast = fast->next) ;
+            for (slow = head; slow != fast; ) {
+                slow = slow->next; fast = fast->next;
+            }
             return slow;
         }
     }
@@ -538,8 +550,8 @@ Node *merge(Node *a, Node *b) {            /* both sorted ascending */
         else                  { tail->next = b; b = b->next; }
         tail = tail->next;
     }
-    tail->next = a ? a : b;                /* append the non-empty remainder */
-    return dummy.next;                     /* the pointer, not the stack object */
+    tail->next = a ? a : b;  /* append the non-empty remainder */
+    return dummy.next;  /* the pointer, not the stack object */
 }
 ```
 
@@ -552,12 +564,14 @@ A doubly linked list adds a `prev` field, which makes deleting a *given* node O(
 ```c
 typedef struct DNode { int val; struct DNode *prev, *next; } DNode;
 
-void dl_init(DNode *s) { s->prev = s->next = s; }                 /* empty list */
+void dl_init(DNode *s) { s->prev = s->next = s; }  /* empty list */
 void dl_insert_after(DNode *p, DNode *n) {
     n->prev = p; n->next = p->next;
     p->next->prev = n; p->next = n;
 }
-void dl_unlink(DNode *n) { n->prev->next = n->next; n->next->prev = n->prev; }
+void dl_unlink(DNode *n) {
+    n->prev->next = n->next; n->next->prev = n->prev;
+}
 ```
 
 The order of the four writes in `dl_insert_after` matters: `n` is wired to its neighbours first, and the neighbours are changed last. This structure is the core of the LRU cache in [§1.15](#s1-15){.ref} and of the intrusive lists inside operating-system kernels.
@@ -601,7 +615,7 @@ bool balanced(const char *s) {
         }
     }
     free(st);
-    return ok && top == 0;                    /* leftovers mean unclosed brackets */
+    return ok && top == 0;  /* leftovers mean unclosed brackets */
 }
 ```
 
@@ -609,9 +623,9 @@ bool balanced(const char *s) {
 
 Packet drivers hand frames from an interrupt handler to a consumer through a fixed array used circularly. The producer writes at `tail` and the consumer reads at `head`; both wrap with a modulus. The difficulty is that `head == tail` describes both an empty and a full buffer. Three remedies exist: keep a `count`, waste one slot, or let the indices run freely and compare their difference.
 
-<figure>
-<svg viewBox="0 0 480 190" width="480">
-<text class="sm" x="20" y="14" text-anchor="start">capacity 8; head = 2 (next to read), tail = 6 (next to write), count = 4</text><rect class="box" style="fill:none" x="20" y="40" width="32" height="24"/>
+@<figure>
+<svg viewBox="0 0 470 190" width="508">
+<text class="sm" x="20" y="14" text-anchor="start">head = 2 (next to read), tail = 6 (next to write), count = 4</text><rect class="box" style="fill:none" x="20" y="40" width="32" height="24"/>
 <text class="mono" x="36.0" y="55.0" text-anchor="middle"></text>
 <text class="sm" x="36.0" y="74" text-anchor="middle">0</text>
 <rect class="box" style="fill:none" x="52" y="40" width="32" height="24"/>
@@ -638,7 +652,7 @@ Packet drivers hand frames from an interrupt handler to a consumer through a fix
 <text class="sm" x="228.0" y="74" text-anchor="middle">6</text>
 <rect class="box" style="fill:none" x="244" y="40" width="32" height="24"/>
 <text class="mono" x="260.0" y="55.0" text-anchor="middle"></text>
-<text class="sm" x="260.0" y="74" text-anchor="middle">7</text><path class="accf" d="M100,38 l-4,-7 l8,0 z"/><text class="lbl" x="100" y="28" text-anchor="middle">head</text><path class="accf" d="M228,66 l-4,7 l8,0 z"/><text class="lbl" x="228" y="83" text-anchor="middle">tail</text><text class="sm" x="20" y="120" text-anchor="start">after more writes tail wraps: tail = (tail + 1) % 8 ; head = 6, tail = 2, count = 4</text><rect class="hl" x="20" y="134" width="32" height="24"/>
+<text class="sm" x="260.0" y="74" text-anchor="middle">7</text><path class="accf" d="M100,38 l-4,-7 l8,0 z"/><text class="lbl" x="100" y="28" text-anchor="middle">head</text><path class="accf" d="M228,66 l-4,7 l8,0 z"/><text class="lbl" x="228" y="83" text-anchor="middle">tail</text><text class="sm" x="20" y="104" text-anchor="start">after more writes the tail wraps: head = 6, tail = 2, count = 4</text><rect class="hl" x="20" y="134" width="32" height="24"/>
 <rect class="box" style="fill:none" x="20" y="134" width="32" height="24"/>
 <text class="mono" x="36.0" y="149.0" text-anchor="middle">h</text>
 <text class="sm" x="36.0" y="168" text-anchor="middle">0</text>
@@ -665,7 +679,7 @@ Packet drivers hand frames from an interrupt handler to a consumer through a fix
 <rect class="hl" x="244" y="134" width="32" height="24"/>
 <rect class="box" style="fill:none" x="244" y="134" width="32" height="24"/>
 <text class="mono" x="260.0" y="149.0" text-anchor="middle">g</text>
-<text class="sm" x="260.0" y="168" text-anchor="middle">7</text><path class="accf" d="M228,132 l-4,-7 l8,0 z"/><text class="lbl" x="228" y="122" text-anchor="middle">head</text><path class="accf" d="M100,160 l-4,7 l8,0 z"/><text class="lbl" x="100" y="177" text-anchor="middle">tail</text><text class="sm" x="310" y="150" text-anchor="start">head == tail is ambiguous: empty or full.</text><text class="sm" x="310" y="164" text-anchor="start">The count field resolves it.</text>
+<text class="sm" x="260.0" y="168" text-anchor="middle">7</text><path class="accf" d="M228,132 l-4,-7 l8,0 z"/><text class="lbl" x="228" y="122" text-anchor="middle">head</text><path class="accf" d="M100,160 l-4,7 l8,0 z"/><text class="lbl" x="100" y="177" text-anchor="middle">tail</text><text class="sm" x="300" y="150" text-anchor="start">head == tail alone is ambiguous:</text><text class="sm" x="300" y="163" text-anchor="start">empty or full. count resolves it.</text>
 </svg>
 <figcaption><b>Figure 1.6</b> A circular buffer of capacity eight, before and after the write index wraps. A separate count removes the full-versus-empty ambiguity.</figcaption>
 </figure>
@@ -698,15 +712,15 @@ When one thread produces and another consumes, the `count` variable is written b
 
 ```cpp
 vector<int> dailyTemps(const vector<int>& t) {
-    vector<int> ans(t.size(), 0), st;            // st: indices, temperatures decreasing
+    vector<int> ans(t.size(), 0), st;   // st: indices, temps decreasing
     for (int i = 0; i < (int)t.size(); ++i) {
         while (!st.empty() && t[st.back()] < t[i]) {
-            ans[st.back()] = i - st.back();      // the wait is an index distance
+            ans[st.back()] = i - st.back();   // wait = index distance
             st.pop_back();
         }
         st.push_back(i);
     }
-    return ans;                                  // never-warmer days stay 0
+    return ans;  // never-warmer days stay 0
 }
 ```
 

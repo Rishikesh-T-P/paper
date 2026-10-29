@@ -19,6 +19,7 @@
 9. [3.9 Transport: UDP, TCP, flow control and congestion control]{} [MUST]{}
 10. [3.10 The application layer: DNS, HTTP, TLS and QUIC]{} [SHOULD]{}
 11. [3.11 Capstone: what happens when you type google.com]{} [MUST]{}
+12. [3.12 Where the topics are asked, and a mini-project]{} [OPTIONAL]{}
 :::
 
 ## [3.1]{.sec}Networks, devices and delay [Must · ■□□]{.tag} {#s3-1}

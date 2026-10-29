@@ -9,12 +9,13 @@ Backtracking builds an answer one choice at a time and undoes each choice after 
 A recursive function needs a *base case* that stops the recursion and a *step* that moves towards it. Backtracking adds a *path* that is extended before the recursive call and restored after it: choose, explore, un-choose. *Recognise:* "all combinations, permutations or subsets", "generate all", "place so that no two conflict", and small limits (*n* ≤ 12 for permutations, *n* ≤ 20 for subsets). The cost is the size of the search tree: 2^*n* for subsets, *n*! for permutations.
 
 ```cpp
-void subsets(const vector<int>& a, int i, vector<int>& path, vector<vector<int>>& out) {
-    if (i == (int)a.size()) { out.push_back(path); return; }   // copies the path
-    subsets(a, i + 1, path, out);                                // skip a[i]
+void subsets(const vector<int>& a, int i, vector<int>& path,
+             vector<vector<int>>& out) {
+    if (i == (int)a.size()) { out.push_back(path); return; }   // copy
+    subsets(a, i + 1, path, out);  // skip a[i]
     path.push_back(a[i]);                                        // choose
-    subsets(a, i + 1, path, out);                                // explore
-    path.pop_back();                                             // un-choose
+    subsets(a, i + 1, path, out);  // explore
+    path.pop_back();  // un-choose
 }
 ```
 
@@ -29,18 +30,20 @@ The two classic bugs are forgetting the un-choose step, which leaks choices into
 4. Pruning by these rules leaves very few branches: at most 3^4 = 81 leaves are ever reached.
 
 ```cpp
-void restore(const string& s, int pos, int parts, string& cur, vector<string>& out) {
+void restore(const string& s, int pos, int parts, string& cur,
+             vector<string>& out) {
     if (parts == 4) {
-        if (pos == (int)s.size()) out.push_back(cur.substr(0, cur.size() - 1));   // drop the last '.'
+        if (pos == (int)s.size())                    // all digits used
+            out.push_back(cur.substr(0, cur.size() - 1));   // drop last '.'
         return;
     }
     size_t keep = cur.size();
     for (int len = 1; len <= 3 && pos + len <= (int)s.size(); ++len) {
         string seg = s.substr(pos, len);
         if ((len > 1 && seg[0] == '0') || stoi(seg) > 255) continue;
-        cur += seg + '.';                                          // choose
-        restore(s, pos + len, parts + 1, cur, out);                // explore
-        cur.resize(keep);                                          // un-choose
+        cur += seg + '.';  // choose
+        restore(s, pos + len, parts + 1, cur, out);  // explore
+        cur.resize(keep);  // un-choose
     }
 }
 ```
@@ -71,7 +74,7 @@ Comparison sorts cannot beat O(*n* log *n*); the table of algorithms is in the R
 ```c
 int cmp_int(const void *pa, const void *pb) {
     int a = *(const int *)pa, b = *(const int *)pb;
-    return (a > b) - (a < b);                 /* -1, 0 or 1; no overflow */
+    return (a > b) - (a < b);  /* -1, 0 or 1; no overflow */
 }
 /* qsort(arr, n, sizeof arr[0], cmp_int); */
 ```
@@ -81,10 +84,10 @@ int cmp_int(const void *pa, const void *pb) {
 *Idea.* In a sorted range, compare with the middle element and discard the half that cannot contain the target. We use one canonical form with a half-open range `[lo, hi)`, which finds the first index whose value is not less than *x*, termed the *lower bound*. Every variant (first occurrence, insertion point, first true of a monotone predicate) is this loop.
 
 ```cpp
-int lowerBound(const vector<int>& a, int x) {         // first i with a[i] >= x, or n
+int lowerBound(const vector<int>& a, int x) {   // first a[i] >= x, or n
     int lo = 0, hi = (int)a.size();
     while (lo < hi) {
-        int mid = lo + (hi - lo) / 2;                 // not (lo + hi) / 2: avoids overflow
+        int mid = lo + (hi - lo) / 2;  // not (lo + hi) / 2: avoids overflow
         if (a[mid] < x) lo = mid + 1; else hi = mid;
     }
     return lo;
@@ -105,11 +108,11 @@ The two classic bugs are the midpoint overflow in `(lo + hi) / 2` for ranges bey
 ```cpp
 int shipWithinDays(const vector<int>& w, int days) {
     int lo = *max_element(w.begin(), w.end());
-    int hi = accumulate(w.begin(), w.end(), 0);            // answer lies in [lo, hi]
+    int hi = accumulate(w.begin(), w.end(), 0);  // answer lies in [lo, hi]
     while (lo < hi) {
         int mid = lo + (hi - lo) / 2, need = 1, load = 0;
         for (int x : w) {
-            if (load + x > mid) { ++need; load = 0; }      // start the next day
+            if (load + x > mid) { ++need; load = 0; }  // start the next day
             load += x;
         }
         if (need <= days) hi = mid; else lo = mid + 1;
@@ -135,10 +138,10 @@ int shipWithinDays(const vector<int>& w, int days) {
 
 ```cpp
 vector<array<long long, 2>> mergeIntervals(vector<array<long long, 2>> v) {
-    sort(v.begin(), v.end());                              // by start, then end
+    sort(v.begin(), v.end());  // by start, then end
     vector<array<long long, 2>> out;
     for (auto& iv : v) {
-        if (!out.empty() && iv[0] <= out.back()[1])        // overlaps (or touches) the last one
+        if (!out.empty() && iv[0] <= out.back()[1])   // overlaps the last
             out.back()[1] = max(out.back()[1], iv[1]);
         else
             out.push_back(iv);
@@ -213,9 +216,9 @@ A *least-recently-used* (LRU) cache holds at most *c* entries and, when full, ev
 
 No single structure does both jobs: a hash map finds an entry in O(1) but keeps no order, and a list keeps order but finds in O(*n*). Combining them works because the map stores, for each key, the *address of its list node*; and a doubly linked list can unlink a node it has the address of in O(1), since the node knows both neighbours.
 
-<figure>
-<svg viewBox="0 0 480 190" width="480"><defs><marker id="a7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a7b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<text class="sm" x="20" y="14" text-anchor="start">hash map</text><text class="sm" x="190" y="14" text-anchor="start">doubly linked list: most recent at the head side</text><rect class="box" x="20" y="28" width="60" height="24"/><text class="mono" x="50" y="43" text-anchor="middle">k1 ●</text><rect class="box" x="20" y="66" width="60" height="24"/><text class="mono" x="50" y="81" text-anchor="middle">k2 ●</text><rect class="box" x="20" y="104" width="60" height="24"/><text class="mono" x="50" y="119" text-anchor="middle">k3 ●</text><rect class="fill" x="150" y="66" width="56" height="26"/><text class="sm" x="178" y="83" text-anchor="middle">head</text><rect class="box" x="230" y="66" width="56" height="26"/><text class="mono" x="258" y="83" text-anchor="middle">k3</text><rect class="box" x="310" y="66" width="56" height="26"/><text class="mono" x="338" y="83" text-anchor="middle">k1</text><rect class="box" x="390" y="66" width="56" height="26"/><text class="mono" x="418" y="83" text-anchor="middle">k2</text><rect class="fill" x="460" y="66" width="0" height="0"/><line class="ln" x1="206" y1="75" x2="230" y2="75" marker-end="url(#a7)"/><line class="lg" x1="230" y1="85" x2="206" y2="85" marker-end="url(#a7)"/><line class="ln" x1="286" y1="75" x2="310" y2="75" marker-end="url(#a7)"/><line class="lg" x1="310" y1="85" x2="286" y2="85" marker-end="url(#a7)"/><line class="ln" x1="366" y1="75" x2="390" y2="75" marker-end="url(#a7)"/><line class="lg" x1="390" y1="85" x2="366" y2="85" marker-end="url(#a7)"/><path class="acc" d="M80,40 C120,40 340,50 338,66" marker-end="url(#a7b)"/><path class="acc" d="M80,78 C120,110 380,120 418,92" marker-end="url(#a7b)"/><path class="acc" d="M80,116 C100,130 200,120 258,92" marker-end="url(#a7b)"/><text class="sm" x="20" y="160" text-anchor="start">get(k3) is a hit and already first. get(k2) unlinks k2 and relinks it after head: four pointer writes, O(1).</text><text class="sm" x="20" y="176" text-anchor="start">Eviction removes the node before the tail (here k2 is the least recent). The map entry must be erased too.</text><text class="sm" x="418" y="110" text-anchor="middle">(tail side: least recent)</text>
+@<figure>
+<svg viewBox="0 0 470 190" width="508"><defs><marker id="a7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a7b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<text class="sm" x="20" y="14" text-anchor="start">hash map</text><text class="sm" x="190" y="14" text-anchor="start">doubly linked list: most recent at the head side</text><rect class="box" x="20" y="28" width="60" height="24"/><text class="mono" x="50" y="43" text-anchor="middle">k1 ●</text><rect class="box" x="20" y="66" width="60" height="24"/><text class="mono" x="50" y="81" text-anchor="middle">k2 ●</text><rect class="box" x="20" y="104" width="60" height="24"/><text class="mono" x="50" y="119" text-anchor="middle">k3 ●</text><rect class="fill" x="150" y="66" width="56" height="26"/><text class="sm" x="178" y="83" text-anchor="middle">head</text><rect class="box" x="230" y="66" width="56" height="26"/><text class="mono" x="258" y="83" text-anchor="middle">k3</text><rect class="box" x="310" y="66" width="56" height="26"/><text class="mono" x="338" y="83" text-anchor="middle">k1</text><rect class="box" x="390" y="66" width="56" height="26"/><text class="mono" x="418" y="83" text-anchor="middle">k2</text><rect class="fill" x="460" y="66" width="0" height="0"/><line class="ln" x1="206" y1="75" x2="230" y2="75" marker-end="url(#a7)"/><line class="lg" x1="230" y1="85" x2="206" y2="85" marker-end="url(#a7)"/><line class="ln" x1="286" y1="75" x2="310" y2="75" marker-end="url(#a7)"/><line class="lg" x1="310" y1="85" x2="286" y2="85" marker-end="url(#a7)"/><line class="ln" x1="366" y1="75" x2="390" y2="75" marker-end="url(#a7)"/><line class="lg" x1="390" y1="85" x2="366" y2="85" marker-end="url(#a7)"/><path class="acc" d="M80,40 C120,40 340,50 338,66" marker-end="url(#a7b)"/><path class="acc" d="M80,78 C120,110 380,120 418,92" marker-end="url(#a7b)"/><path class="acc" d="M80,116 C100,130 200,120 258,92" marker-end="url(#a7b)"/><text class="sm" x="20" y="160" text-anchor="start">get(k3) is a hit and already first. get(k2) unlinks k2 and relinks it after head: four pointer writes, O(1).</text><text class="sm" x="20" y="176" text-anchor="start">Eviction removes the node before the tail (here k2 is the least recent). The map entry must be erased too.</text><text class="sm" x="418" y="108" text-anchor="middle">least recent</text>
 </svg>
 <figcaption><b>Figure 1.12</b> LRU cache: the map finds a node in O(1); the list orders nodes by recency and lets us unlink one in O(1) because the node holds both neighbours.</figcaption>
 </figure>
@@ -224,26 +227,26 @@ No single structure does both jobs: a hash map finds an entry in O(1) but keeps 
 class LRU {
     using Item = pair<int, int>;                         // (key, value)
     size_t cap;
-    list<Item> items;                                    // front = most recent
+    list<Item> items;  // front = most recent
     unordered_map<int, list<Item>::iterator> pos;        // key -> node
 public:
     explicit LRU(size_t c) : cap(c) {}
     int get(int k) {
         auto it = pos.find(k);
         if (it == pos.end()) return -1;
-        items.splice(items.begin(), items, it->second);  // move node to the front, O(1)
+        items.splice(items.begin(), items, it->second);   // to front, O(1)
         return it->second->second;
     }
     void put(int k, int v) {
         if (cap == 0) return;
         auto it = pos.find(k);
-        if (it != pos.end()) {                           // update and refresh
+        if (it != pos.end()) {  // update and refresh
             it->second->second = v;
             items.splice(items.begin(), items, it->second);
             return;
         }
-        if (items.size() == cap) {                       // evict the least recent
-            pos.erase(items.back().first);               // erase from the map as well
+        if (items.size() == cap) {  // evict the least recent
+            pos.erase(items.back().first);  // erase from the map as well
             items.pop_back();
         }
         items.emplace_front(k, v);
@@ -280,9 +283,9 @@ public:
 
 A *token bucket* limits the average rate to *r* tokens per second while allowing bursts of at most *B* tokens. The bucket holds up to *B* tokens, and tokens arrive at *r* per second. A packet of size *s* may pass if the bucket holds at least *s* tokens, which it then removes; otherwise the packet is dropped (policing) or delayed (shaping). In router terms, *r* is the committed information rate and *B* the committed burst size.
 
-<figure>
-<svg viewBox="0 0 480 206" width="480"><defs><marker id="a8" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
-<path class="box" d="M180,40 L180,130 L260,130 L260,40" /><rect class="hl" x="181" y="85" width="78" height="44"/><line class="dash lg" x1="170" y1="40" x2="270" y2="40"/><text class="sm" x="300" y="44" text-anchor="start">capacity B (burst size)</text><text class="lbl" x="220" y="112" text-anchor="middle">tokens</text><line class="ln" x1="220" y1="6" x2="220" y2="38" marker-end="url(#a8)"/><text class="sm" x="235" y="20" text-anchor="start">refill rate r tokens per second</text><line class="ln" x1="30" y1="150" x2="170" y2="150" marker-end="url(#a8)"/><text class="sm" x="100" y="143" text-anchor="middle">packet of size s</text><line class="ln" x1="260" y1="150" x2="400" y2="150" marker-end="url(#a8)"/><text class="sm" x="330" y="143" text-anchor="middle">forwarded if tokens ≥ s</text><path class="acc" d="M220,130 L220,160 L200,185" /><line class="ln" x1="200" y1="185" x2="200" y2="185"/><text class="sm" x="205" y="196" text-anchor="start">else drop or delay</text><text class="sm" x="20" y="74" text-anchor="start">on each packet:</text><text class="mono" x="20" y="88" text-anchor="start">tokens = min(B, tokens + r·Δt)</text><text class="mono" x="20" y="102" text-anchor="start">if tokens ≥ s: tokens −= s, allow</text>
+@<figure>
+<svg viewBox="0 0 440 180" width="475"><defs><marker id="a8" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
+<path class="box" style="fill:none" d="M180,40 L180,130 L260,130 L260,40" /><rect class="hl" x="181" y="85" width="78" height="44"/><line class="dash lg" x1="170" y1="40" x2="270" y2="40"/><text class="sm" x="278" y="44" text-anchor="start">capacity B (burst)</text><text class="lbl" x="220" y="112" text-anchor="middle">tokens</text><line class="ln" x1="220" y1="6" x2="220" y2="38" marker-end="url(#a8)"/><text class="sm" x="230" y="20" text-anchor="start">refill: r tokens per second</text><line class="ln" x1="30" y1="150" x2="170" y2="150" marker-end="url(#a8)"/><text class="sm" x="100" y="143" text-anchor="middle">packet of size s</text><line class="ln" x1="270" y1="150" x2="400" y2="150" marker-end="url(#a8)"/><text class="sm" x="335" y="143" text-anchor="middle">pass if tokens ≥ s</text><text class="sm" x="220" y="170" text-anchor="middle">else drop (or delay)</text><text class="sm" x="10" y="70" text-anchor="start">on each packet:</text><text class="mono" x="10" y="83" text-anchor="start">tokens = min(B, tokens + r·Δt)</text><text class="mono" x="10" y="96" text-anchor="start">pass: tokens −= s</text>
 </svg>
 <figcaption><b>Figure 1.13</b> A token bucket. The long-run rate is r and the largest burst is B, because the level can never exceed the capacity.</figcaption>
 </figure>
@@ -307,16 +310,16 @@ void tb_init(Bucket *b, uint64_t rate, uint64_t burst, uint64_t now_us) {
 }
 bool tb_allow(Bucket *b, uint64_t size, uint64_t now_us) {
     uint64_t cap = b->burst * 1000000ull;
-    uint64_t dt = now_us - b->last_us;             /* monotonic: never negative */
+    uint64_t dt = now_us - b->last_us;  /* monotonic: never negative */
     b->last_us = now_us;
-    if (b->rate && dt > cap / b->rate)             /* long idle: bucket is full, and */
-        b->level = cap;                            /* r*dt could overflow otherwise   */
+    if (b->rate && dt > cap / b->rate)  /* long idle: bucket is full, and */
+        b->level = cap;  /* r*dt could overflow otherwise   */
     else {
         b->level += b->rate * dt;
         if (b->level > cap) b->level = cap;
     }
     uint64_t need = size * 1000000ull;
-    if (b->level < need) return false;             /* not enough tokens: drop */
+    if (b->level < need) return false;  /* not enough tokens: drop */
     b->level -= need;
     return true;
 }
@@ -358,9 +361,9 @@ A finite-state machine replaces tangled conditionals by a table that gives the n
 
 A *finite-state machine* (FSM) has a set of states, a set of events (or input symbols), a start state and a transition function from (state, event) to the next state; an event with no entry is illegal. Protocols such as TCP, link-state adjacency formation and DHCP are specified this way, and Juniper and Broadcom interviews ask for one in C. *Recognise:* "validate a sequence of events", "parse a protocol", "valid number" (a number grammar is an FSM over characters).
 
-<figure>
-<svg viewBox="0 0 480 126" width="480"><defs><marker id="a9" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
-<rect class="box" x="20" y="40" width="56" height="28" rx="14"/><text class="lbl" x="48" y="58" text-anchor="middle">CLOSED</text><rect class="box" x="120" y="40" width="56" height="28" rx="14"/><text class="lbl" x="148" y="58" text-anchor="middle">SYN_SENT</text><rect class="box" x="220" y="40" width="56" height="28" rx="14"/><text class="lbl" x="248" y="58" text-anchor="middle">ESTAB</text><rect class="box" x="320" y="40" width="56" height="28" rx="14"/><text class="lbl" x="348" y="58" text-anchor="middle">FIN_WAIT</text><rect class="box" x="420" y="40" width="56" height="28" rx="14"/><text class="lbl" x="448" y="58" text-anchor="middle">CLOSED</text><line class="ln" x1="76" y1="54" x2="120" y2="54" marker-end="url(#a9)"/><text class="sm" x="98.0" y="36" text-anchor="middle">send SYN</text><text class="sm" x="98.0" y="82" text-anchor="middle"></text><line class="ln" x1="176" y1="54" x2="220" y2="54" marker-end="url(#a9)"/><text class="sm" x="198.0" y="36" text-anchor="middle">rcv SYN+ACK /</text><text class="sm" x="198.0" y="82" text-anchor="middle">send ACK</text><line class="ln" x1="276" y1="54" x2="320" y2="54" marker-end="url(#a9)"/><text class="sm" x="298.0" y="36" text-anchor="middle">send FIN</text><text class="sm" x="298.0" y="82" text-anchor="middle"></text><line class="ln" x1="376" y1="54" x2="420" y2="54" marker-end="url(#a9)"/><text class="sm" x="398.0" y="36" text-anchor="middle">rcv ACK+FIN /</text><text class="sm" x="398.0" y="82" text-anchor="middle">send ACK</text><path class="acc dash" d="M248,68 Q248,110 48,68" /><text class="sm" x="150" y="112" text-anchor="middle">illegal event in any state: report error and keep state</text>
+@<figure>
+<svg viewBox="0 0 480 126" width="518"><defs><marker id="a9" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
+<rect class="box" x="20" y="40" width="56" height="28" rx="14"/><text class="lbl" x="48" y="58" text-anchor="middle">CLOSED</text><rect class="box" x="120" y="40" width="56" height="28" rx="14"/><text class="lbl" x="148" y="58" text-anchor="middle">SYN&#95;SENT</text><rect class="box" x="220" y="40" width="56" height="28" rx="14"/><text class="lbl" x="248" y="58" text-anchor="middle">ESTAB</text><rect class="box" x="320" y="40" width="56" height="28" rx="14"/><text class="lbl" x="348" y="58" text-anchor="middle">FIN&#95;WAIT</text><rect class="box" x="420" y="40" width="56" height="28" rx="14"/><text class="lbl" x="448" y="58" text-anchor="middle">CLOSED</text><line class="ln" x1="76" y1="54" x2="120" y2="54" marker-end="url(#a9)"/><text class="sm" x="98.0" y="36" text-anchor="middle">send SYN</text><text class="sm" x="98.0" y="82" text-anchor="middle"></text><line class="ln" x1="176" y1="54" x2="220" y2="54" marker-end="url(#a9)"/><text class="sm" x="198.0" y="36" text-anchor="middle">rcv SYN+ACK /</text><text class="sm" x="198.0" y="82" text-anchor="middle">send ACK</text><line class="ln" x1="276" y1="54" x2="320" y2="54" marker-end="url(#a9)"/><text class="sm" x="298.0" y="36" text-anchor="middle">send FIN</text><text class="sm" x="298.0" y="82" text-anchor="middle"></text><line class="ln" x1="376" y1="54" x2="420" y2="54" marker-end="url(#a9)"/><text class="sm" x="398.0" y="36" text-anchor="middle">rcv ACK+FIN /</text><text class="sm" x="398.0" y="82" text-anchor="middle">send ACK</text><path class="acc dash" d="M248,68 Q248,110 48,68" /><text class="sm" x="150" y="112" text-anchor="middle">illegal event in any state: report error and keep state</text>
 </svg>
 <figcaption><b>Figure 1.14</b> A reduced connection state machine (handshake and teardown only). A table indexed by state and event replaces nested conditionals.</figcaption>
 </figure>
@@ -372,7 +375,8 @@ A two-dimensional array indexed by state and event is the compact form. Entries 
 #include <stdint.h>
 
 typedef enum { CLOSED, SYN_SENT, ESTAB, FIN_WAIT, NSTATES } State;
-typedef enum { E_SEND_SYN, E_RCV_SYNACK, E_SEND_FIN, E_RCV_FINACK, NEVENTS } Event;
+typedef enum { E_SEND_SYN, E_RCV_SYNACK, E_SEND_FIN, E_RCV_FINACK,
+               NEVENTS } Event;
 
 static const int8_t next_state[NSTATES][NEVENTS] = {
     /* CLOSED   */ { SYN_SENT, -1,    -1,       -1     },
@@ -381,7 +385,7 @@ static const int8_t next_state[NSTATES][NEVENTS] = {
     /* FIN_WAIT */ { -1,       -1,    -1,       CLOSED },
 };
 
-/* Returns the final state, or -1 if event i is illegal (index stored in *bad). */
+/* Final state, or -1 if event *bad is illegal. */
 int run_fsm(const Event *ev, size_t n, size_t *bad) {
     State s = CLOSED;
     for (size_t i = 0; i < n; i++) {
@@ -416,7 +420,8 @@ In C, a tiny harness costs a minute and catches most mistakes:
 ```c
 #include <stdio.h>
 static int fails;
-#define CHECK(c) do { if (!(c)) { printf("FAIL line %d: %s\n", __LINE__, #c); fails++; } } while (0)
+#define CHECK(c) do { if (!(c)) { fails++; \
+    printf("FAIL line %d: %s\n", __LINE__, #c); } } while (0)
 
 int main(void) {
     uint32_t a;

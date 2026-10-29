@@ -8,9 +8,9 @@ A binary search tree keeps its keys ordered so that each comparison discards a w
 
 A *binary tree* is a node with at most two children; a *binary search tree* (BST) adds the rule that every key in the left subtree is smaller than the node and every key in the right subtree is larger. The *height* *h* is the number of edges on the longest root-to-leaf path. Search, insert and delete each follow one path, so they cost O(*h*). For *n* random keys *h* is about 2 log *n*, but inserting sorted keys produces a chain with *h* = *n*, and every operation degrades to O(*n*). Self-balancing trees (AVL, red-black) restore O(log *n*); C++ `std::map` and `std::set` are red-black trees.
 
-<figure>
-<svg viewBox="0 0 480 192" width="480">
-<line class="ln" x1="240" y1="28" x2="140" y2="70"/><line class="ln" x1="240" y1="28" x2="340" y2="70"/><line class="ln" x1="140" y1="70" x2="90" y2="112"/><line class="ln" x1="140" y1="70" x2="190" y2="112"/><line class="ln" x1="340" y1="70" x2="390" y2="112"/><line class="ln" x1="190" y1="112" x2="160" y2="154"/><line class="ln" x1="190" y1="112" x2="220" y2="154"/><line class="ln" x1="390" y1="112" x2="360" y2="154"/><circle class="box" cx="240" cy="28" r="12" style="fill:#FFF4C2"/><text class="lbl" x="240" y="31" text-anchor="middle">8</text><circle class="box" cx="140" cy="70" r="12" style="fill:#FFF4C2"/><text class="lbl" x="140" y="73" text-anchor="middle">3</text><circle class="box" cx="340" cy="70" r="12"/><text class="lbl" x="340" y="73" text-anchor="middle">10</text><circle class="box" cx="90" cy="112" r="12"/><text class="lbl" x="90" y="115" text-anchor="middle">1</text><circle class="box" cx="190" cy="112" r="12" style="fill:#FFF4C2"/><text class="lbl" x="190" y="115" text-anchor="middle">6</text><circle class="box" cx="390" cy="112" r="12"/><text class="lbl" x="390" y="115" text-anchor="middle">14</text><circle class="box" cx="160" cy="154" r="12" style="fill:#FFF4C2"/><text class="lbl" x="160" y="157" text-anchor="middle">4</text><circle class="box" cx="220" cy="154" r="12"/><text class="lbl" x="220" y="157" text-anchor="middle">7</text><circle class="box" cx="360" cy="154" r="12"/><text class="lbl" x="360" y="157" text-anchor="middle">13</text><text class="sm" x="20" y="180" text-anchor="start">search 4: 4 &lt; 8 left, 4 > 3 right, 4 &lt; 6 left, found (4 comparisons). In-order: 1 3 4 6 7 8 10 13 14</text>
+@<figure>
+<svg viewBox="0 0 440 192" width="475">
+<line class="ln" x1="240" y1="28" x2="140" y2="70"/><line class="ln" x1="240" y1="28" x2="340" y2="70"/><line class="ln" x1="140" y1="70" x2="90" y2="112"/><line class="ln" x1="140" y1="70" x2="190" y2="112"/><line class="ln" x1="340" y1="70" x2="390" y2="112"/><line class="ln" x1="190" y1="112" x2="160" y2="154"/><line class="ln" x1="190" y1="112" x2="220" y2="154"/><line class="ln" x1="390" y1="112" x2="360" y2="154"/><circle class="box" cx="240" cy="28" r="12" style="fill:#FFF4C2"/><text class="lbl" x="240" y="31" text-anchor="middle">8</text><circle class="box" cx="140" cy="70" r="12" style="fill:#FFF4C2"/><text class="lbl" x="140" y="73" text-anchor="middle">3</text><circle class="box" cx="340" cy="70" r="12"/><text class="lbl" x="340" y="73" text-anchor="middle">10</text><circle class="box" cx="90" cy="112" r="12"/><text class="lbl" x="90" y="115" text-anchor="middle">1</text><circle class="box" cx="190" cy="112" r="12" style="fill:#FFF4C2"/><text class="lbl" x="190" y="115" text-anchor="middle">6</text><circle class="box" cx="390" cy="112" r="12"/><text class="lbl" x="390" y="115" text-anchor="middle">14</text><circle class="box" cx="160" cy="154" r="12" style="fill:#FFF4C2"/><text class="lbl" x="160" y="157" text-anchor="middle">4</text><circle class="box" cx="220" cy="154" r="12"/><text class="lbl" x="220" y="157" text-anchor="middle">7</text><circle class="box" cx="360" cy="154" r="12"/><text class="lbl" x="360" y="157" text-anchor="middle">13</text><text class="sm" x="20" y="180" text-anchor="start">search 4: left at 8, right at 3, left at 6, found.  In-order: 1 3 4 6 7 8 10 13 14</text>
 </svg>
 <figcaption><b>Figure 1.7</b> A binary search tree. Everything left of a node is smaller and everything right is larger; the highlighted path is the search for 4.</figcaption>
 </figure>
@@ -22,12 +22,14 @@ Depth-first traversals differ only in when the node is visited: *pre-order* (nod
 ```cpp
 struct TreeNode { int val; TreeNode *left = nullptr, *right = nullptr; };
 
-int height(TreeNode* t) { return t ? 1 + max(height(t->left), height(t->right)) : 0; }   // nodes on longest path
+int height(TreeNode* t) {                  // nodes on the longest path
+    return t ? 1 + max(height(t->left), height(t->right)) : 0;
+}
 
-vector<int> inorderIter(TreeNode* root) {              // no recursion: explicit stack
+vector<int> inorderIter(TreeNode* root) {  // no recursion: explicit stack
     vector<int> out; vector<TreeNode*> st; TreeNode* cur = root;
     while (cur || !st.empty()) {
-        while (cur) { st.push_back(cur); cur = cur->left; }   // go as far left as possible
+        while (cur) { st.push_back(cur); cur = cur->left; }  // far left
         cur = st.back(); st.pop_back();
         out.push_back(cur->val);
         cur = cur->right;
@@ -39,7 +41,7 @@ vector<vector<int>> levelOrder(TreeNode* root) {
     vector<vector<int>> res; if (!root) return res;
     queue<TreeNode*> q; q.push(root);
     while (!q.empty()) {
-        int sz = q.size(); res.emplace_back();            // sz = nodes on this level
+        int sz = q.size(); res.emplace_back();  // sz = nodes on this level
         while (sz--) {
             TreeNode* t = q.front(); q.pop();
             res.back().push_back(t->val);
@@ -64,7 +66,7 @@ T *bst_insert(T *t, int k) {
     if (!t) { t = calloc(1, sizeof *t); if (t) t->key = k; return t; }
     if (k < t->key)      t->l = bst_insert(t->l, k);
     else if (k > t->key) t->r = bst_insert(t->r, k);
-    return t;                                       /* duplicates are ignored */
+    return t;  /* duplicates are ignored */
 }
 const T *bst_search(const T *t, int k) {
     while (t && t->key != k) t = k < t->key ? t->l : t->r;
@@ -77,12 +79,12 @@ T *bst_delete(T *t, int k) {
     if (k < t->key)      t->l = bst_delete(t->l, k);
     else if (k > t->key) t->r = bst_delete(t->r, k);
     else {
-        if (!t->l || !t->r) {                       /* zero or one child */
+        if (!t->l || !t->r) {  /* zero or one child */
             T *child = t->l ? t->l : t->r;
             free(t);
-            return child;                           /* parent adopts the child */
+            return child;  /* parent adopts the child */
         }
-        T *s = min_node(t->r);                      /* in-order successor */
+        T *s = min_node(t->r);  /* in-order successor */
         t->key = s->key;
         t->r = bst_delete(t->r, s->key);
     }
@@ -109,9 +111,10 @@ Deletion has three cases: a leaf is removed; a node with one child is replaced b
 Checking each node only against its parent is wrong, since a node deep in the right subtree may still be smaller than an ancestor. We pass down the open interval that each key must lie in.
 
 ```cpp
-bool valid(TreeNode* t, long long lo, long long hi) {      // lo < key < hi
+bool valid(TreeNode* t, long long lo, long long hi) {  // lo < key < hi
     return !t || (lo < t->val && t->val < hi &&
-                  valid(t->left, lo, t->val) && valid(t->right, t->val, hi));
+                  valid(t->left, lo, t->val) &&
+                  valid(t->right, t->val, hi));
 }
 // call: valid(root, LLONG_MIN, LLONG_MAX)
 ```
@@ -140,9 +143,9 @@ A *trie* (prefix tree) stores a set of strings along the edges of a tree: the pa
 
 **Binary trie.** We treat a 32-bit address as a string over {0, 1}, with one level per bit. Inserting a prefix of length *p* follows (and creates) *p* edges and stores the next hop at the final node. A lookup follows the address bits from the root and records the next hop of every marked node it passes; when the next edge is missing, the last recorded hop is the longest match.
 
-<figure>
-<svg viewBox="0 0 480 200" width="480">
-<line class="ln" x1="240" y1="24" x2="140" y2="64"/><text class="sm" x="182.0" y="42.0" text-anchor="middle">0</text><line class="ln" x1="240" y1="24" x2="340" y2="64"/><text class="sm" x="298.0" y="42.0" text-anchor="middle">1</text><line class="ln" x1="140" y1="64" x2="200" y2="104"/><text class="sm" x="178.0" y="82.0" text-anchor="middle">1</text><line class="ln" x1="200" y1="104" x2="260" y2="144"/><text class="sm" x="238.0" y="122.0" text-anchor="middle">1</text><line class="ln" x1="260" y1="144" x2="300" y2="184"/><text class="sm" x="272.0" y="162.0" text-anchor="middle">0</text><circle class="box" cx="240" cy="24" r="11" style="fill:#fff"/><circle class="box" cx="140" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="140" y="67" text-anchor="middle">A</text><circle class="box" cx="340" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="340" y="67" text-anchor="middle">D</text><circle class="box" cx="200" cy="104" r="11" style="fill:#FFF4C2"/><text class="lbl" x="200" y="107" text-anchor="middle">B</text><circle class="box" cx="260" cy="144" r="11" style="fill:#fff"/><circle class="box" cx="300" cy="184" r="11" style="fill:#FFF4C2"/><text class="lbl" x="300" y="187" text-anchor="middle">C</text><text class="sm" x="20" y="60" text-anchor="start">Prefixes (4-bit toy):</text><text class="mono" x="20" y="74" text-anchor="start">0*  → A</text><text class="mono" x="20" y="86" text-anchor="start">01* → B</text><text class="mono" x="20" y="98" text-anchor="start">0110 → C</text><text class="mono" x="20" y="110" text-anchor="start">1*  → D</text><text class="sm" x="360" y="150" text-anchor="start">lookup 0111:</text><text class="sm" x="360" y="164" text-anchor="start">0 (A), 1 (B), 1, then no 0/1 child</text><text class="lbl" x="360" y="178" text-anchor="start">last mark seen = B</text>
+@<figure>
+<svg viewBox="0 0 440 200" width="475">
+<line class="acc" x1="240" y1="24" x2="140" y2="64"/><text class="sm" x="182.0" y="42.0" text-anchor="middle">0</text><line class="ln" x1="240" y1="24" x2="340" y2="64"/><text class="sm" x="298.0" y="42.0" text-anchor="middle">1</text><line class="acc" x1="140" y1="64" x2="200" y2="104"/><text class="sm" x="178.0" y="82.0" text-anchor="middle">1</text><line class="acc" x1="200" y1="104" x2="260" y2="144"/><text class="sm" x="238.0" y="122.0" text-anchor="middle">1</text><line class="ln" x1="260" y1="144" x2="300" y2="184"/><text class="sm" x="272.0" y="162.0" text-anchor="middle">0</text><circle class="box" cx="240" cy="24" r="11" style="fill:#fff"/><circle class="box" cx="140" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="140" y="67" text-anchor="middle">A</text><circle class="box" cx="340" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="340" y="67" text-anchor="middle">D</text><circle class="box" cx="200" cy="104" r="11" style="fill:#FFF4C2"/><text class="lbl" x="200" y="107" text-anchor="middle">B</text><circle class="box" cx="260" cy="144" r="11" style="fill:#fff"/><circle class="box" cx="300" cy="184" r="11" style="fill:#FFF4C2"/><text class="lbl" x="300" y="187" text-anchor="middle">C</text><text class="sm" x="10" y="60" text-anchor="start">Prefixes (4-bit toy):</text><text class="mono" x="10" y="74" text-anchor="start">0&#42;   → A</text><text class="mono" x="10" y="86" text-anchor="start">01&#42;  → B</text><text class="mono" x="10" y="98" text-anchor="start">0110 → C</text><text class="mono" x="10" y="110" text-anchor="start">1&#42;   → D</text><text class="sm" x="330" y="140" text-anchor="start">lookup 0111 (accent path):</text><text class="sm" x="330" y="153" text-anchor="start">marks seen: A, then B;</text><text class="sm" x="330" y="166" text-anchor="start">no edge 0 below 011,</text><text class="lbl" x="330" y="179" text-anchor="start">so the answer is B</text>
 </svg>
 <figcaption><b>Figure 1.8</b> A binary trie for four toy prefixes. A shaded node carries a next hop; a lookup walks the address bits and remembers the deepest shaded node it passed.</figcaption>
 </figure>
@@ -152,14 +155,18 @@ A *trie* (prefix tree) stores a set of strings along the edges of a tree: the pa
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct Node { struct Node *c[2]; int hop; } Node;   /* hop < 0: no route here */
+typedef struct Node {
+    struct Node *c[2];
+    int hop;                       /* hop < 0: no route ends here */
+} Node;
 
 static Node *new_node(void) {
     Node *n = malloc(sizeof *n);
     if (n) { n->c[0] = n->c[1] = NULL; n->hop = -1; }
     return n;
 }
-bool trie_insert(Node *root, uint32_t prefix, unsigned len, int hop) {   /* len <= 32 */
+bool trie_insert(Node *root, uint32_t prefix, unsigned len, int hop) {
+    /* len <= 32 */
     Node *t = root;
     for (unsigned i = 0; i < len; i++) {
         unsigned bit = (prefix >> (31 - i)) & 1u;
@@ -170,13 +177,13 @@ bool trie_insert(Node *root, uint32_t prefix, unsigned len, int hop) {   /* len 
     return true;
 }
 int trie_lookup(const Node *root, uint32_t addr) {
-    int best = root->hop;                         /* the default route /0, if any */
+    int best = root->hop;  /* the default route /0, if any */
     const Node *t = root;
     for (unsigned i = 0; i < 32 && t; i++) {
         t = t->c[(addr >> (31 - i)) & 1u];
-        if (t && t->hop >= 0) best = t->hop;      /* a longer match than before */
+        if (t && t->hop >= 0) best = t->hop;   /* longer match found */
     }
-    return best;                                  /* -1: no matching prefix */
+    return best;  /* -1: no matching prefix */
 }
 ```
 
@@ -184,9 +191,9 @@ int trie_lookup(const Node *root, uint32_t addr) {
 
 **Multibit tries.** Reading eight bits per level (a *stride* of 8) needs only four steps for IPv4, at the cost of nodes with 256 children. Figure 1.9 draws such a trie for four prefixes. Real routers go further: they use compressed tries or TCAM hardware (the device internals are treated in Pillar 5, §5.2.8). The software alternative to a trie is one hash table per prefix length: probe the /32 table, then /31, and so on, down to /0, and keep the first hit; this costs up to 32 hash lookups but needs no pointer chasing.
 
-<figure>
-<svg viewBox="0 0 480 222" width="480"><defs><marker id="a6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a6b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<rect class="box" x="20" y="60" width="50" height="26" rx="2"/><text class="lbl" x="45" y="77" text-anchor="middle">root</text><rect class="box" x="120" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="145" y="77" text-anchor="middle">10</text><text class="sm" x="145" y="100" text-anchor="middle">/8 → hopA</text><rect class="box" x="220" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="245" y="77" text-anchor="middle">1</text><text class="sm" x="245" y="100" text-anchor="middle">/16 → hopB</text><rect class="box" x="320" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="345" y="77" text-anchor="middle">2</text><text class="sm" x="345" y="100" text-anchor="middle">/24 → hopC</text><rect class="box" x="120" y="130" width="50" height="26" rx="2"/><text class="mono" x="145" y="147" text-anchor="middle">192</text><rect class="box" x="220" y="130" width="50" height="26" rx="2"/><text class="mono" x="245" y="147" text-anchor="middle">168</text><text class="sm" x="245" y="170" text-anchor="middle">/16 → hopD</text><rect class="box" x="220" y="20" width="50" height="22" rx="2"/><text class="mono" x="245" y="35" text-anchor="middle">9</text><text class="sm" x="300" y="35" text-anchor="start">10.9/16: none</text><line class="ln" x1="70" y1="73" x2="120" y2="73"/><line class="ln" x1="170" y1="73" x2="220" y2="73"/><line class="ln" x1="270" y1="73" x2="320" y2="73"/><line class="ln" x1="70" y1="80" x2="120" y2="143"/><line class="ln" x1="170" y1="143" x2="220" y2="143"/><line class="ln" x1="170" y1="66" x2="220" y2="31"/><path class="acc" d="M45,60 Q95,38 145,58 M170,58 Q205,40 245,58 M270,58 Q305,40 345,58" marker-end="url(#a6b)"/><text class="sm" x="20" y="195" text-anchor="start">lookup 10.1.2.77: 10, 1, 2 all exist, deepest mark /24 → hopC.   lookup 10.1.9.9: 9 absent under 1, deepest mark seen /16 → hopB.</text><text class="sm" x="20" y="210" text-anchor="start">lookup 10.200.0.1: 200 absent under 10, deepest mark /8 → hopA.</text>
+@<figure>
+<svg viewBox="0 0 440 222" width="475"><defs><marker id="a6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a6b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<rect class="box" x="20" y="60" width="50" height="26" rx="2"/><text class="lbl" x="45" y="77" text-anchor="middle">root</text><rect class="box" x="120" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="145" y="77" text-anchor="middle">10</text><text class="sm" x="145" y="100" text-anchor="middle">/8 → hopA</text><rect class="box" x="220" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="245" y="77" text-anchor="middle">1</text><text class="sm" x="245" y="100" text-anchor="middle">/16 → hopB</text><rect class="box" x="320" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="345" y="77" text-anchor="middle">2</text><text class="sm" x="345" y="100" text-anchor="middle">/24 → hopC</text><rect class="box" x="120" y="130" width="50" height="26" rx="2"/><text class="mono" x="145" y="147" text-anchor="middle">192</text><rect class="box" x="220" y="130" width="50" height="26" rx="2"/><text class="mono" x="245" y="147" text-anchor="middle">168</text><text class="sm" x="245" y="170" text-anchor="middle">/16 → hopD</text><line class="ln" x1="70" y1="73" x2="120" y2="73"/><line class="ln" x1="170" y1="73" x2="220" y2="73"/><line class="ln" x1="270" y1="73" x2="320" y2="73"/><line class="ln" x1="70" y1="80" x2="120" y2="143"/><line class="ln" x1="170" y1="143" x2="220" y2="143"/><path class="acc" d="M45,60 Q95,38 145,58 M170,58 Q205,40 245,58 M270,58 Q305,40 345,58" marker-end="url(#a6b)"/><text class="sm" x="20" y="195" text-anchor="start">10.1.2.77: octets 10, 1, 2 all exist; deepest mark /24 → hopC.</text><text class="sm" x="20" y="210" text-anchor="start">10.1.9.9: 9 is absent under 1; deepest mark /16 → hopB.  10.200.0.1: 200 absent under 10; /8 → hopA.</text>
 </svg>
 <figcaption><b>Figure 1.9</b> A stride-8 trie (one level per octet) for 10.0.0.0/8, 10.1.0.0/16, 10.1.2.0/24 and 192.168.0.0/16. The accent walk is the lookup of 10.1.2.77.</figcaption>
 </figure>
@@ -237,8 +244,8 @@ A heap keeps the smallest (or largest) element at the front of a partially order
 
 A *binary min-heap* is a complete binary tree in which every parent is no larger than its children. Because the tree is complete, it is stored in an array with no pointers: the children of index *i* are `2i+1` and `2i+2`, and its parent is `(i-1)/2`.
 
-<figure>
-<svg viewBox="0 0 480 215" width="480">
+@<figure>
+<svg viewBox="0 0 440 215" width="475">
 <line class="ln" x1="240" y1="26" x2="150" y2="70"/><line class="ln" x1="240" y1="26" x2="330" y2="70"/><line class="ln" x1="150" y1="70" x2="105" y2="114"/><line class="ln" x1="150" y1="70" x2="195" y2="114"/><line class="ln" x1="330" y1="70" x2="285" y2="114"/><line class="ln" x1="330" y1="70" x2="375" y2="114"/><circle class="box" cx="240" cy="26" r="12"/><text class="lbl" x="240" y="29" text-anchor="middle">2</text><circle class="box" cx="150" cy="70" r="12" style="fill:#FFF4C2"/><text class="lbl" x="150" y="73" text-anchor="middle">5</text><circle class="box" cx="330" cy="70" r="12"/><text class="lbl" x="330" y="73" text-anchor="middle">3</text><circle class="box" cx="105" cy="114" r="12" style="fill:#FFF4C2"/><text class="lbl" x="105" y="117" text-anchor="middle">9</text><circle class="box" cx="195" cy="114" r="12" style="fill:#FFF4C2"/><text class="lbl" x="195" y="117" text-anchor="middle">6</text><circle class="box" cx="285" cy="114" r="12"/><text class="lbl" x="285" y="117" text-anchor="middle">8</text><circle class="box" cx="375" cy="114" r="12"/><text class="lbl" x="375" y="117" text-anchor="middle">4</text><rect class="box" style="fill:none" x="90" y="150" width="40" height="24"/>
 <text class="mono" x="110.0" y="165.0" text-anchor="middle">2</text>
 <text class="sm" x="110.0" y="184" text-anchor="middle">0</text>
@@ -259,7 +266,7 @@ A *binary min-heap* is a complete binary tree in which every parent is no larger
 <text class="sm" x="310.0" y="184" text-anchor="middle">5</text>
 <rect class="box" style="fill:none" x="330" y="150" width="40" height="24"/>
 <text class="mono" x="350.0" y="165.0" text-anchor="middle">4</text>
-<text class="sm" x="350.0" y="184" text-anchor="middle">6</text><text class="sm" x="20" y="166" text-anchor="start">array</text><text class="sm" x="20" y="205" text-anchor="start">parent(i) = (i-1)/2     left(i) = 2i+1     right(i) = 2i+2.   Children of index 1 (value 5) are indices 3 and 4.</text>
+<text class="sm" x="350.0" y="184" text-anchor="middle">6</text><text class="sm" x="20" y="166" text-anchor="start">array</text><text class="sm" x="20" y="205" text-anchor="start">parent(i) = (i-1)/2;  left(i) = 2i+1;  right(i) = 2i+2.  Index 1 (value 5) has children 3 and 4.</text>
 </svg>
 <figcaption><b>Figure 1.10</b> A min-heap as a tree and as the array that stores it. No pointers are needed because the shape is always a complete tree.</figcaption>
 </figure>
@@ -269,11 +276,11 @@ A *binary min-heap* is a complete binary tree in which every parent is no larger
 *Recognise:* "k largest or smallest", "k most frequent", "merge k sorted", "median of a stream", "next event by time", "reorder packets by sequence number". In C++ `priority_queue<int>` is a max-heap; for a min-heap pass `greater<int>`. Python's `heapq` is a min-heap; negate values for a max-heap.
 
 ```cpp
-vector<int> topK(const vector<int>& a, int k) {              // the k largest, ascending
-    priority_queue<int, vector<int>, greater<int>> h;         // min-heap of size <= k
+vector<int> topK(const vector<int>& a, int k) {  // the k largest, ascending
+    priority_queue<int, vector<int>, greater<int>> h;  // min-heap of k
     for (int x : a) {
         h.push(x);
-        if ((int)h.size() > k) h.pop();                       // discard the smallest
+        if ((int)h.size() > k) h.pop();  // discard the smallest
     }
     vector<int> out;
     while (!h.empty()) { out.push_back(h.top()); h.pop(); }
@@ -310,24 +317,27 @@ A *graph* has *V* vertices and *E* edges; an edge may be directed, may carry a w
 BFS explores in rings of increasing hop count, using a queue, so the first time it reaches a vertex is by a shortest path. Marking a vertex visited when it is *pushed* (not when it is popped) keeps duplicates out of the queue. DFS follows one path as deep as it goes, using a stack, and is the tool for connectivity, cycles and ordering. The iterative form avoids the recursion limit (about 1000 in Python, and the stack size in C).
 
 ```cpp
-vector<int> bfs(const vector<vector<int>>& g, int src) {      // hop distance, -1 if unreachable
+vector<int> bfs(const vector<vector<int>>& g, int src) {
+    // hop distance from src, -1 if unreachable
     vector<int> dist(g.size(), -1);
     queue<int> q; dist[src] = 0; q.push(src);
     while (!q.empty()) {
         int u = q.front(); q.pop();
         for (int v : g[u])
-            if (dist[v] < 0) { dist[v] = dist[u] + 1; q.push(v); }   // visited on push
+            if (dist[v] < 0) {                      // mark on push
+                dist[v] = dist[u] + 1; q.push(v);
+            }
     }
     return dist;
 }
 
-vector<int> dfsOrder(const vector<vector<int>>& g, int s) {  // iterative DFS
+vector<int> dfsOrder(const vector<vector<int>>& g, int s) {   // iterative
     vector<char> seen(g.size(), 0); vector<int> st{s}, order;
     while (!st.empty()) {
         int u = st.back(); st.pop_back();
         if (seen[u]) continue;
         seen[u] = 1; order.push_back(u);
-        for (int i = (int)g[u].size() - 1; i >= 0; --i)      // reverse: match recursive order
+        for (int i = (int)g[u].size() - 1; i >= 0; --i)  // reverse order
             if (!seen[g[u][i]]) st.push_back(g[u][i]);
     }
     return order;
@@ -344,24 +354,25 @@ A grid is a graph whose vertices are cells and whose neighbours are the four adj
 
 *Idea.* Keep a tentative distance to each vertex. Repeatedly settle the unsettled vertex with the smallest tentative distance, and relax its edges: if going through it improves a neighbour's distance, update it. Because every weight is non-negative, no later path can reach a settled vertex more cheaply, so a settled distance is final. A min-heap supplies the next vertex. Entries are never updated in place; an improved vertex is pushed again, and the older, larger entry is discarded when it surfaces. *Recognise:* "cheapest", "minimum time", "network delay", weights present and non-negative.
 
-<figure>
-<svg viewBox="0 0 480 192" width="480">
-<line class="ln" x1="50" y1="90" x2="170" y2="40"/><line class="ln" x1="50" y1="90" x2="170" y2="140"/><line class="ln" x1="170" y1="140" x2="170" y2="40"/><line class="ln" x1="170" y1="40" x2="300" y2="90"/><line class="ln" x1="170" y1="140" x2="300" y2="90"/><line class="ln" x1="300" y1="90" x2="420" y2="90"/><rect x="102.0" y="58.0" width="16" height="13" fill="#fff"/><text class="sm" x="110.0" y="68.0" text-anchor="middle">4</text><rect x="102.0" y="108.0" width="16" height="13" fill="#fff"/><text class="sm" x="110.0" y="118.0" text-anchor="middle">1</text><rect x="162.0" y="83.0" width="16" height="13" fill="#fff"/><text class="sm" x="170.0" y="93.0" text-anchor="middle">2</text><rect x="227.0" y="58.0" width="16" height="13" fill="#fff"/><text class="sm" x="235.0" y="68.0" text-anchor="middle">5</text><rect x="227.0" y="108.0" width="16" height="13" fill="#fff"/><text class="sm" x="235.0" y="118.0" text-anchor="middle">8</text><rect x="352.0" y="83.0" width="16" height="13" fill="#fff"/><text class="sm" x="360.0" y="93.0" text-anchor="middle">3</text><circle class="box" cx="50" cy="90" r="13"/><text class="lbl" x="50" y="93" text-anchor="middle">A</text><circle class="box" cx="170" cy="40" r="13"/><text class="lbl" x="170" y="43" text-anchor="middle">B</text><circle class="box" cx="170" cy="140" r="13"/><text class="lbl" x="170" y="143" text-anchor="middle">C</text><circle class="box" cx="300" cy="90" r="13"/><text class="lbl" x="300" y="93" text-anchor="middle">D</text><circle class="box" cx="420" cy="90" r="13"/><text class="lbl" x="420" y="93" text-anchor="middle">E</text><path class="acc" d="M50,90 L170,140 L170,40 L300,90 L420,90" stroke-linejoin="round"/><text class="sm" x="20" y="180" text-anchor="start">shortest path tree from A: A-C-B-D-E with total cost 1+2+5+3 = 11</text>
+@<figure>
+<svg viewBox="0 0 460 192" width="497">
+<line class="lg" x1="50" y1="90" x2="170" y2="40"/><line class="lg" x1="50" y1="90" x2="170" y2="140"/><line class="lg" x1="170" y1="140" x2="170" y2="40"/><line class="lg" x1="170" y1="40" x2="300" y2="90"/><line class="lg" x1="170" y1="140" x2="300" y2="90"/><line class="lg" x1="300" y1="90" x2="420" y2="90"/><path class="acc" d="M50,90 L170,140 L170,40 L300,90 L420,90" stroke-linejoin="round"/><rect x="103.0" y="58.0" width="14" height="13" fill="#fff"/><text class="lbl" x="110.0" y="68.0" text-anchor="middle">4</text><rect x="103.0" y="108.0" width="14" height="13" fill="#fff"/><text class="lbl" x="110.0" y="118.0" text-anchor="middle">1</text><rect x="173.0" y="83.0" width="14" height="13" fill="#fff"/><text class="lbl" x="180.0" y="93.0" text-anchor="middle">2</text><rect x="228.0" y="58.0" width="14" height="13" fill="#fff"/><text class="lbl" x="235.0" y="68.0" text-anchor="middle">5</text><rect x="228.0" y="108.0" width="14" height="13" fill="#fff"/><text class="lbl" x="235.0" y="118.0" text-anchor="middle">8</text><rect x="353.0" y="83.0" width="14" height="13" fill="#fff"/><text class="lbl" x="360.0" y="93.0" text-anchor="middle">3</text><circle class="box" cx="50" cy="90" r="13"/><text class="lbl" x="50" y="93" text-anchor="middle">A</text><circle class="box" cx="170" cy="40" r="13"/><text class="lbl" x="170" y="43" text-anchor="middle">B</text><circle class="box" cx="170" cy="140" r="13"/><text class="lbl" x="170" y="143" text-anchor="middle">C</text><circle class="box" cx="300" cy="90" r="13"/><text class="lbl" x="300" y="93" text-anchor="middle">D</text><circle class="box" cx="420" cy="90" r="13"/><text class="lbl" x="420" y="93" text-anchor="middle">E</text><text class="sm" x="20" y="180" text-anchor="start">shortest path tree from A: A-C-B-D-E, total cost 1+2+5+3 = 11</text>
 </svg>
 <figcaption><b>Figure 1.11</b> A weighted undirected graph (link costs). The accent path is the shortest route from A to E.</figcaption>
 </figure>
 
 ```cpp
-using Graph = vector<vector<pair<int, int>>>;                 // g[u] = {(v, weight), ...}
+using Graph = vector<vector<pair<int, int>>>;  // g[u] = {(v, weight), ...}
 
 vector<long long> dijkstra(const Graph& g, int src) {
     const long long INF = LLONG_MAX / 4;
     vector<long long> dist(g.size(), INF);
-    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq;
+    using P = pair<long long, int>;
+    priority_queue<P, vector<P>, greater<>> pq;
     dist[src] = 0; pq.push({0, src});
     while (!pq.empty()) {
         auto [d, u] = pq.top(); pq.pop();
-        if (d > dist[u]) continue;                            // stale entry
+        if (d > dist[u]) continue;  // stale entry
         for (auto [v, w] : g[u])
             if (d + w < dist[v]) { dist[v] = d + w; pq.push({dist[v], v}); }
     }
@@ -397,13 +408,15 @@ Bellman–Ford relaxes every edge, *V* − 1 times. After round *r*, `dist[v]` i
 
 ```cpp
 struct Edge { int u, v, w; };
-vector<long long> bellmanFord(int n, const vector<Edge>& es, int src, int rounds) {
+vector<long long> bellmanFord(int n, const vector<Edge>& es,
+                              int src, int rounds) {
     const long long INF = LLONG_MAX / 4;
     vector<long long> dist(n, INF); dist[src] = 0;
-    for (int r = 0; r < rounds; ++r) {                         // rounds <= n - 1
-        vector<long long> nxt = dist;                          // use last round's values only
+    for (int r = 0; r < rounds; ++r) {  // rounds <= n - 1
+        vector<long long> nxt = dist;  // use last round's values only
         for (const Edge& e : es)
-            if (dist[e.u] < INF && dist[e.u] + e.w < nxt[e.v]) nxt[e.v] = dist[e.u] + e.w;
+            if (dist[e.u] < INF && dist[e.u] + e.w < nxt[e.v])
+                nxt[e.v] = dist[e.u] + e.w;
         dist = nxt;
     }
     return dist;
@@ -426,7 +439,7 @@ vector<int> topo(int n, const vector<vector<int>>& g) {
         int u = q.front(); q.pop(); order.push_back(u);
         for (int v : g[u]) if (--indeg[v] == 0) q.push(v);
     }
-    return order;                                              // size < n: a cycle exists
+    return order;  // size < n: a cycle exists
 }
 ```
 
@@ -439,7 +452,7 @@ struct DSU {
     int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
     bool unite(int a, int b) {
         a = find(a); b = find(b);
-        if (a == b) return false;                              // already connected: edge closes a loop
+        if (a == b) return false;  // already connected: edge closes a loop
         if (sz[a] < sz[b]) swap(a, b);
         p[b] = a; sz[a] += sz[b];
         return true;

@@ -14,277 +14,276 @@ Every address has two parts: the *network* part, shared by all devices in the sa
 
 <figure>
 <svg viewBox="0 0 480 144" width="480">
-<text class="sm" x="118" y="12" text-anchor="start" >Octet 1</text>
-<text class="sm" x="160.0" y="12" text-anchor="middle" >octet 1</text>
-<text class="sm" x="249.0" y="12" text-anchor="middle" >octet 2</text>
-<text class="sm" x="338.0" y="12" text-anchor="middle" >octet 3</text>
-<text class="sm" x="427.0" y="12" text-anchor="middle" >octet 4</text>
+<text class="sm" x="122.0" y="12" text-anchor="middle" >octet 1</text>
+<text class="sm" x="202.0" y="12" text-anchor="middle" >octet 2</text>
+<text class="sm" x="282.0" y="12" text-anchor="middle" >octet 3</text>
+<text class="sm" x="362.0" y="12" text-anchor="middle" >octet 4</text>
 <text class="lbl" x="14" y="33" text-anchor="start" >Address</text>
-<rect class="fill" x="118.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="123.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="128.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="133.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="139.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="144.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="149.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="154.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="160.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="165.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="170.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="175.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="181.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="186.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="191.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="196.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="207.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="212.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="217.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="222.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="228.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="233.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="238.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="243.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="249.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="254.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="259.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="264.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="270.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="275.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="280.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="285.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="296.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="301.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="306.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="311.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="317.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="322.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="327.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="332.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="338.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="343.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="348.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="353.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="359.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="364.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="369.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="374.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="385.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="390.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="395.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="400.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="406.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="411.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="416.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="421.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="427.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="432.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="437.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="442.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="448.0" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="453.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="458.5" y="20" width="10.5" height="18" rx="0" />
-<text class="mono" x="463.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
-<text class="lbl" x="477.0" y="33" text-anchor="start" >172.16.45.200</text>
+<rect class="fill" x="84.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="88.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="93.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="98.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="103.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="107.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="112.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="117.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="122.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="126.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="131.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="136.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="141.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="145.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="150.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="155.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="164.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="168.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="173.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="178.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="183.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="187.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="192.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="197.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="202.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="206.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="211.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="216.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="221.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="225.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="230.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="235.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="244.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="248.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="253.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="258.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="263.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="267.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="272.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="277.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="282.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="286.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="291.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="296.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="301.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="305.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="310.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="315.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="324.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="328.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="333.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="338.2" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="343.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="347.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="352.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="357.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="362.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="366.8" y="33" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="371.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="376.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="381.0" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="385.8" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="390.5" y="20" width="9.5" height="18" rx="0" />
+<text class="mono" x="395.2" y="33" text-anchor="middle" style="font-size:8px">0</text>
+<text class="lbl" x="408.0" y="33" text-anchor="start" >172.16.45.200</text>
 <text class="lbl" x="14" y="59" text-anchor="start" >Mask /21</text>
-<rect class="fill" x="118.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="123.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="128.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="133.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="139.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="144.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="149.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="154.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="160.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="165.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="170.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="175.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="181.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="186.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="191.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="196.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="207.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="212.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="217.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="222.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="228.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="233.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="238.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="243.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="249.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="254.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="259.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="264.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="270.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="275.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="280.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="285.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="296.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="301.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="306.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="311.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="317.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="322.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="327.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="332.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="338.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="343.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="348.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="353.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="359.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="364.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="369.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="374.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="385.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="390.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="395.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="400.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="406.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="411.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="416.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="421.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="427.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="432.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="437.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="442.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="448.0" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="453.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="458.5" y="46" width="10.5" height="18" rx="0" />
-<text class="mono" x="463.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
-<text class="lbl" x="477.0" y="59" text-anchor="start" >255.255.248.0</text>
-<text class="lbl" x="14" y="85" text-anchor="start" >Network = addr AND mask</text>
-<rect class="fill" x="118.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="123.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="128.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="133.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="139.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="144.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="149.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="154.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="160.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="165.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="170.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="175.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="181.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="186.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="191.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="196.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="207.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="212.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="217.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="222.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="228.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="233.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="238.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="243.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="249.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="254.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="259.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="264.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="270.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="275.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="280.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="285.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="296.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="301.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="306.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="311.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="317.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="322.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="327.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="332.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="338.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="343.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="348.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="353.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="359.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="364.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="369.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="374.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="385.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="390.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="395.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="400.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="406.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="411.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="416.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="421.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="427.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="432.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="437.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="442.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="448.0" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="453.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="box" x="458.5" y="72" width="10.5" height="18" rx="0" />
-<text class="mono" x="463.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
-<text class="lbl" x="477.0" y="85" text-anchor="start" >172.16.40.0</text>
-<text class="lbl" x="14" y="111" text-anchor="start" >Broadcast = net OR wildcard</text>
-<rect class="fill" x="118.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="123.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="128.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="133.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="139.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="144.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="149.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="154.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="160.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="165.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="170.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="175.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="181.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="186.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="191.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="196.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="207.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="212.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="217.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="222.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="228.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="233.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="238.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="243.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="249.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="254.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="259.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="264.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="270.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="275.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="280.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="285.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="296.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="301.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="306.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="311.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="317.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="322.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="fill" x="327.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="332.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
-<rect class="fill" x="338.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="343.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="348.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="353.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="359.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="364.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="369.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="374.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="385.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="390.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="395.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="400.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="406.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="411.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="416.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="421.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="427.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="432.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="437.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="442.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="448.0" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="453.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<rect class="box" x="458.5" y="98" width="10.5" height="18" rx="0" />
-<text class="mono" x="463.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
-<text class="lbl" x="477.0" y="111" text-anchor="start" >172.16.47.255</text>
-<line class="acc" x1="348.0" y1="16" x2="348.0" y2="124"/>
-<text class="acct" x="348.0" y="135" text-anchor="middle"  style="font-size:8px;font-weight:600">21 network bits | 11 host bits</text>
+<rect class="fill" x="84.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="88.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="93.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="98.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="103.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="107.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="112.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="117.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="122.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="126.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="131.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="136.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="141.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="145.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="150.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="155.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="164.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="168.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="173.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="178.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="183.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="187.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="192.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="197.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="202.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="206.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="211.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="216.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="221.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="225.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="230.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="235.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="244.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="248.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="253.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="258.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="263.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="267.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="272.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="277.2" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="282.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="286.8" y="59" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="291.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="296.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="301.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="305.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="310.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="315.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="324.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="328.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="333.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="338.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="343.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="347.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="352.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="357.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="362.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="366.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="371.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="376.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="381.0" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="385.8" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="390.5" y="46" width="9.5" height="18" rx="0" />
+<text class="mono" x="395.2" y="59" text-anchor="middle" style="font-size:8px">0</text>
+<text class="lbl" x="408.0" y="59" text-anchor="start" >255.255.248.0</text>
+<text class="lbl" x="14" y="85" text-anchor="start" >AND = network</text>
+<rect class="fill" x="84.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="88.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="93.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="98.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="103.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="107.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="112.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="117.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="122.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="126.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="131.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="136.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="141.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="145.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="150.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="155.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="164.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="168.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="173.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="178.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="183.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="187.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="192.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="197.2" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="202.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="206.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="211.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="216.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="221.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="225.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="230.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="235.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="244.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="248.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="253.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="258.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="263.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="267.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="272.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="277.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="282.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="286.8" y="85" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="291.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="296.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="301.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="305.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="310.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="315.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="324.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="328.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="333.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="338.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="343.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="347.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="352.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="357.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="362.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="366.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="371.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="376.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="381.0" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="385.8" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="box" x="390.5" y="72" width="9.5" height="18" rx="0" />
+<text class="mono" x="395.2" y="85" text-anchor="middle" style="font-size:8px">0</text>
+<text class="lbl" x="408.0" y="85" text-anchor="start" >172.16.40.0</text>
+<text class="lbl" x="14" y="111" text-anchor="start" >OR wildcard</text>
+<rect class="fill" x="84.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="88.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="93.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="98.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="103.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="107.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="112.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="117.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="122.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="126.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="131.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="136.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="141.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="145.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="150.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="155.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="164.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="168.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="173.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="178.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="183.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="187.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="192.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="197.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="202.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="206.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="211.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="216.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="221.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="225.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="230.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="235.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="244.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="248.8" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="253.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="258.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="263.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="267.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="fill" x="272.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="277.2" y="111" text-anchor="middle" style="font-size:8px">0</text>
+<rect class="fill" x="282.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="286.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="291.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="296.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="301.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="305.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="310.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="315.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="324.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="328.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="333.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="338.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="343.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="347.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="352.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="357.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="362.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="366.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="371.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="376.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="381.0" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="385.8" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<rect class="box" x="390.5" y="98" width="9.5" height="18" rx="0" />
+<text class="mono" x="395.2" y="111" text-anchor="middle" style="font-size:8px">1</text>
+<text class="lbl" x="408.0" y="111" text-anchor="start" >172.16.47.255</text>
+<line class="acc" x1="291.0" y1="16" x2="291.0" y2="124"/>
+<text class="acct" x="291.0" y="135" text-anchor="middle"  style="font-size:8px;font-weight:600">21 network bits | 11 host bits</text>
 <text class="sm" x="14" y="135" text-anchor="start" >shaded = network bits</text>
 </svg>
 <figcaption><b>Figure 3.10</b> The 32-bit ruler for 172.16.45.200/21. The mask line falls inside the third octet, between bit 21 and bit 22; everything left of it is the network, everything right of it is the host.</figcaption>

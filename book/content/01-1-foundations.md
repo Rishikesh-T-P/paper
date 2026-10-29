@@ -69,10 +69,10 @@ The input size in the problem statement tells us which algorithms can finish in 
 [**Big-O** — an upper bound on how the work grows with the input size *n*, ignoring constants and lower-order terms.]{.margin}We count growth, not seconds. An algorithm taking *c·n* steps and one taking *c′·n + 50* steps are both O(*n*), since for large *n* the constants do not change the shape of the curve. The three loops below show the three cases that cover most code.
 
 ```c
-for (i = 0; i < n; i++) sum += a[i];           /* O(n): one pass          */
+for (i = 0; i < n; i++) sum += a[i];  /* O(n): one pass          */
 for (i = 0; i < n; i++)
-    for (j = i + 1; j < n; j++) pairs++;        /* O(n^2): n(n-1)/2 steps  */
-while (n) n >>= 1;                              /* O(log n): halves n      */
+    for (j = i + 1; j < n; j++) pairs++;  /* O(n^2): n(n-1)/2 steps  */
+while (n) n >>= 1;  /* O(log n): halves n      */
 ```
 
 Consider a switch. Flooding a frame to every port costs O(*p*) for *p* ports, whereas finding the egress port in the MAC table costs O(1) on average because the table is hashed. Thus, the data structure, not the hardware speed, sets the cost per frame.
@@ -108,7 +108,7 @@ vector<int> twoSum(const vector<int>& a, int target) {
     for (int i = 0; i < (int)a.size(); ++i) {
         auto it = seen.find(target - a[i]);
         if (it != seen.end()) return {it->second, i};
-        seen[a[i]] = i;                            // insert after the lookup
+        seen[a[i]] = i;  // insert after the lookup
     }
     return {};
 }
@@ -144,8 +144,8 @@ An array stores its elements contiguously, so the address of `a[i]` is `base + i
 
 *Idea.* On a sorted array, one pointer at each end moves inward, and each step discards an element that cannot be part of any answer. *Recognise:* "sorted", "pair with sum", "palindrome", "container". *Complexity:* O(*n*) time, O(1) space.
 
-<figure>
-<svg viewBox="0 0 480 190" width="480"><defs><marker id="a1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
+@<figure>
+<svg viewBox="0 0 360 190" width="389"><defs><marker id="a1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
 <text class="sm" x="20" y="14" text-anchor="start">start: L = 0, R = 5, a[L] + a[R] = 12 > 10, so R moves left</text><rect class="box" style="fill:none" x="20" y="40" width="30" height="24"/>
 <text class="mono" x="35.0" y="55.0" text-anchor="middle">1</text>
 <text class="sm" x="35.0" y="74" text-anchor="middle">0</text>
@@ -163,7 +163,7 @@ An array stores its elements contiguously, so the address of `a[i]` is `base + i
 <text class="sm" x="155.0" y="74" text-anchor="middle">4</text>
 <rect class="box" style="fill:none" x="170" y="40" width="30" height="24"/>
 <text class="mono" x="185.0" y="55.0" text-anchor="middle">11</text>
-<text class="sm" x="185.0" y="74" text-anchor="middle">5</text><path class="accf" d="M35,38 l-4,-7 l8,0 z"/><text class="lbl" x="35" y="28" text-anchor="middle">L</text><path class="accf" d="M185,38 l-4,-7 l8,0 z"/><text class="lbl" x="185" y="28" text-anchor="middle">R</text><text class="sm" x="20" y="122" text-anchor="start">end: L = 2, R = 3, 4 + 6 = 10, found</text><rect class="box" style="fill:none" x="20" y="136" width="30" height="24"/>
+<text class="sm" x="185.0" y="74" text-anchor="middle">5</text><path class="accf" d="M35,38 l-4,-7 l8,0 z"/><text class="lbl" x="35" y="28" text-anchor="middle">L</text><path class="accf" d="M185,38 l-4,-7 l8,0 z"/><text class="lbl" x="185" y="28" text-anchor="middle">R</text><text class="sm" x="20" y="112" text-anchor="start">end: L = 2, R = 3, 4 + 6 = 10, found</text><rect class="box" style="fill:none" x="20" y="136" width="30" height="24"/>
 <text class="mono" x="35.0" y="151.0" text-anchor="middle">1</text>
 <text class="sm" x="35.0" y="170" text-anchor="middle">0</text>
 <rect class="box" style="fill:none" x="50" y="136" width="30" height="24"/>
@@ -182,7 +182,7 @@ An array stores its elements contiguously, so the address of `a[i]` is `base + i
 <text class="sm" x="155.0" y="170" text-anchor="middle">4</text>
 <rect class="box" style="fill:none" x="170" y="136" width="30" height="24"/>
 <text class="mono" x="185.0" y="151.0" text-anchor="middle">11</text>
-<text class="sm" x="185.0" y="170" text-anchor="middle">5</text><path class="accf" d="M95,134 l-4,-7 l8,0 z"/><text class="lbl" x="95" y="124" text-anchor="middle">L</text><path class="accf" d="M125,134 l-4,-7 l8,0 z"/><text class="lbl" x="125" y="124" text-anchor="middle">R</text><text class="sm" x="250" y="52" text-anchor="start">sum too large: R--</text><text class="sm" x="250" y="66" text-anchor="start">sum too small: L++</text><text class="sm" x="250" y="80" text-anchor="start">sum equal: answer</text>
+<text class="sm" x="185.0" y="170" text-anchor="middle">5</text><path class="accf" d="M95,134 l-4,-7 l8,0 z"/><text class="lbl" x="95" y="124" text-anchor="middle">L</text><path class="accf" d="M125,134 l-4,-7 l8,0 z"/><text class="lbl" x="125" y="124" text-anchor="middle">R</text><text class="sm" x="225" y="52" text-anchor="start">sum too large: R--</text><text class="sm" x="225" y="66" text-anchor="start">sum too small: L++</text><text class="sm" x="225" y="80" text-anchor="start">sum equal: answer</text>
 </svg>
 <figcaption><b>Figure 1.1</b> Opposite-end pointers on a sorted array with target 10. Each step discards one element that cannot belong to any answer, so at most n steps occur.</figcaption>
 </figure>
@@ -193,7 +193,7 @@ pair<int,int> pairSum(const vector<int>& a, long long t) {   // a sorted
     while (l < r) {
         long long s = (long long)a[l] + a[r];
         if (s == t) return {l, r};
-        if (s < t) ++l; else --r;      // too small: need a larger left value
+        if (s < t) ++l; else --r;  // too small: need a larger left value
     }
     return {-1, -1};
 }
@@ -206,7 +206,7 @@ The argument for correctness is that if `a[l] + a[r]` exceeds *t*, then `a[r]` p
 *Idea.* A fast index `r` reads every element; a slow index `w` marks the end of the answer built so far. *Recognise:* "in place", "remove duplicates", "move zeroes", "partition". *Complexity:* O(*n*) time, O(1) space.
 
 ```cpp
-int dedupe(vector<int>& a) {            // a sorted; returns the new length
+int dedupe(vector<int>& a) {  // a sorted; returns the new length
     int w = 0;                          // a[0..w) holds the answer so far
     for (int r = 0; r < (int)a.size(); ++r)
         if (w == 0 || a[r] != a[w - 1]) a[w++] = a[r];
@@ -231,7 +231,7 @@ int dedupe(vector<int>& a) {            // a sorted; returns the new length
 *Idea.* Instead of re-summing *k* elements for each position, add the entering element and subtract the leaving one. *Recognise:* "subarray of size *k*", "every window of length *k*". *Complexity:* O(*n*) time, O(1) space.
 
 ```cpp
-long long maxSumK(const vector<int>& a, int k) {     // requires 1 <= k <= n
+long long maxSumK(const vector<int>& a, int k) {  // requires 1 <= k <= n
     long long cur = 0, best = LLONG_MIN;
     for (int i = 0; i < (int)a.size(); ++i) {
         cur += a[i];
@@ -248,9 +248,9 @@ The classic bug is the off-by-one at eviction: the element leaving when index `i
 
 *Idea.* The right edge advances every step; the left edge advances only while the window violates a condition. Each index enters and leaves once, so the work is O(*n*) although two loops are nested. *Recognise:* "longest or shortest contiguous subarray or substring such that …". *Complexity:* O(*n*) time, O(*alphabet*) space.
 
-<figure>
-<svg viewBox="0 0 480 160" width="480">
-<text class="sm" x="20" y="14" text-anchor="start">s = "abcabcbb", state after right = 4 (character b): the repeat forced left from 0 to 2</text><rect class="box" style="fill:none" x="20" y="40" width="34" height="24"/>
+@<figure>
+<svg viewBox="0 0 330 152" width="356">
+<text class="sm" x="20" y="14" text-anchor="start">s = abcabcbb. State after right = 4 (character b); the repeat moved left from 0 to 2.</text><rect class="box" style="fill:none" x="20" y="40" width="34" height="24"/>
 <text class="mono" x="37.0" y="55.0" text-anchor="middle">a</text>
 <text class="sm" x="37.0" y="74" text-anchor="middle">0</text>
 <rect class="box" style="fill:none" x="54" y="40" width="34" height="24"/>
@@ -276,13 +276,13 @@ The classic bug is the off-by-one at eviction: the element leaving when index `i
 <text class="sm" x="241.0" y="74" text-anchor="middle">6</text>
 <rect class="box" style="fill:none" x="258" y="40" width="34" height="24"/>
 <text class="mono" x="275.0" y="55.0" text-anchor="middle">b</text>
-<text class="sm" x="275.0" y="74" text-anchor="middle">7</text><path class="acc" d="M90,76 v6 h98 v-6"/><path class="accf" d="M105,38 l-4,-7 l8,0 z"/><text class="lbl" x="105" y="28" text-anchor="middle">left</text><path class="accf" d="M173,38 l-4,-7 l8,0 z"/><text class="lbl" x="173" y="28" text-anchor="middle">right</text><text class="lbl" x="139.0" y="96" text-anchor="middle">window = "cab", length 3</text><text class="sm" x="20" y="130" text-anchor="start">count[a]=1  count[b]=1  count[c]=1   every count is at most 1, so the window is valid</text><text class="sm" x="20" y="146" text-anchor="start">best = 3 so far; the next character c repeats, so left moves to 3 (shrink with while, not if)</text>
+<text class="sm" x="275.0" y="74" text-anchor="middle">7</text><path class="acc" d="M90,76 v6 h98 v-6"/><path class="accf" d="M105,38 l-4,-7 l8,0 z"/><text class="lbl" x="105" y="28" text-anchor="middle">left</text><path class="accf" d="M173,38 l-4,-7 l8,0 z"/><text class="lbl" x="173" y="28" text-anchor="middle">right</text><text class="lbl" x="139.0" y="96" text-anchor="middle">window = "cab", length 3</text><text class="sm" x="20" y="128" text-anchor="start">every count in the window is at most 1, so the window is valid</text><text class="sm" x="20" y="142" text-anchor="start">best = 3 so far; the next c repeats, so left moves to 3 (shrink with while)</text>
 </svg>
 <figcaption><b>Figure 1.2</b> Variable sliding window. The right edge always advances; the left edge advances only to restore the invariant.</figcaption>
 </figure>
 
 ```cpp
-int lengthOfLongest(const string& s) {           // longest run with no repeats
+int lengthOfLongest(const string& s) {  // longest run with no repeats
     int cnt[256] = {0}, best = 0, left = 0;
     for (int right = 0; right < (int)s.size(); ++right) {
         ++cnt[(unsigned char)s[right]];
@@ -313,7 +313,7 @@ At `right = 6` the window `abc` meets a second `b`; the loop removes `a`, then `
 
 ```cpp
 int subarraySum(const vector<int>& a, int k) {
-    unordered_map<long long, int> seen{{0, 1}};   // the empty prefix, seeded
+    unordered_map<long long, int> seen{{0, 1}};  // the empty prefix, seeded
     long long pre = 0; int count = 0;
     for (int x : a) {
         pre += x;

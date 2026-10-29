@@ -99,34 +99,34 @@ Every link has a *maximum transmission unit* (MTU), the largest IP packet it car
 <text class="lbl" x="14" y="26" text-anchor="start" >Original</text>
 <rect class="hl" x="70" y="10" width="14" height="24" rx="0" />
 <rect class="ln" x="70" y="10" width="14" height="24" rx="0" fill="none"/>
-<rect class="box" x="84" y="10" width="360.0" height="24" rx="0" />
-<text class="lbl" x="264.0" y="25" text-anchor="middle" >3980 B data</text>
-<text class="sm" x="450.0" y="20" text-anchor="start" >Total Length 4000</text>
-<text class="sm" x="450.0" y="30" text-anchor="start" >ID 0x1c46</text>
+<rect class="box" x="84" y="10" width="300.0" height="24" rx="0" />
+<text class="lbl" x="234.0" y="25" text-anchor="middle" >3980 B data</text>
+<text class="sm" x="390.0" y="20" text-anchor="start" >Total Length 4000</text>
+<text class="sm" x="390.0" y="30" text-anchor="start" >ID 0x1c46</text>
 <text class="lbl" x="14" y="70" text-anchor="start" >Fragment 1</text>
 <rect class="hl" x="70" y="54" width="14" height="24" rx="0" />
 <rect class="ln" x="70" y="54" width="14" height="24" rx="0" fill="none"/>
-<rect class="box" x="84" y="54" width="133.9" height="24" rx="0" />
-<text class="lbl" x="150.9" y="69" text-anchor="middle" >1480 B data</text>
-<text class="sm" x="223.9" y="64" text-anchor="start" >TL 1500</text>
-<text class="sm" x="223.9" y="74" text-anchor="start" >offset 0, MF 1</text>
+<rect class="box" x="84" y="54" width="111.6" height="24" rx="0" />
+<text class="lbl" x="139.8" y="69" text-anchor="middle" >1480 B data</text>
+<text class="sm" x="201.6" y="64" text-anchor="start" >TL 1500</text>
+<text class="sm" x="201.6" y="74" text-anchor="start" >offset 0, MF 1</text>
 <text class="lbl" x="14" y="102" text-anchor="start" >Fragment 2</text>
 <rect class="hl" x="70" y="86" width="14" height="24" rx="0" />
 <rect class="ln" x="70" y="86" width="14" height="24" rx="0" fill="none"/>
-<rect class="box" x="84" y="86" width="133.9" height="24" rx="0" />
-<text class="lbl" x="150.9" y="101" text-anchor="middle" >1480 B data</text>
-<text class="sm" x="223.9" y="96" text-anchor="start" >TL 1500</text>
-<text class="sm" x="223.9" y="106" text-anchor="start" >offset 185, MF 1</text>
+<rect class="box" x="84" y="86" width="111.6" height="24" rx="0" />
+<text class="lbl" x="139.8" y="101" text-anchor="middle" >1480 B data</text>
+<text class="sm" x="201.6" y="96" text-anchor="start" >TL 1500</text>
+<text class="sm" x="201.6" y="106" text-anchor="start" >offset 185, MF 1</text>
 <text class="lbl" x="14" y="134" text-anchor="start" >Fragment 3</text>
 <rect class="hl" x="70" y="118" width="14" height="24" rx="0" />
 <rect class="ln" x="70" y="118" width="14" height="24" rx="0" fill="none"/>
-<rect class="box" x="84" y="118" width="92.3" height="24" rx="0" />
-<text class="lbl" x="130.1" y="133" text-anchor="middle" >1020 B data</text>
-<text class="sm" x="182.3" y="128" text-anchor="start" >TL 1040</text>
-<text class="sm" x="182.3" y="138" text-anchor="start" >offset 370, MF 0</text>
+<rect class="box" x="84" y="118" width="76.9" height="24" rx="0" />
+<text class="lbl" x="122.4" y="133" text-anchor="middle" >1020 B data</text>
+<text class="sm" x="166.9" y="128" text-anchor="start" >TL 1040</text>
+<text class="sm" x="166.9" y="138" text-anchor="start" >offset 370, MF 0</text>
 <text class="sm" x="70" y="152" text-anchor="start" >Yellow cell = 20-byte IP header. All fragments carry the same Identification; offsets count 8-byte units (1480 / 8 = 185).</text>
-<line class="lg" x1="217.9" y1="34" x2="217.9" y2="54" stroke-dasharray="2 2"/>
-<line class="lg" x1="351.7" y1="34" x2="351.7" y2="54" stroke-dasharray="2 2"/>
+<line class="lg" x1="195.6" y1="34" x2="195.6" y2="54" stroke-dasharray="2 2"/>
+<line class="lg" x1="307.1" y1="34" x2="307.1" y2="54" stroke-dasharray="2 2"/>
 </svg>
 <figcaption><b>Figure 3.13</b> Fragmenting a 4,000-byte datagram for a link with MTU 1,500. Only the destination reassembles; routers on the way treat each fragment as a separate packet.</figcaption>
 </figure>
@@ -265,7 +265,7 @@ IP addresses say where a packet is going, MAC addresses say who gets it on the n
 <text class="sm" x="410" y="26" text-anchor="middle" >192.168.1.77 / CC:CC</text>
 <text class="sm" x="254" y="64" text-anchor="start" >Dst MAC ff:ff:ff:ff:ff:ff, opcode 1</text>
 <text class="sm" x="254" y="74" text-anchor="start" >"Who has 192.168.1.1? Tell 192.168.1.10"</text>
-<text class="sm" x="410" y="70" text-anchor="middle" >C ignores it</text>
+<text class="sm" x="440" y="70" text-anchor="middle" >C ignores it</text>
 <text class="sm" x="254" y="114" text-anchor="start" >Dst MAC AA:AA, opcode 2</text>
 <text class="sm" x="254" y="124" text-anchor="start" >"192.168.1.1 is at 11:11"</text>
 <text class="acct" x="8" y="140" text-anchor="start"  style="font-size:8px;font-weight:600">A caches 192.168.1.1 → 11:11</text>
@@ -412,8 +412,8 @@ The following worked example is the canonical "show me every hop" question. PC-A
 
 ```
 R1# show ip nat translations
-Pro Inside global        Inside local         Outside local        Outside global
-tcp 203.0.113.2:51000    192.168.1.10:51000   198.51.100.80:80     198.51.100.80:80
+Inside global      Inside local        Outside local     Outside global
+203.0.113.2:51000  192.168.1.10:51000  198.51.100.80:80  198.51.100.80:80
 ```
 
 [Result: the MAC addresses change on every leg; the IP addresses are constant except at R1, which rewrites only the source address and port outward and the destination address and port inward. The TTL falls by one at each of the two routers.]{.result}
@@ -435,10 +435,10 @@ Q3.23 is the walk above, usually with PAT. Interviewers push with "what if PC-A 
 ```
 $ ip neigh show 192.168.1.1
 192.168.1.1 dev eth0 lladdr 00:11:22:33:44:55 REACHABLE
- 1 DHCP Discover - Transaction ID 0x3a7c1e02
- 2 DHCP Offer    - Your (client) IP address: 192.168.1.50
- 3 DHCP Request  - Requested IP Address: 192.168.1.50; Server Identifier: 192.168.1.1
- 4 DHCP ACK      - IP Address Lease Time: 86400 s; Router: 192.168.1.1; DNS: 192.168.1.1
+1 DHCP Discover - Transaction ID 0x3a7c1e02
+2 DHCP Offer    - Your IP address: 192.168.1.50
+3 DHCP Request  - Requested IP: 192.168.1.50
+4 DHCP ACK      - Lease 86400 s; Router 192.168.1.1
 ```
 
 **What you should notice:** the first two packets use the Ethernet broadcast, and the DHCP transaction ID ties all four together. After the ACK, the client sends a gratuitous ARP; `show ip nat translations` fills only when traffic leaves the inside.

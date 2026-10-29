@@ -1,220 +1,5 @@
 ::: {.p1}
 
-## [1.4]{.sec}Strings and parsing network data [Must · ■■□]{.tag} {#s1-4}
-
-::: bigidea
-Parsing is validation first and conversion second, because network input is untrusted and every malformed case an interviewer can imagine is a test case.
-:::
-
-A C string is an array of `char` ended by a zero byte, so `strlen` must walk the whole string and costs O(*n*). Hence a loop written `for (i = 0; i < strlen(s); i++)` is O(*n*²), because the length is recomputed on every iteration. A C++ `string` stores its length and answers `size()` in O(1). A string literal in C is read-only, so writing to `char *p = "abc"` is undefined behaviour; copy it into an array first.
-
-::: trap
-*Claim:* `strncpy(dst, src, n)` is a safe `strcpy`. *Why it is wrong:* when `src` has `n` or more characters, `strncpy` copies exactly `n` characters and writes no terminating zero. *Correct statement:* always set `dst[n-1] = '\0'` after `strncpy`, or use `snprintf(dst, n, "%s", src)`, which always terminates.
-:::
-
-*Recognise:* "valid", "parse", "split", "tokens", dotted or colon-separated text, "log lines". *Method:* scan once with an index; at each field check its character class, its length and its numeric range, and then check that nothing remains. Do not use `atoi` or `strtok` for validation: `atoi` accepts leading spaces, signs and trailing garbage and cannot report an error, and `strtok` modifies its input and keeps hidden state.
-
-The function below parses a dotted-quad IPv4 address into a host-order 32-bit integer. It rejects an empty octet, a non-digit, a value above 255, a leading zero ("01") and trailing characters.
-
-```c
-#include <stdint.h>
-#include <stdbool.h>
-
-bool parse_ipv4(const char *s, uint32_t *out) {
-    uint32_t addr = 0;
-    for (int part = 0; part < 4; part++) {
-        if (*s < '0' || *s > '9') return false;  /* empty octet or junk */
-        const char *start = s;
-        int val = 0, digits = 0;
-        while (*s >= '0' && *s <= '9') {
-            val = val * 10 + (*s - '0');
-            if (++digits > 3 || val > 255) return false;
-            s++;
-        }
-        if (digits > 1 && *start == '0') return false;  /* leading zero */
-        addr = (addr << 8) | (uint32_t)val;
-        if (part < 3) {
-            if (*s != '.') return false;
-            s++;
-        }
-    }
-    if (*s != '\0') return false;  /* trailing junk */
-    *out = addr;
-    return true;
-}
-```
-
-| Input | Result | Reason |
-|---|---|---|
-| `192.168.1.1` | true, 0xC0A80101 | four valid octets |
-| `01.2.3.4` | false | leading zero in first octet |
-| `1.2.3` | false | after the third octet the next character is the terminator, not a dot |
-| `1.2.3.4.5` | false | trailing characters remain after the fourth octet |
-| `1..2.3` | false | second octet is empty |
-| `256.1.1.1` | false | value exceeds 255 |
-
-The reverse conversion extracts each byte with a shift and a mask, using `%u` with an explicit cast because `uint32_t` is not guaranteed to be `unsigned int`:
-
-```c
-void format_ipv4(uint32_t a, char buf[16]) {  /* 15 characters + NUL */
-    snprintf(buf, 16, "%u.%u.%u.%u",
-             (unsigned)(a >> 24), (unsigned)((a >> 16) & 255),
-             (unsigned)((a >> 8) & 255), (unsigned)(a & 255));
-}
-```
-
-A MAC address follows the same pattern with hexadecimal digits and colons. Note how the second digit is read only after the first has been validated, so the code never reads past the terminator.
-
-```c
-static int hexval(char c) {
-    if (c >= '0' && c <= '9') return c - '0';
-    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-    return -1;
-}
-bool parse_mac(const char *s, uint8_t mac[6]) {
-    for (int i = 0; i < 6; i++) {
-        int hi = hexval(s[0]), lo = hi < 0 ? -1 : hexval(s[1]);
-        if (hi < 0 || lo < 0) return false;
-        mac[i] = (uint8_t)(hi << 4 | lo);
-        s += 2;
-        if (i < 5) { if (*s != ':') return false; s++; }
-    }
-    return *s == '\0';
-}
-```
-
-An IPv6 address adds one difficulty, the *zero compression* `::`, which stands for one or more groups of zeros and may appear once. The method is to collect the groups before and after the `::` in two arrays, and to place the second array at the end of the 16 bytes, leaving the zeros in between.
-
-```c
-bool parse_ipv6(const char *s, uint8_t out[16]) {
-    uint16_t g[2][8];                     /* groups before and after "::" */
-    int n[2] = {0, 0}, side = 0;
-    if (s[0] == ':') {                    /* a leading colon must be "::" */
-        if (s[1] != ':') return false;
-        side = 1; s += 2;
-    }
-    while (*s) {
-        unsigned v = 0; int digits = 0;
-        while (isxdigit((unsigned char)*s)) {
-            v = v * 16 + (unsigned)hexval(*s++);
-            if (++digits > 4) return false;
-        }
-        if (digits == 0 || n[0] + n[1] >= 8) return false;
-        g[side][n[side]++] = (uint16_t)v;
-        if (!*s) break;
-        if (*s++ != ':') return false;
-        if (*s == ':') {                  /* "::" */
-            if (side == 1) return false;  /* only one allowed */
-            side = 1; s++;
-        } else if (!*s) return false;     /* trailing single colon */
-    }
-    int total = n[0] + n[1];
-    if (side == 0 ? total != 8 : total > 7) return false;
-    memset(out, 0, 16);
-    for (int i = 0; i < n[0]; i++) {
-        out[2*i] = g[0][i] >> 8;  out[2*i + 1] = g[0][i] & 0xFF;
-    }
-    for (int i = 0; i < n[1]; i++) {
-        int pos = 8 - n[1] + i;           /* right-aligned */
-        out[2*pos] = g[1][i] >> 8;  out[2*pos + 1] = g[1][i] & 0xFF;
-    }
-    return true;
-}
-```
-
-Without a `::` exactly eight groups are required; with one, at most seven, because `::` must replace at least one group. For `2001:db8::1`, the groups before the gap are `2001` and `0db8`, the group after it is `1`, and the 16 bytes are `20 01 0d b8` followed by ten zero bytes and `00 01`. The forms with an embedded IPv4 suffix (`::ffff:192.0.2.1`) are omitted here; they add a final step that calls `parse_ipv4`.
-
-A CIDR string `a.b.c.d/p` is handled by parsing the address up to the slash, then parsing *p* as a decimal number in 0–32 with the same no-leading-zero rule. Validation of IPv6 groups and the reporting problems built on these parsers are in the Problem Set ([Problem Set](#ps1){.ref}).
-
-### Substring search
-
-*Idea.* To find a pattern of length *m* in a text of length *n*, the naive method compares at every start position and costs O(*nm*) in the worst case (`aaaa…ab` against `aaab`). The Knuth–Morris–Pratt (KMP) method never moves backwards in the text. It precomputes, for each prefix of the pattern, the length of the longest proper prefix that is also a suffix; after a mismatch, that length says how much of the pattern is still known to match. *Recognise:* "find the pattern", "repeated substring", "does *B* occur in *A*". *Complexity:* O(*n* + *m*) time, O(*m*) space.
-
-```cpp
-vector<int> prefixFunction(const string& p) {   // pi[i]: border of p[0..i]
-    vector<int> pi(p.size(), 0);
-    for (size_t i = 1, k = 0; i < p.size(); ++i) {
-        while (k && p[i] != p[k]) k = pi[k - 1];   // shorter border
-        if (p[i] == p[k]) ++k;
-        pi[i] = k;
-    }
-    return pi;
-}
-int findFirst(const string& s, const string& p) {  // first index or -1
-    if (p.empty()) return 0;
-    vector<int> pi = prefixFunction(p);
-    for (size_t i = 0, k = 0; i < s.size(); ++i) {
-        while (k && s[i] != p[k]) k = pi[k - 1];
-        if (s[i] == p[k]) ++k;
-        if (k == p.size()) return (int)(i - k + 1);
-    }
-    return -1;
-}
-```
-
-For the pattern `ababc`, the table is `pi = [0, 0, 1, 2, 0]`: for example `abab` has the border `ab`, so `pi[3] = 2`. Searching `abababc`, the match length `k` runs 1, 2, 3, 4 over `abab`, then the text character `a` meets pattern character `c` and `k` falls back from 4 to `pi[3] = 2` instead of restarting at zero; the match then continues 3, 4, 5 and ends at index 6, so the answer is 6 − 5 + 1 = 2. The pointer `i` never moves back, which is the source of the linear bound. A common alternative is the rolling hash of Rabin and Karp: hash each window of length *m* in O(1) by removing the leading character and adding the trailing one, and verify only on a hash match; it runs in O(*n* + *m*) on average and extends to many patterns at once.
-
-::: lab
-`LAB 1.4 · 10 MIN` Check the parser against the C library, which is the reference implementation. Put `hexval` and `parse_ipv6` of this section in `v6.c`, with the driver below, and compile.
-
-```c
-#include <arpa/inet.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
-/* ... hexval() and parse_ipv6() from this section ... */
-int main(void) {
-    const char *t[] = { "::", "::1", "1::", "2001:db8::ff00:42:8329",
-        "1:2:3:4:5:6:7:8", "1:2:3:4:5:6:7::", "1::2::3", ":1:2:3:4:5:6:7",
-        "12345::", "1:2:3:4:5:6:7:8:9", "1:2:3:4:5:6:7:8:", "g::1",
-        "1:::2" };
-    int bad = 0;
-    for (size_t i = 0; i < sizeof t / sizeof *t; i++) {
-        uint8_t mine[16], ref[16];
-        int a = parse_ipv6(t[i], mine);
-        int b = inet_pton(AF_INET6, t[i], ref) == 1;
-        int same = (a == b) && (!a || memcmp(mine, ref, 16) == 0);
-        printf("%-26s mine=%d lib=%d %s\n", t[i], a, b,
-               same ? "ok" : "MISMATCH");
-        bad += !same;
-    }
-    printf("%d mismatches\n", bad);
-    return bad != 0;
-}
-```
-
-```
-$ gcc -Wall -o v6 v6.c && ./v6
-::                         mine=1 lib=1 ok
-::1                        mine=1 lib=1 ok
-1::                        mine=1 lib=1 ok
-2001:db8::ff00:42:8329     mine=1 lib=1 ok
-1:2:3:4:5:6:7:8            mine=1 lib=1 ok
-1:2:3:4:5:6:7::            mine=1 lib=1 ok
-1::2::3                    mine=0 lib=0 ok
-:1:2:3:4:5:6:7             mine=0 lib=0 ok
-12345::                    mine=0 lib=0 ok
-1:2:3:4:5:6:7:8:9          mine=0 lib=0 ok
-1:2:3:4:5:6:7:8:           mine=0 lib=0 ok
-g::1                       mine=0 lib=0 ok
-1:::2                      mine=0 lib=0 ok
-0 mismatches
-```
-
-**What you should notice:** the seven malformed strings (two `::`, a leading single colon, five-digit group, nine groups, trailing colon, non-hex letter, three colons) are all rejected by both, and the valid ones give identical bytes. Add your own cases; every mismatch is a bug in one of the two, and the library is usually right.
-:::
-
-::: check
-1. Why is `01.2.3.4` rejected even though `atoi("01")` is 1? [^c1-8]
-2. What goes wrong with `char buf[15]` in `format_ipv4`? [^c1-9]
-:::
-
-[^c1-8]: Leading zeros are ambiguous (some parsers read them as octal), so strict validators reject them.
-[^c1-9]: The longest address `255.255.255.255` has 15 characters, and the terminating zero needs a sixteenth byte.
-
 ## [1.5]{.sec}Bit manipulation and subnet code [Must · ■■□]{.tag} {#s1-5}
 
 ::: bigidea
@@ -518,7 +303,7 @@ void describe(uint32_t ip, unsigned p,
 1. The mask has 22 ones: `0xFFFFFC00`, which is 255.255.252.0.
 2. The network address is `ip & mask`. The third octet 30 = `00011110` keeps its top six bits, giving `00011100` = 28, and the fourth octet is cleared. Network: 10.20.28.0.
 3. The broadcast address is `net | ~mask`, which sets the ten host bits: third octet 28 + 3 = 31, fourth octet 255. Broadcast: 10.20.31.255.
-4. Usable hosts run from 10.20.28.1 to 10.20.31.254, which is 2^10 − 2 = 1022 addresses.
+4. Usable hosts run from 10.20.28.1 to 10.20.31.254, which is 2<sup>10</sup> − 2 = 1022 addresses.
 5. Test 10.20.29.7 against it: its third octet 29 = `00011101` also clears to 28, so it lies in the subnet.
 
 [Result: network 10.20.28.0, broadcast 10.20.31.255, 1022 hosts.]{.result}
@@ -557,7 +342,7 @@ For the bytes shown, the header is 5 × 4 = 20 bytes long, the packet is 115 byt
 
 ### Bitmasks as sets
 
-An integer of *n* bits can represent a subset of *n* items, so that the union is `|`, the intersection is `&`, membership is a bit test, and all subsets are the integers 0 to 2^*n* − 1. This is practical for *n* ≤ 20 (about 10^6 subsets). *Recognise:* "all subsets", "choose a subset such that", small *n*.
+An integer of *n* bits can represent a subset of *n* items, so that the union is `|`, the intersection is `&`, membership is a bit test, and all subsets are the integers 0 to 2<sup>*n*</sup> − 1. This is practical for *n* ≤ 20 (about 10<sup>6</sup> subsets). *Recognise:* "all subsets", "choose a subset such that", small *n*.
 
 ```cpp
 int countSubsetsWithSum(const vector<int>& a, int target) {   // n <= 20
@@ -572,7 +357,7 @@ int countSubsetsWithSum(const vector<int>& a, int target) {   // n <= 20
 }
 ```
 
-The empty subset is included (it has sum zero). The cost is O(2^*n* · *n*); iterating only over the set bits with `x &= x - 1` and `ctz` removes the inner scan.
+The empty subset is included (it has sum zero). The cost is O(2<sup>*n*</sup> · *n*); iterating only over the set bits with `x &= x - 1` and `ctz` removes the inner scan.
 
 ::: lens
 [QUALCOMM · BROADCOM · JUNIPER · CISCO]{.co}
@@ -586,7 +371,7 @@ Bit questions are asked in C and are examined for care with types: unsigned oper
 :::
 
 [^c1-10]: 32 (100000): the lowest set bit is cleared.
-[^c1-11]: 2^5 − 2 = 30.
+[^c1-11]: 2<sup>5</sup> − 2 = 30.
 
 ## [1.6]{.sec}Linked lists in C [Must · ■■□]{.tag} {#s1-6}
 
@@ -702,8 +487,8 @@ Node *cycle_start(Node *head) {            /* NULL if there is no cycle */
 ```
 
 <figure>
-<svg viewBox="0 0 480 160" width="518"><defs><marker id="a12" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<circle class="box" cx="30" cy="90" r="9"/><line class="ln" x1="39" y1="90" x2="61" y2="90"/><circle class="box" cx="70" cy="90" r="9"/><line class="ln" x1="79" y1="90" x2="101" y2="90"/><circle class="box" cx="110" cy="90" r="9"/><line class="ln" x1="119" y1="90" x2="141" y2="90"/><circle class="box" cx="150" cy="90" r="9"/><line class="ln" x1="159" y1="90" x2="181" y2="90"/><text class="lbl" x="90" y="122" text-anchor="middle">a nodes</text><text class="sm" x="30" y="70" text-anchor="middle">head</text><circle class="ln" cx="250" cy="90" r="60" style="fill:none"/><circle class="box" cx="190" cy="90" r="9" style="fill:#FFF4C2"/><text class="sm" x="190" y="68" text-anchor="middle">start</text><circle class="box" cx="270.5" cy="146.4" r="9" style="fill:#FFF4C2"/><text class="sm" x="292.52120859954016" y="164.3815572471545" text-anchor="middle">meeting</text><text class="lbl" x="190" y="128" text-anchor="middle">b</text><text class="lbl" x="300" y="130" text-anchor="middle">c</text><text class="sm" x="330" y="60" text-anchor="start">cycle length L = b + c</text><text class="sm" x="330" y="74" text-anchor="start">slow walked a + b</text><text class="sm" x="330" y="88" text-anchor="start">fast walked 2(a + b)</text><text class="sm" x="330" y="108" text-anchor="start">a + b = kL, so a = (k-1)L + c:</text><text class="sm" x="330" y="122" text-anchor="start">a pointer from the head and one</text><text class="sm" x="330" y="136" text-anchor="start">from the meeting point meet at start</text>
+<svg viewBox="0 0 440 160" width="475"><defs><marker id="a12" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
+<circle class="box" cx="30" cy="90" r="9"/><line class="ln" x1="39" y1="90" x2="61" y2="90"/><circle class="box" cx="70" cy="90" r="9"/><line class="ln" x1="79" y1="90" x2="101" y2="90"/><circle class="box" cx="110" cy="90" r="9"/><line class="ln" x1="119" y1="90" x2="141" y2="90"/><circle class="box" cx="150" cy="90" r="9"/><line class="ln" x1="159" y1="90" x2="181" y2="90"/><text class="lbl" x="90" y="116" text-anchor="middle">a nodes</text><text class="sm" x="30" y="72" text-anchor="middle">head</text><circle class="ln" cx="230" cy="90" r="50" style="fill:none"/><circle class="box" cx="180" cy="90" r="9" style="fill:#FFF4C2"/><text class="sm" x="168" y="112" text-anchor="end">start</text><circle class="box" cx="255.0" cy="133.3" r="9" style="fill:#FFF4C2"/><text class="sm" x="269.0" y="155.30127018922192" text-anchor="start">meeting point</text><text class="lbl" x="190" y="150" text-anchor="middle">b</text><text class="lbl" x="230" y="28" text-anchor="middle">c</text><text class="sm" x="300" y="50" text-anchor="start">cycle length L = b + c</text><text class="sm" x="300" y="64" text-anchor="start">slow walked a + b</text><text class="sm" x="300" y="78" text-anchor="start">fast walked 2(a + b)</text><text class="sm" x="300" y="98" text-anchor="start">so a + b = kL and</text><text class="sm" x="300" y="112" text-anchor="start">a = (k-1)L + c: walking from</text><text class="sm" x="300" y="126" text-anchor="start">the head and from the meeting</text><text class="sm" x="300" y="140" text-anchor="start">point, both reach the start</text>
 </svg>
 <figcaption><b>Figure 1.9</b> The geometry behind Floyd's cycle test. The tail has a nodes; the meeting point lies b steps round the cycle from its start and c steps short of completing it.</figcaption>
 </figure>
@@ -801,202 +586,5 @@ The question is usually phrased as "write it in C on the shared editor": delete 
 
 [^c1-12]: To `head` itself, which is `NULL`, so the loop does not run and nothing is freed.
 [^c1-13]: Without it, writing `head->next = prev` destroys the only reference to the rest of the list.
-
-## [1.7]{.sec}Stacks, queues, ring buffers and deques [Must · ■■□]{.tag} {#s1-7}
-
-::: bigidea
-A stack remembers the most recent unfinished thing and a queue remembers the oldest, and a ring buffer gives a queue of fixed size with no allocation, which is exactly what a network driver needs.
-:::
-
-A *stack* is last in, first out: `push`, `pop` and `top` are O(1) on an array with a top index. *Recognise:* nested structure, "undo", "matching", "most recent", expression evaluation. A *queue* is first in, first out and is the engine of breadth-first search and of packet queues. A *deque* allows insertion and removal at both ends in O(1); `std::deque` provides it, and Python's `collections.deque` does the same.
-
-Matching brackets is the model stack problem. Each opening bracket is pushed; each closing bracket must match the top.
-
-```c
-bool balanced(const char *s) {
-    size_t top = 0;
-    char *st = malloc(strlen(s) + 1);
-    if (!st) return false;
-    bool ok = true;
-    for (; *s && ok; s++) {
-        switch (*s) {
-        case '(': case '[': case '{': st[top++] = *s; break;
-        case ')': ok = top && st[--top] == '('; break;
-        case ']': ok = top && st[--top] == '['; break;
-        case '}': ok = top && st[--top] == '{'; break;
-        }
-    }
-    free(st);
-    return ok && top == 0;  /* leftovers mean unclosed brackets */
-}
-```
-
-### Stacks and queues in C
-
-An array with a top index is the simplest stack. Every operation checks for overflow and underflow and reports it, because the caller, not the language, owns the error. A linked queue keeps pointers to both ends so that `enqueue` at the tail is O(1); with a single pointer it would be O(*n*).
-
-```c
-typedef struct { int a[64]; int top; } Stack;  /* top = element count */
-bool st_push(Stack *s, int v) {
-    if (s->top == 64) return false;
-    s->a[s->top++] = v;
-    return true;
-}
-bool st_pop(Stack *s, int *v) {
-    if (s->top == 0) return false;
-    *v = s->a[--s->top];
-    return true;
-}
-
-typedef struct { Node *head, *tail; } Queue;      /* Node: list section */
-bool enqueue(Queue *q, int v) {
-    Node *n = malloc(sizeof *n);
-    if (!n) return false;
-    n->val = v; n->next = NULL;
-    if (q->tail) q->tail->next = n;
-    else q->head = n;                       /* empty queue: head too */
-    q->tail = n;
-    return true;
-}
-bool dequeue(Queue *q, int *v) {
-    Node *n = q->head;
-    if (!n) return false;
-    *v = n->val;
-    q->head = n->next;
-    if (!q->head) q->tail = NULL;  /* queue became empty */
-    free(n);
-    return true;
-}
-```
-
-The classic queue bug is leaving `tail` pointing at the freed last node after the queue empties, which the second-to-last line above prevents.
-
-### The ring buffer
-
-Packet drivers hand frames from an interrupt handler to a consumer through a fixed array used circularly. The producer writes at `tail` and the consumer reads at `head`; both wrap with a modulus. The difficulty is that `head == tail` describes both an empty and a full buffer. Three remedies exist: keep a `count`, waste one slot, or let the indices run freely and compare their difference.
-
-<figure>
-<svg viewBox="0 0 470 190" width="508">
-<text class="sm" x="20" y="14" text-anchor="start">head = 2 (next to read), tail = 6 (next to write), count = 4</text><rect class="box" style="fill:none" x="20" y="40" width="32" height="24"/>
-<text class="mono" x="36.0" y="55.0" text-anchor="middle"></text>
-<text class="sm" x="36.0" y="74" text-anchor="middle">0</text>
-<rect class="box" style="fill:none" x="52" y="40" width="32" height="24"/>
-<text class="mono" x="68.0" y="55.0" text-anchor="middle"></text>
-<text class="sm" x="68.0" y="74" text-anchor="middle">1</text>
-<rect class="hl" x="84" y="40" width="32" height="24"/>
-<rect class="box" style="fill:none" x="84" y="40" width="32" height="24"/>
-<text class="mono" x="100.0" y="55.0" text-anchor="middle">d</text>
-<text class="sm" x="100.0" y="74" text-anchor="middle">2</text>
-<rect class="hl" x="116" y="40" width="32" height="24"/>
-<rect class="box" style="fill:none" x="116" y="40" width="32" height="24"/>
-<text class="mono" x="132.0" y="55.0" text-anchor="middle">e</text>
-<text class="sm" x="132.0" y="74" text-anchor="middle">3</text>
-<rect class="hl" x="148" y="40" width="32" height="24"/>
-<rect class="box" style="fill:none" x="148" y="40" width="32" height="24"/>
-<text class="mono" x="164.0" y="55.0" text-anchor="middle">f</text>
-<text class="sm" x="164.0" y="74" text-anchor="middle">4</text>
-<rect class="hl" x="180" y="40" width="32" height="24"/>
-<rect class="box" style="fill:none" x="180" y="40" width="32" height="24"/>
-<text class="mono" x="196.0" y="55.0" text-anchor="middle">g</text>
-<text class="sm" x="196.0" y="74" text-anchor="middle">5</text>
-<rect class="box" style="fill:none" x="212" y="40" width="32" height="24"/>
-<text class="mono" x="228.0" y="55.0" text-anchor="middle"></text>
-<text class="sm" x="228.0" y="74" text-anchor="middle">6</text>
-<rect class="box" style="fill:none" x="244" y="40" width="32" height="24"/>
-<text class="mono" x="260.0" y="55.0" text-anchor="middle"></text>
-<text class="sm" x="260.0" y="74" text-anchor="middle">7</text><path class="accf" d="M100,38 l-4,-7 l8,0 z"/><text class="lbl" x="100" y="28" text-anchor="middle">head</text><path class="accf" d="M228,66 l-4,7 l8,0 z"/><text class="lbl" x="228" y="83" text-anchor="middle">tail</text><text class="sm" x="20" y="104" text-anchor="start">after more writes the tail wraps: head = 6, tail = 2, count = 4</text><rect class="hl" x="20" y="134" width="32" height="24"/>
-<rect class="box" style="fill:none" x="20" y="134" width="32" height="24"/>
-<text class="mono" x="36.0" y="149.0" text-anchor="middle">h</text>
-<text class="sm" x="36.0" y="168" text-anchor="middle">0</text>
-<rect class="hl" x="52" y="134" width="32" height="24"/>
-<rect class="box" style="fill:none" x="52" y="134" width="32" height="24"/>
-<text class="mono" x="68.0" y="149.0" text-anchor="middle">i</text>
-<text class="sm" x="68.0" y="168" text-anchor="middle">1</text>
-<rect class="box" style="fill:none" x="84" y="134" width="32" height="24"/>
-<text class="mono" x="100.0" y="149.0" text-anchor="middle"></text>
-<text class="sm" x="100.0" y="168" text-anchor="middle">2</text>
-<rect class="box" style="fill:none" x="116" y="134" width="32" height="24"/>
-<text class="mono" x="132.0" y="149.0" text-anchor="middle"></text>
-<text class="sm" x="132.0" y="168" text-anchor="middle">3</text>
-<rect class="box" style="fill:none" x="148" y="134" width="32" height="24"/>
-<text class="mono" x="164.0" y="149.0" text-anchor="middle"></text>
-<text class="sm" x="164.0" y="168" text-anchor="middle">4</text>
-<rect class="box" style="fill:none" x="180" y="134" width="32" height="24"/>
-<text class="mono" x="196.0" y="149.0" text-anchor="middle"></text>
-<text class="sm" x="196.0" y="168" text-anchor="middle">5</text>
-<rect class="hl" x="212" y="134" width="32" height="24"/>
-<rect class="box" style="fill:none" x="212" y="134" width="32" height="24"/>
-<text class="mono" x="228.0" y="149.0" text-anchor="middle">f</text>
-<text class="sm" x="228.0" y="168" text-anchor="middle">6</text>
-<rect class="hl" x="244" y="134" width="32" height="24"/>
-<rect class="box" style="fill:none" x="244" y="134" width="32" height="24"/>
-<text class="mono" x="260.0" y="149.0" text-anchor="middle">g</text>
-<text class="sm" x="260.0" y="168" text-anchor="middle">7</text><path class="accf" d="M228,132 l-4,-7 l8,0 z"/><text class="lbl" x="228" y="122" text-anchor="middle">head</text><path class="accf" d="M100,160 l-4,7 l8,0 z"/><text class="lbl" x="100" y="177" text-anchor="middle">tail</text><text class="sm" x="300" y="150" text-anchor="start">head == tail alone is ambiguous:</text><text class="sm" x="300" y="163" text-anchor="start">empty or full. count resolves it.</text>
-</svg>
-<figcaption><b>Figure 1.10</b> A circular buffer of capacity eight, before and after the write index wraps. A separate count removes the full-versus-empty ambiguity.</figcaption>
-</figure>
-
-```c
-#define N 8
-typedef struct { uint8_t buf[N]; size_t head, tail, count; } Ring;
-
-bool ring_push(Ring *r, uint8_t b) {
-    if (r->count == N) return false;              /* full */
-    r->buf[r->tail] = b;
-    r->tail = (r->tail + 1) % N;
-    r->count++;
-    return true;
-}
-bool ring_pop(Ring *r, uint8_t *out) {
-    if (r->count == 0) return false;              /* empty */
-    *out = r->buf[r->head];
-    r->head = (r->head + 1) % N;
-    r->count--;
-    return true;
-}
-```
-
-When one thread produces and another consumes, the `count` variable is written by both and needs a lock. The lock-free alternative keeps `head` and `tail` as free-running unsigned counters and uses a power-of-two capacity: the slot is `idx & (N - 1)`, the buffer is empty when `head == tail` and full when `tail - head == N`. The subtraction is correct even after the counters wrap, because unsigned arithmetic is modular. The producer writes only `tail` and the consumer only `head`, so no lock is needed, provided each side publishes its index with the memory ordering that the concurrency chapters describe.
-
-### The monotonic stack
-
-*Idea.* To find, for each element, the next greater element, keep a stack of indices whose values are decreasing. A new value pops every smaller entry, and each popped entry has found its answer. Every index is pushed and popped once, so the cost is O(*n*). *Recognise:* "next greater or smaller", "days until", "span", "histogram".
-
-```cpp
-vector<int> dailyTemps(const vector<int>& t) {
-    vector<int> ans(t.size(), 0), st;   // st: indices, temps decreasing
-    for (int i = 0; i < (int)t.size(); ++i) {
-        while (!st.empty() && t[st.back()] < t[i]) {
-            ans[st.back()] = i - st.back();   // wait = index distance
-            st.pop_back();
-        }
-        st.push_back(i);
-    }
-    return ans;  // never-warmer days stay 0
-}
-```
-
-| i | t[i] | indices popped (answers set) | stack after |
-|---|---|---|---|
-| 0 | 73 | none | 0 |
-| 1 | 74 | 0 → 1 | 1 |
-| 2 | 75 | 1 → 1 | 2 |
-| 3 | 71 | none | 2, 3 |
-| 4 | 69 | none | 2, 3, 4 |
-| 5 | 72 | 4 → 1, 3 → 2 | 2, 5 |
-| 6 | 76 | 5 → 1, 2 → 4 | 6 |
-| 7 | 73 | none | 6, 7 |
-
-[Result for `[73, 74, 75, 71, 69, 72, 76, 73]`: `[1, 1, 4, 2, 1, 1, 0, 0]`. The classic bug is to store values instead of indices, which makes the distance impossible to compute.]{.result}
-
-The sliding-window maximum uses the same idea with a deque; it is solved in the Problem Set.
-
-::: check
-1. In the lock-free ring, why does `tail - head == N` identify a full buffer after both counters have wrapped past 2^32? [^c1-14]
-2. What is the time complexity of `dailyTemps`, given the inner `while`? [^c1-15]
-:::
-
-[^c1-14]: Unsigned subtraction is modulo 2^32, so the difference is the true occupancy as long as it never exceeds *N*.
-[^c1-15]: O(*n*): each index is pushed once and popped at most once.
 
 :::

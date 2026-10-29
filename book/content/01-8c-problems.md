@@ -67,7 +67,7 @@ Each `add` sends the new value through `lo` to `hi`, which keeps every value of 
 
 [30-second answer: if the distinct addresses fit in memory, one pass with a hash map of totals and a size-10 min-heap suffices; if not, hash-partition the log into files by address, total each file separately, and merge the per-file top tens.]{.short}
 
-**Approach.** Memory is set by the number of *distinct* keys, not by the log size: 10^7 addresses need about 10^7 × (4 + 8) bytes for the totals, which is modest. If even that is too large, partition: a hash of the address picks one of *P* files, so every record of an address lands in the same file, and each file then fits in memory. The top ten overall are among the union of the per-file top tens. When an approximate answer is acceptable, a count-min sketch with a heap of candidates uses fixed memory.
+**Approach.** Memory is set by the number of *distinct* keys, not by the log size: 10<sup>7</sup> addresses need about 10<sup>7</sup> × (4 + 8) bytes for the totals, which is modest. If even that is too large, partition: a hash of the address picks one of *P* files, so every record of an address lands in the same file, and each file then fits in memory. The top ten overall are among the union of the per-file top tens. When an approximate answer is acceptable, a count-min sketch with a heap of candidates uses fixed memory.
 
 ```cpp
 using P = pair<uint64_t, uint32_t>;

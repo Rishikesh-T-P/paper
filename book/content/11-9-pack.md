@@ -30,7 +30,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: a timeout means no answer, so the packet was dropped somewhere; a refusal is a RST from a reachable host with nothing listening, or a firewall REJECT.]{.short}
 
-**Answer.** On the wire, a timeout is SYN retransmissions at 1 s, 3 s and 7 s; a refusal is a SYN followed within a millisecond by a RST ([Figure 11.6](#s11-6){.ref}). Hence a refusal proves the path works. **Follow-up.** For UDP, a closed port returns ICMP port unreachable.
+**Answer.** On the wire, a timeout is SYN retransmissions at 1 s, 3 s and 7 s; a refusal is a SYN followed within a millisecond by a RST ([Figure 11.7](#s11-6){.ref}). Hence a refusal proves the path works. **Follow-up.** For UDP, a closed port returns ICMP port unreachable.
 :::
 
 ::: q
@@ -39,7 +39,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: bottom-up after a physical change, top-down when one application fails, and divide and conquer from Layer 3 when many hops are involved and there is no other clue.]{.short}
 
-**Answer.** Divide and conquer halves the search with each test; in [Figure 11.5](#s11-4){.ref} two pings isolate one of five links. Add follow the packet for routing faults, compare with working when one of two similar things fails, and swap when counters implicate hardware. **Mistake.** Always starting at Layer 1.
+**Answer.** Divide and conquer halves the search with each test; in [Figure 11.6](#s11-4){.ref} two pings isolate one of five links. Add follow the packet for routing faults, compare with working when one of two similar things fails, and swap when counters implicate hardware. **Mistake.** Always starting at Layer 1.
 :::
 
 ::: q
@@ -48,13 +48,11 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: the first word is the physical state and the second the line protocol (Layer 2); "administratively down" means someone typed `shutdown`.]{.short}
 
-| Status / protocol | Meaning |
-|---|---------------------|
-| up / up | Healthy |
-| up / down | Carrier present, Layer 2 failing: encapsulation, keepalives, clocking; for an SVI, no active port in the VLAN |
-| down / down | No signal: cable, remote shut, wrong optic |
-| administratively down | Shut by configuration |
-| err-disabled | A protection (BPDU Guard, port security) closed it |
+- *up / up*: healthy.
+- *up / down*: carrier present, Layer 2 failing (encapsulation, keepalives, clocking); for an SVI, no active port in the VLAN.
+- *down / down*: no signal (cable, remote shut, wrong optic).
+- *administratively down*: shut by configuration.
+- *err-disabled*: a protection (BPDU Guard, port security) closed it.
 :::
 
 ::: q
@@ -198,7 +196,7 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 [30-second answer: restate the symptom; ask for addresses, what fails, what does work, whether it ever worked, the routing protocol, the change history and the access to outputs; state the scenario back in one sentence; then walk Layer 3 first by pinging gateways.]{.short}
 
-**Answer.** The full transcript with timestamps is [Round 1](#m11-1){.ref} of [§11.9](#s11-9){.ref}, where two stacked faults (a trunk list and a missing relay) are found. The scoring turns on the clarification: eight questions defined the scenario in [Figure 11.3](#s11-3){.ref}. **Mistake.** Proposing a fix after the first finding.
+**Answer.** The full transcript with timestamps is [Round 1](#m11-1){.ref} of [§11.9](#s11-9){.ref}, where two stacked faults (a trunk list and a missing relay) are found. The scoring turns on the clarification: eight questions defined the scenario in [Figure 11.4](#s11-3){.ref}. **Mistake.** Proposing a fix after the first finding.
 :::
 
 ::: q
@@ -276,38 +274,50 @@ Each solution opens with the 30-second answer. Tags give the companies that repo
 
 ```python
 import json, pathlib, re
-from concurrent.futures import ThreadPoolExecutor
-STATE, LIMIT = pathlib.Path("counters.json"), 50
-MOCK = {"sw1": "GigabitEthernet1/0/10 is up, line protocol is up\n"
-               "     2217 input errors, 2217 CRC, 0 frame\n",
-        "sw2": "GigabitEthernet1/0/1 is up, line protocol is up\n"
-               "     12 input errors, 12 CRC, 0 frame\n"}
-def fetch(host):              # real: ConnectHandler(...).send_command(...)
+from concurrent.futures import (
+    ThreadPoolExecutor as Pool)
+STATE, LIMIT = pathlib.Path("c.json"), 50
+MOCK = {   # host -> "show interfaces"
+ "sw1": "Gi1/0/10 is up, line protocol"
+        " is up\n 2217 input errors\n",
+ "sw2": "Gi1/0/1 is up, line protocol"
+        " is up\n 12 input errors\n"}
+
+def fetch(host):     # real: Netmiko
     return MOCK[host]
+
 def parse(text):
-    counts, name = {}, None
-    for line in text.splitlines():
-        m = re.match(r"(\S+) is (?:up|down|administratively down)", line)
-        if m: name = m.group(1)
-        m = re.search(r"(\d+) input errors", line)
-        if m and name: counts[name] = int(m.group(1))
-    return counts
-def alerts(now, before):
-    for host, ifs in now.items():
-        for ifn, n in ifs.items():
-            p = before.get(host, {}).get(ifn, n)
-            d = n - p if n >= p else n     # counter cleared
-            if d > LIMIT: yield host, ifn, d
+    out, name = {}, None
+    for ln in text.splitlines():
+        m = re.match(r"(\S+) is (up|down)", ln)
+        if m:
+            name = m.group(1)
+        m = re.search(r"(\d+) input err", ln)
+        if m and name:
+            out[name] = int(m.group(1))
+    return out
+
+def alerts(now, old):
+    for h, ifs in now.items():
+        for i, n in ifs.items():
+            p = old.get(h, {}).get(i, n)
+            d = n - p if n >= p else n
+            if d > LIMIT:   # d=n: cleared
+                yield h, i, d
+
 hosts = sorted(MOCK)
-with ThreadPoolExecutor(20) as pool:
-    now = dict(zip(hosts, map(parse, pool.map(fetch, hosts))))
-before = json.loads(STATE.read_text()) if STATE.exists() else {}
-for h, i, d in alerts(now, before):
-    print(f"ALERT {h} {i}: +{d} input errors")
+with Pool(20) as pool:
+    now = dict(zip(hosts, map(parse,
+          pool.map(fetch, hosts))))
+old = {}
+if STATE.exists():
+    old = json.loads(STATE.read_text())
+for h, i, d in alerts(now, old):
+    print(f"ALERT {h} {i}: +{d} errors")
 STATE.write_text(json.dumps(now))
 ```
 
-With a previous state of 1,000 errors for `sw1` Gi1/0/10 and 10 for `sw2` Gi1/0/1, the output is `ALERT sw1 GigabitEthernet1/0/10: +1217 input errors`; `sw2` rose by 2 and is quiet. **Mistake.** Alerting on the absolute counter, which stays high for ever.
+With a saved state of 1,000 errors for `sw1` Gi1/0/10 and 10 for `sw2` Gi1/0/1, the output is `ALERT sw1 Gi1/0/10: +1217 errors`; `sw2` rose by 2 and stays quiet. The first run only stores a baseline. **Mistake.** Alerting on the absolute counter, which stays high for ever.
 :::
 
 ::: q
@@ -368,7 +378,7 @@ With a previous state of 1,000 errors for `sw1` Gi1/0/10 and 10 for `sw2` Gi1/0/
 
 **Ten facts.** (1) Three first questions: how many, since when, what changed. (2) Timeout means a drop; refusal means a RST from a live host; reset mid-stream means a middlebox or crash. (3) Ping proves ICMP only. (4) Counters are cumulative: take deltas. (5) ExStart means MTU; Init means one-way hellos; BGP Active means TCP failing. (6) Small packets pass and large fail: MTU and blocked ICMP. (7) In a live outage, roll back before diagnosing. (8) `allowed vlan` without `add` replaces the list. (9) Only `mtr` loss that persists to the destination counts. (10) Fix one fault, re-test: stacked faults are common.
 
-**Three figures to redraw.** The SCALPEL card with its loop (Figure 11.1); the three ladders, timeout, refusal, reset (Figure 11.6); the strategy chooser (Figure 11.4).
+**Three figures to redraw.** The SCALPEL card with its loop (Figure 11.2); the three ladders, timeout, refusal, reset (Figure 11.7); the strategy chooser (Figure 11.5).
 :::
 
 ### Command matrix, condensed

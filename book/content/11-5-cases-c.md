@@ -7,7 +7,7 @@
 **Prompt.** "After adding a second internet link, some users' sessions to the cloud application break; it looks random."
 
 <figure>
-<svg viewBox="0 0 480 150" width="480">
+<svg viewBox="0 0 480 168" width="480">
 <line class="ln" x1="30" y1="70" x2="95" y2="70"/>
 <line class="ln" x1="95" y1="70" x2="180" y2="32"/>
 <line class="ln" x1="180" y1="32" x2="260" y2="32"/>
@@ -18,28 +18,28 @@
 <line class="acc dash" x1="260" y1="110" x2="345" y2="110"/>
 <line class="acc dash" x1="345" y1="110" x2="445" y2="70"/>
 <rect class="box" x="15" y="60" width="30" height="20" rx="1"/><path class="ln" d="M22,84 L38,84"/><rect class="fill" x="19" y="64" width="22" height="11"/>
-<text class="lbl" x="30" y="94" text-anchor="middle">Users</text>
-<rect class="box" x="73" y="59" width="44" height="22" rx="2"/><path class="ln" d="M82,67 L108,67 M104,64 L108,67 L104,70 M108,74 L82,74 M86,71 L82,74 L86,77"/><text class="sm" x="116" y="57" text-anchor="end">L3</text>
-<text class="lbl" x="95" y="91" text-anchor="middle">Core</text>
-<text class="sm" x="95" y="100" text-anchor="middle">ECMP</text>
+<text class="lbl" x="30" y="96" text-anchor="middle">Users</text>
+<rect class="box" x="73" y="59" width="44" height="22" rx="2"/><path class="ln" d="M82,67 L108,67 M104,64 L108,67 L104,70 M108,74 L82,74 M86,71 L82,74 L86,77"/>
+<text class="lbl" x="95" y="94" text-anchor="middle">Core</text>
+<text class="sm" x="95" y="103" text-anchor="middle">ECMP</text>
 <rect class="box" x="160" y="20" width="40" height="24" rx="1"/><path class="ln" d="M160,32 L200,32 M173,20 L173,32 M187,20 L187,32 M180,32 L180,44 M166,32 L166,44 M194,32 L194,44"/>
-<text class="lbl" x="180" y="54" text-anchor="middle">FW-A</text>
+<text class="lbl" x="180" y="57" text-anchor="middle">FW-A</text>
 <rect class="box" x="160" y="98" width="40" height="24" rx="1"/><path class="ln" d="M160,110 L200,110 M173,98 L173,110 M187,98 L187,110 M180,110 L180,122 M166,110 L166,122 M194,110 L194,122"/><rect class="acc" x="157" y="95" width="46" height="30" rx="3"/>
-<text class="lbl" x="180" y="132" text-anchor="middle">FW-B</text>
-<text class="sm" x="180" y="141" text-anchor="middle">no state</text>
+<text class="lbl" x="180" y="135" text-anchor="middle">FW-B</text>
+<text class="sm" x="180" y="144" text-anchor="middle">no state</text>
 <circle class="box" cx="260" cy="32" r="13"/><path class="ln" d="M253,32 L267,32 M260,25 L260,39 M255,27 L265,37 M255,37 L265,27"/>
-<text class="lbl" x="260" y="55" text-anchor="middle">Edge-A</text>
+<text class="lbl" x="260" y="58" text-anchor="middle">Edge-A</text>
 <circle class="box" cx="260" cy="110" r="13"/><path class="ln" d="M253,110 L267,110 M260,103 L260,117 M255,105 L265,115 M255,115 L265,105"/>
-<text class="lbl" x="260" y="133" text-anchor="middle">Edge-B</text>
+<text class="lbl" x="260" y="136" text-anchor="middle">Edge-B</text>
 <path class="box" d="M317,43 C305,43 305,27 319,27 C319,13 343,9 351,21 C363,15 379,27 371,35 C383,37 379,43 369,43 Z"/>
-<text class="lbl" x="345" y="55" text-anchor="middle">ISP-A</text>
+<text class="lbl" x="345" y="58" text-anchor="middle">ISP-A</text>
 <path class="box" d="M317,121 C305,121 305,105 319,105 C319,91 343,87 351,99 C363,93 379,105 371,113 C383,115 379,121 369,121 Z"/>
-<text class="lbl" x="345" y="133" text-anchor="middle">ISP-B</text>
+<text class="lbl" x="345" y="136" text-anchor="middle">ISP-B</text>
 <rect class="box" x="431" y="55" width="28" height="30" rx="1"/><path class="ln" d="M431,65 L459,65 M431,75 L459,75"/><circle class="accf" cx="453" cy="60" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="445" y="95" text-anchor="middle">Cloud app</text>
-<text class="sm acct" x="300" y="142" text-anchor="middle">SYN-ACK returns through ISP-B (accent)</text>
+<text class="lbl" x="445" y="98" text-anchor="middle">Cloud app</text>
+<text class="sm acct" x="300" y="160" text-anchor="middle">SYN-ACK returns through ISP-B (accent)</text>
 </svg>
-<figcaption><b>Figure 11.20</b> Case 13. The request leaves through ISP-A and FW-A; the reply returns through ISP-B and FW-B, which has no state for it.</figcaption>
+<figcaption><b>Figure 11.21</b> Case 13. The request leaves through ISP-A and FW-A; the reply returns through ISP-B and FW-B, which has no state for it.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -67,8 +67,6 @@
 
 **Prevent.** A design rule that a stateful device must see both directions, and failover tests of each path.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | What is TCP state bypass? | A firewall setting that skips state checks for chosen flows; it removes the symptom and some protection. |
@@ -77,6 +75,12 @@
 
 **Variant.** *NAT pool exhaustion.* New connections fail while old ones work; `show ip nat statistics` shows misses. Enlarge the pool or use PAT.
 
+::: lens
+[GOOGLE · AMAZON · CISCO]{.co}
+
+A design question disguised as a fault. A strong answer ends with a rule (stateful devices must see both directions) and offers two fixes with their trade-offs. Expect: "what would you do if you could not change the ISPs?"
+:::
+
 ### Case 14 · Website slow for some users only [Should · ■■■]{.tag} {#c11-14}
 
 [L1 · L2 · L3 · GOOGLE · MICROSOFT · AMAZON · ARISTA]{.where}
@@ -84,33 +88,33 @@
 **Prompt.** "About a quarter of users say the internal portal is slow; the others are fine. Server CPU is low."
 
 <figure>
-<svg viewBox="0 0 480 160" width="480">
-<line class="ln" x1="30" y1="80" x2="100" y2="80"/>
-<line class="ln" x1="100" y1="80" x2="260" y2="18"/>
-<line class="acc" x1="100" y1="80" x2="260" y2="64"/>
-<line class="ln" x1="100" y1="80" x2="260" y2="110"/>
-<line class="ln" x1="100" y1="80" x2="260" y2="156"/>
-<line class="ln" x1="260" y1="18" x2="420" y2="80"/>
-<line class="ln" x1="260" y1="64" x2="420" y2="80"/>
-<line class="ln" x1="260" y1="110" x2="420" y2="80"/>
-<line class="ln" x1="260" y1="156" x2="420" y2="80"/>
-<text class="sm" x="136" y="72" text-anchor="middle">Et49</text>
-<rect class="box" x="15" y="70" width="30" height="20" rx="1"/><path class="ln" d="M22,94 L38,94"/><rect class="fill" x="19" y="74" width="22" height="11"/>
-<text class="lbl" x="30" y="104" text-anchor="middle">Users</text>
-<rect class="box" x="78" y="69" width="44" height="22" rx="2"/><path class="ln" d="M87,77 L113,77 M109,74 L113,77 L109,80 M113,84 L87,84 M91,81 L87,84 L91,87"/><text class="sm" x="121" y="67" text-anchor="end">L3</text>
-<text class="lbl" x="100" y="101" text-anchor="middle">Leaf1</text>
-<rect class="box" x="238" y="7" width="44" height="22" rx="2"/><path class="ln" d="M247,15 L273,15 M269,12 L273,15 L269,18 M273,22 L247,22 M251,19 L247,22 L251,25"/><text class="sm" x="281" y="5" text-anchor="end">L3</text>
-<text class="lbl" x="260" y="39" text-anchor="middle">Spine1</text>
-<rect class="box" x="238" y="53" width="44" height="22" rx="2"/><path class="ln" d="M247,61 L273,61 M269,58 L273,61 L269,64 M273,68 L247,68 M251,65 L247,68 L251,71"/><text class="sm" x="281" y="51" text-anchor="end">L3</text><rect class="acc" x="235" y="50" width="50" height="28" rx="3"/>
-<text class="lbl" x="260" y="85" text-anchor="middle">Spine2</text>
-<rect class="box" x="238" y="99" width="44" height="22" rx="2"/><path class="ln" d="M247,107 L273,107 M269,104 L273,107 L269,110 M273,114 L247,114 M251,111 L247,114 L251,117"/><text class="sm" x="281" y="97" text-anchor="end">L3</text>
-<text class="lbl" x="260" y="131" text-anchor="middle">Spine3</text>
-<rect class="box" x="238" y="145" width="44" height="22" rx="2"/><path class="ln" d="M247,153 L273,153 M269,150 L273,153 L269,156 M273,160 L247,160 M251,157 L247,160 L251,163"/><text class="sm" x="281" y="143" text-anchor="end">L3</text>
-<text class="lbl" x="260" y="177" text-anchor="middle">Spine4</text>
-<rect class="box" x="398" y="69" width="44" height="22" rx="2"/><path class="ln" d="M407,77 L433,77 M429,74 L433,77 L429,80 M433,84 L407,84 M411,81 L407,84 L411,87"/><text class="sm" x="441" y="67" text-anchor="end">L3</text>
-<text class="lbl" x="420" y="101" text-anchor="middle">Leaf2</text>
+<svg viewBox="0 0 480 190" width="480">
+<line class="ln" x1="30" y1="85" x2="100" y2="85"/>
+<line class="ln" x1="100" y1="85" x2="260" y2="18"/>
+<line class="acc" x1="100" y1="85" x2="260" y2="62"/>
+<line class="ln" x1="100" y1="85" x2="260" y2="106"/>
+<line class="ln" x1="100" y1="85" x2="260" y2="150"/>
+<line class="ln" x1="260" y1="18" x2="420" y2="85"/>
+<line class="ln" x1="260" y1="62" x2="420" y2="85"/>
+<line class="ln" x1="260" y1="106" x2="420" y2="85"/>
+<line class="ln" x1="260" y1="150" x2="420" y2="85"/>
+<text class="sm" x="136" y="76" text-anchor="middle">Et49</text>
+<rect class="box" x="15" y="75" width="30" height="20" rx="1"/><path class="ln" d="M22,99 L38,99"/><rect class="fill" x="19" y="79" width="22" height="11"/>
+<text class="lbl" x="30" y="111" text-anchor="middle">Users</text>
+<rect class="box" x="78" y="74" width="44" height="22" rx="2"/><path class="ln" d="M87,82 L113,82 M109,79 L113,82 L109,85 M113,89 L87,89 M91,86 L87,89 L91,92"/>
+<text class="lbl" x="100" y="109" text-anchor="middle">Leaf1</text>
+<rect class="box" x="238" y="7" width="44" height="22" rx="2"/><path class="ln" d="M247,15 L273,15 M269,12 L273,15 L269,18 M273,22 L247,22 M251,19 L247,22 L251,25"/>
+<text class="lbl" x="260" y="42" text-anchor="middle">Spine1</text>
+<rect class="box" x="238" y="51" width="44" height="22" rx="2"/><path class="ln" d="M247,59 L273,59 M269,56 L273,59 L269,62 M273,66 L247,66 M251,63 L247,66 L251,69"/><rect class="acc" x="235" y="48" width="50" height="28" rx="3"/>
+<text class="lbl" x="260" y="86" text-anchor="middle">Spine2</text>
+<rect class="box" x="238" y="95" width="44" height="22" rx="2"/><path class="ln" d="M247,103 L273,103 M269,100 L273,103 L269,106 M273,110 L247,110 M251,107 L247,110 L251,113"/>
+<text class="lbl" x="260" y="130" text-anchor="middle">Spine3</text>
+<rect class="box" x="238" y="139" width="44" height="22" rx="2"/><path class="ln" d="M247,147 L273,147 M269,144 L273,147 L269,150 M273,154 L247,154 M251,151 L247,154 L251,157"/>
+<text class="lbl" x="260" y="174" text-anchor="middle">Spine4</text>
+<rect class="box" x="398" y="74" width="44" height="22" rx="2"/><path class="ln" d="M407,82 L433,82 M429,79 L433,82 L429,85 M433,89 L407,89 M411,86 L407,89 L411,92"/>
+<text class="lbl" x="420" y="109" text-anchor="middle">Leaf2</text>
 </svg>
-<figcaption><b>Figure 11.21</b> Case 14. Flows from Leaf1 are hashed over four spine uplinks; one has a failing optic.</figcaption>
+<figcaption><b>Figure 11.22</b> Case 14. Flows from Leaf1 are hashed over four spine uplinks; one has a failing optic.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -124,7 +128,7 @@
 
 | Layer | Command | Decisive output | Inference |
 |----|-----------------|----------------------------|--------------------------|
-| L7 | `curl -w '%{time_namelookup} %{time_connect} %{time_starttransfer}\n' -o /dev/null -s URL`, slow vs fast client | DNS and connect equal; transfer slow | Not DNS or setup; loss in the transfer |
+| L7 | `curl -w` with the timing variables (name lookup, connect, first byte), slow vs fast client | DNS and connect equal; transfer slow | Not DNS or setup; loss in the transfer |
 | L3 | `mtr -rwzbc 100 portal` from a slow client | Loss from the leaf-to-spine hop, persisting to the end | Real forwarding loss on one path |
 | L1 | `show interfaces counters errors` on Leaf1 | `Et49  FCS 18342` rising | CRC errors on one uplink |
 | L1 | `show interfaces transceiver` | `Et49  Rx power -14.2 dBm` | The optic is weak |
@@ -138,8 +142,6 @@
 
 **Prevent.** Telemetry alerts on CRC rate and optical power thresholds ([Pillar 10](#ch10){.ref}), and an automated drain.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | Which fields feed the ECMP hash? | Source and destination address, protocol and ports. |
@@ -147,6 +149,12 @@
 | What is a gray failure? | A partial fault that health checks miss; end-to-end probes over every path find it. |
 
 **Variant.** A port channel member suspended for a mismatched configuration (flag `s` in `show etherchannel summary`) gives the same "some flows" pattern.
+
+::: lens
+[GOOGLE · MICROSOFT · ARISTA]{.co}
+
+A gray-failure question. The marks are for linking "same users every time" to flow hashing, and for proposing telemetry on every member. Expect: "how would you find this across 500 leaves?"
+:::
 
 ### Case 15 · VPN tunnel up, but no traffic [Should · ■■□]{.tag} {#c11-15}
 
@@ -160,18 +168,18 @@
 <line class="ln" x1="100" y1="45" x2="240" y2="45"/>
 <line class="ln" x1="240" y1="45" x2="380" y2="45"/>
 <circle class="box" cx="100" cy="45" r="13"/><path class="ln" d="M93,45 L107,45 M100,38 L100,52 M95,40 L105,50 M95,50 L105,40"/>
-<text class="lbl" x="100" y="68" text-anchor="middle">HQ (BR1)</text>
-<text class="sm" x="100" y="77" text-anchor="middle">10.10.0.0/16</text>
+<text class="lbl" x="100" y="71" text-anchor="middle">HQ (BR1)</text>
+<text class="sm" x="100" y="80" text-anchor="middle">10.10.0.0/16</text>
 <path class="box" d="M212,56 C200,56 200,40 214,40 C214,26 238,22 246,34 C258,28 274,40 266,48 C278,50 274,56 264,56 Z"/>
-<text class="lbl" x="240" y="68" text-anchor="middle">Internet</text>
+<text class="lbl" x="240" y="71" text-anchor="middle">Internet</text>
 <circle class="box" cx="380" cy="45" r="13"/><path class="ln" d="M373,45 L387,45 M380,38 L380,52 M375,40 L385,50 M375,50 L385,40"/><circle class="acc" cx="380" cy="45" r="16"/>
-<text class="lbl" x="380" y="68" text-anchor="middle">Hyderabad</text>
-<text class="sm" x="380" y="77" text-anchor="middle">10.20.0.0/16</text>
+<text class="lbl" x="380" y="71" text-anchor="middle">Hyderabad</text>
+<text class="sm" x="380" y="80" text-anchor="middle">10.20.0.0/16</text>
 <text class="sm" x="100" y="100" text-anchor="middle">selector 10.20.0.0/16</text>
 <text class="sm acct" x="380" y="100" text-anchor="middle">selector 10.20.1.0/24</text>
 <text class="sm acct" x="100" y="111" text-anchor="middle">PAT before encryption</text>
 </svg>
-<figcaption><b>Figure 11.22</b> Case 15. The two sides disagree on the traffic selectors, and HQ translates VPN-bound traffic before encrypting it.</figcaption>
+<figcaption><b>Figure 11.23</b> Case 15. The two sides disagree on the traffic selectors, and HQ translates VPN-bound traffic before encrypting it.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -199,8 +207,6 @@
 
 **Prevent.** Generate both peers from one definition, and use the checklist of [§9.7](#s9-7){.ref}.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | What causes Phase 1 to fail? | A wrong pre-shared key, mismatched proposals, or UDP 500 and 4500 blocked. |
@@ -221,20 +227,20 @@
 <line class="ln" x1="150" y1="40" x2="265" y2="40"/>
 <line class="ln" x1="265" y1="40" x2="390" y2="40"/>
 <rect class="box" x="25" y="30" width="30" height="20" rx="1"/><path class="ln" d="M32,54 L48,54"/><rect class="fill" x="29" y="34" width="22" height="11"/>
-<text class="lbl" x="40" y="64" text-anchor="middle">Client</text>
-<text class="sm" x="40" y="73" text-anchor="middle">10.0.1.5</text>
+<text class="lbl" x="40" y="66" text-anchor="middle">Client</text>
+<text class="sm" x="40" y="75" text-anchor="middle">10.0.1.5</text>
 <rect class="box" x="130" y="28" width="40" height="24" rx="1"/><path class="ln" d="M130,40 L170,40 M143,28 L143,40 M157,28 L157,40 M150,40 L150,52 M136,40 L136,52 M164,40 L164,52"/>
-<text class="lbl" x="150" y="62" text-anchor="middle">Cloud SG</text>
-<text class="sm" x="150" y="71" text-anchor="middle">timeout?</text>
+<text class="lbl" x="150" y="65" text-anchor="middle">Cloud SG</text>
+<text class="sm" x="150" y="74" text-anchor="middle">timeout?</text>
 <rect class="box" x="245" y="28" width="40" height="24" rx="1"/><path class="ln" d="M245,40 L285,40 M258,28 L258,40 M272,28 L272,40 M265,40 L265,52 M251,40 L251,52 M279,40 L279,52"/>
-<text class="lbl" x="265" y="62" text-anchor="middle">nftables</text>
-<text class="sm" x="265" y="71" text-anchor="middle">timeout?</text>
+<text class="lbl" x="265" y="65" text-anchor="middle">nftables</text>
+<text class="sm" x="265" y="74" text-anchor="middle">timeout?</text>
 <rect class="box" x="376" y="25" width="28" height="30" rx="1"/><path class="ln" d="M376,35 L404,35 M376,45 L404,45"/><circle class="accf" cx="398" cy="30" r="1.2" style="fill:#1A1D23"/><rect class="acc" x="373" y="22" width="34" height="36" rx="3"/>
-<text class="lbl" x="390" y="65" text-anchor="middle">App</text>
-<text class="sm" x="390" y="74" text-anchor="middle">127.0.0.1:8080</text>
+<text class="lbl" x="390" y="68" text-anchor="middle">App</text>
+<text class="sm" x="390" y="77" text-anchor="middle">127.0.0.1:8080</text>
 <text class="sm" x="240" y="100" text-anchor="middle">three barriers, three different symptoms</text>
 </svg>
-<figcaption><b>Figure 11.23</b> Case 16. Three barriers in a row, each with its own symptom; the loopback bind is the first.</figcaption>
+<figcaption><b>Figure 11.24</b> Case 16. Three barriers in a row, each with its own symptom; the loopback bind is the first.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -247,7 +253,7 @@
 
 | Layer | Command | Decisive output | Inference |
 |----|-----------------|----------------------------|--------------------------|
-| L4 | `ss -tlnp \| grep 8080` on the VM | `LISTEN 0 128 127.0.0.1:8080 ... users:(("python3",pid=2211,fd=3))` | Loopback only; the kernel answers other hosts with a RST |
+| L4 | `ss -tlnp` on the VM, line for 8080 | `LISTEN 0 128 127.0.0.1:8080 ... users:(("python3",pid=2211,fd=3))` | Loopback only; the kernel answers other hosts with a RST |
 | L4 | after rebinding to `0.0.0.0`: client `curl` | `curl: (28) Connection timed out after 5001 milliseconds` | A drop, not a refusal |
 | L4 | `nft list ruleset` or `ufw status` | no rule for 8080; `policy drop` | The host firewall drops it; allow it |
 | L4 | `tcpdump -ni eth0 port 8080` on the VM | nothing arrives | The packet dies outside the VM: the security group |
@@ -260,8 +266,6 @@
 **Verify.** `curl -v http://10.0.2.10:8080/health` returns 200 from the client, and `ss` shows `0.0.0.0:8080`.
 
 **Prevent.** A deployment health check run from outside the host, and the security groups held as infrastructure-as-code.
-
-**Follow-ups.**
 
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
@@ -282,17 +286,17 @@
 <line class="ln" x1="50" y1="40" x2="240" y2="40"/>
 <line class="ln" x1="240" y1="40" x2="430" y2="40"/>
 <rect class="box" x="36" y="25" width="28" height="30" rx="1"/><path class="ln" d="M36,35 L64,35 M36,45 L64,45"/><circle class="accf" cx="58" cy="30" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="50" y="65" text-anchor="middle">Mumbai</text>
-<text class="sm" x="50" y="74" text-anchor="middle">wscale 7</text>
+<text class="lbl" x="50" y="68" text-anchor="middle">Mumbai</text>
+<text class="sm" x="50" y="77" text-anchor="middle">wscale 7</text>
 <rect class="box" x="220" y="28" width="40" height="24" rx="1"/><path class="ln" d="M220,40 L260,40 M233,28 L233,40 M247,28 L247,40 M240,40 L240,52 M226,40 L226,52 M254,40 L254,52"/><rect class="acc" x="217" y="25" width="46" height="30" rx="3"/>
-<text class="lbl" x="240" y="62" text-anchor="middle">Middlebox</text>
-<text class="sm" x="240" y="71" text-anchor="middle">strips wscale</text>
+<text class="lbl" x="240" y="65" text-anchor="middle">Middlebox</text>
+<text class="sm" x="240" y="74" text-anchor="middle">strips wscale</text>
 <rect class="box" x="416" y="25" width="28" height="30" rx="1"/><path class="ln" d="M416,35 L444,35 M416,45 L444,45"/><circle class="accf" cx="438" cy="30" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="430" y="65" text-anchor="middle">Frankfurt</text>
-<text class="sm" x="430" y="74" text-anchor="middle">rmem max 64 KB</text>
+<text class="lbl" x="430" y="68" text-anchor="middle">Frankfurt</text>
+<text class="sm" x="430" y="77" text-anchor="middle">rmem max 64 KB</text>
 <text class="sm" x="240" y="100" text-anchor="middle">1 Gb/s, RTT 80 ms, one stream about 6 Mb/s</text>
 </svg>
-<figcaption><b>Figure 11.24</b> Case 17. A middlebox strips the window-scale option and an old script caps the receive buffer; one stream is limited to 64 KB per round trip.</figcaption>
+<figcaption><b>Figure 11.25</b> Case 17. A middlebox strips the window-scale option and an old script caps the receive buffer; one stream is limited to 64 KB per round trip.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -321,8 +325,6 @@
 
 **Prevent.** Baseline long-haul throughput tests, and an audit for drift in `sysctl` settings.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | Why do parallel streams help? | Each stream has its own window, so their sum approaches the link rate. |
@@ -344,22 +346,22 @@
 <line class="ln" x1="250" y1="40" x2="350" y2="40"/>
 <line class="ln" x1="350" y1="40" x2="445" y2="40"/>
 <rect class="box" x="15" y="30" width="30" height="20" rx="1"/><path class="ln" d="M22,54 L38,54"/><rect class="fill" x="19" y="34" width="22" height="11"/>
-<text class="lbl" x="30" y="64" text-anchor="middle">Customer</text>
+<text class="lbl" x="30" y="66" text-anchor="middle">Customer</text>
 <circle class="box" cx="120" cy="40" r="13"/><path class="ln" d="M113,40 L127,40 M120,33 L120,47 M115,35 L125,45 M115,45 L125,35"/>
-<text class="lbl" x="120" y="63" text-anchor="middle">ISP edge</text>
-<text class="sm" x="120" y="72" text-anchor="middle">hop 2-3</text>
+<text class="lbl" x="120" y="66" text-anchor="middle">ISP edge</text>
+<text class="sm" x="120" y="75" text-anchor="middle">hop 2-3</text>
 <circle class="box" cx="250" cy="40" r="13"/><path class="ln" d="M243,40 L257,40 M250,33 L250,47 M245,35 L255,45 M245,45 L255,35"/><circle class="acc" cx="250" cy="40" r="16"/>
-<text class="lbl" x="250" y="63" text-anchor="middle">Border</text>
-<text class="sm" x="250" y="72" text-anchor="middle">hop 4, CoPP</text>
+<text class="lbl" x="250" y="66" text-anchor="middle">Border</text>
+<text class="sm" x="250" y="75" text-anchor="middle">hop 4, CoPP</text>
 <circle class="box" cx="350" cy="40" r="13"/><path class="ln" d="M343,40 L357,40 M350,33 L350,47 M345,35 L355,45 M345,45 L355,35"/>
-<text class="lbl" x="350" y="63" text-anchor="middle">Core</text>
-<text class="sm" x="350" y="72" text-anchor="middle">hop 5</text>
+<text class="lbl" x="350" y="66" text-anchor="middle">Core</text>
+<text class="sm" x="350" y="75" text-anchor="middle">hop 5</text>
 <rect class="box" x="431" y="25" width="28" height="30" rx="1"/><path class="ln" d="M431,35 L459,35 M431,45 L459,45"/><circle class="accf" cx="453" cy="30" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="445" y="65" text-anchor="middle">Destination</text>
-<text class="sm" x="445" y="74" text-anchor="middle">0% loss</text>
+<text class="lbl" x="445" y="68" text-anchor="middle">Destination</text>
+<text class="sm" x="445" y="77" text-anchor="middle">0% loss</text>
 <text class="sm acct" x="250" y="100" text-anchor="middle">mtr shows 70% loss at hop 4 only</text>
 </svg>
-<figcaption><b>Figure 11.25</b> Case 18. The border router rate-limits the ICMP it generates; the forwarding path is clean.</figcaption>
+<figcaption><b>Figure 11.26</b> Case 18. The border router rate-limits the ICMP it generates; the forwarding path is clean.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -385,8 +387,6 @@
 **Verify.** The customer's application metrics are normal.
 
 **Prevent.** A support runbook entry for this report.
-
-**Follow-ups.**
 
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|

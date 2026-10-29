@@ -80,12 +80,32 @@ The routing protocols have state machines, taught in [ยง4.5](#s4-5){.ref} and [ย
 |---------------|------------------------------|------------------------|
 | OSPF Down or Init | Hellos do not arrive, or are one-way (ACL, multicast, passive interface) | `show ip ospf interface`, `debug ip ospf hello` |
 | OSPF 2-Way | Normal between DROthers on a broadcast segment | none needed |
-| OSPF ExStart or Exchange | DBD exchange fails, usually an MTU mismatch | `show interfaces \| include MTU` on both ends |
+| OSPF ExStart or Exchange | DBD exchange fails, usually an MTU mismatch | `show interfaces`, MTU line, on both ends |
 | OSPF Loading | LSRs not answered, packets lost | Check MTU, authentication, loss |
 | BGP Idle | Administratively down, or no route to the peer | `show ip bgp neighbors`, `show ip route peer` |
 | BGP Active | TCP connection attempts fail (not "active" in the usual sense) | Ping and `telnet peer 179` from the same source; ACL |
 | BGP OpenSent | Open sent, no valid reply: AS or parameters mismatch | Logs: NOTIFICATION |
 | BGP Established with a number | The number is the prefixes received; the session is healthy | `show ip bgp neighbors X advertised-routes` |
+
+### Reading Linux evidence
+
+On a Linux host, three outputs carry most of the diagnosis. The pair for `ss -ti` shows a healthy long-haul connection and the window-limited one of [Case 17](#c11-17){.ref}; the `ping` pair shows a path-MTU black hole ([Case 5](#c11-5){.ref}); the last block shows `ip -s link`, where errors and drops are deltas to be read twice.
+
+```
+ss -ti   healthy
+ cubic wscale:7,7 rto:284 rtt:81/4 cwnd:640 bytes_retrans:0
+ss -ti   window-limited, retransmitting
+ cubic rto:284 rtt:81/4 cwnd:10 bytes_retrans:182520 retrans:0/127
+
+ping -M do -s 1372 10.10.5.20    healthy at the path MTU
+1380 bytes from 10.10.5.20: icmp_seq=1 ttl=62 time=21.4 ms
+ping -M do -s 1472 10.10.5.20    black hole: no reply and no error
+--- 10.10.5.20 ping statistics --- 3 packets transmitted, 0 received
+
+ip -s link show eth0
+    RX: bytes packets errors dropped  missed  mcast
+    8812770112 6120331  2217      40       0   1203
+```
 
 ### Reading ping, traceroute and Linux socket output
 
@@ -165,7 +185,7 @@ Precise words for the symptom point at different faults, because a timeout, a re
 <line class="ln" x1="340" y1="126" x2="450" y2="136" marker-end="url(#ld1)"/><text class="sm" x="395" y="125" text-anchor="middle">data</text>
 <line class="acc" x1="450" y1="150" x2="340" y2="160" marker-end="url(#ld2)"/><text class="sm" x="395" y="149" text-anchor="middle">RST (middlebox)</text>
 </svg>
-<figcaption><b>Figure 11.6</b> Three ladders. In a timeout the sender hears nothing; in a refusal the server answers at once with a reset; in a mid-stream reset a device that lost the state answers later data with a reset.</figcaption>
+<figcaption><b>Figure 11.7</b> Three ladders. In a timeout the sender hears nothing; in a refusal the server answers at once with a reset; in a mid-stream reset a device that lost the state answers later data with a reset.</figcaption>
 </figure>
 
 ```
@@ -231,7 +251,7 @@ In a live outage, restoring service comes before finding the cause, because ever
 <line class="ln" x1="8" y1="62" x2="472" y2="62"/><line class="ln" x1="8" y1="58" x2="8" y2="66"/><line class="ln" x1="472" y1="58" x2="472" y2="66"/>
 <text class="sm" x="240" y="76" text-anchor="middle">Communicate throughout: first update within 10 minutes, then at a fixed cadence (every 30 minutes for Sev 1)</text>
 <text class="sm" x="102" y="94" text-anchor="middle">minutes</text><text class="sm" x="290" y="94" text-anchor="middle">hours</text><text class="sm" x="430" y="94" text-anchor="middle">days</text></svg>
-<figcaption><b>Figure 11.7</b> The incident overlay. Mitigation is the accent step; communication runs in parallel with every phase.</figcaption>
+<figcaption><b>Figure 11.8</b> The incident overlay. Mitigation is the accent step; communication runs in parallel with every phase.</figcaption>
 </figure>
 
 | Mitigation | Use when | Evidence to save first |
@@ -252,6 +272,16 @@ Severity sets how often stakeholders are updated and who is woken.
 | Sev 4 | Cosmetic or no user impact | Alarm threshold needs tuning | At closure |
 
 Four roles are named at once in a serious incident: an *incident commander* who decides and does not type commands, an *operator* who runs them, a *scribe* who keeps the timeline, and a *communications lead* who updates stakeholders. In an interview, naming these roles scores as maturity; saying "I would do everything myself" does not.
+
+::: example
+**Three incident messages.** A good message states impact, action, and the time of the next update, and nothing speculative. The wording below is for the floor outage of Case 11.
+
+| Message | Text |
+|-------|----------------------------------------------------------|
+| First update (10 minutes) | "11:12. The third floor has no network. About 180 users are affected. We suspect a Layer 2 loop and are isolating ports. Next update at 11:40." |
+| Progress update | "11:30. The suspected ports are shut and traffic on the floor is recovering. We are verifying each VLAN. Next update at 12:00." |
+| Resolution | "11:48. Service is restored since 11:31. The cause was a cable loop on edge ports. A review will be circulated within three working days." |
+:::
 
 ::: example
 **A blameless post-mortem for Case 11.** The template has seven parts; the filled version is below, abridged.

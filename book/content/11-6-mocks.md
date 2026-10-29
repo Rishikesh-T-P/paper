@@ -16,7 +16,7 @@ Three timed rounds follow, for practice with a friend. The partner reads the *in
 
 ### Round 1 · The Cisco vague-diagram round (cases 2 and 12) {#m11-1}
 
-**Setting.** The diagram is [Figure 11.3](#s11-3){.ref}, and the eight clarifying answers there are already known. The prompt is "PC-A cannot reach PC-B." Time: 25 minutes.
+**Setting.** The diagram is [Figure 11.4](#s11-3){.ref}, and the eight clarifying answers there are already known. The prompt is "PC-A cannot reach PC-B." Time: 25 minutes.
 
 | Hidden fact | Reveal only if asked |
 |----------------------|--------------------------------------------|

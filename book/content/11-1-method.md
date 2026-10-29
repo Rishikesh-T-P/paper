@@ -47,7 +47,31 @@ A troubleshooting interview scores the way you reduce uncertainty as much as the
 | 1:30 | Lists twelve commands, none tied to a hypothesis | Learns: one VLAN, timeout (not refusal), started after yesterday's change; states three hypotheses |
 | 4:00 | Asked "what does that show?", cannot say what a healthy output looks like | Pings the gateway, then the server: "gateway answers, so L1 to L3 of this VLAN are intact; I test TCP 443 next" |
 | 9:00 | Proposes restarting the web server | Finds the ACL line, fixes it, re-tests, proposes a template check |
-| Score | Clarification 0, structure 1, evidence 1, closure 0 | Clarification 4, structure 4, evidence 4, closure 4 |
+| Score (0 to 4) | Clarification 0, structure 1, depth 2, evidence 1, communication 1, closure 0 | All six criteria at 4 |
+
+<figure>
+<svg viewBox="0 0 480 190" width="480">
+<polygon class="lg" points="240.0,76.5 253.4,84.2 253.4,99.8 240.0,107.5 226.6,99.8 226.6,84.2"/>
+<polygon class="lg" points="240.0,61.0 266.8,76.5 266.8,107.5 240.0,123.0 213.2,107.5 213.2,76.5"/>
+<polygon class="lg" points="240.0,45.5 280.3,68.8 280.3,115.2 240.0,138.5 199.7,115.3 199.7,68.8"/>
+<polygon class="lg" points="240.0,30.0 293.7,61.0 293.7,123.0 240.0,154.0 186.3,123.0 186.3,61.0"/>
+<line class="lg" x1="240" y1="92" x2="240.0" y2="30.0"/>
+<text class="lbl" x="240.0" y="19.0" text-anchor="middle">Clarification</text>
+<line class="lg" x1="240" y1="92" x2="293.7" y2="61.0"/>
+<text class="lbl" x="305.8" y="57.0" text-anchor="start">Structure</text>
+<line class="lg" x1="240" y1="92" x2="293.7" y2="123.0"/>
+<text class="lbl" x="305.8" y="133.0" text-anchor="start">Technical depth</text>
+<line class="lg" x1="240" y1="92" x2="240.0" y2="154.0"/>
+<text class="lbl" x="240.0" y="170.9" text-anchor="middle">Evidence</text>
+<line class="lg" x1="240" y1="92" x2="186.3" y2="123.0"/>
+<text class="lbl" x="174.2" y="133.0" text-anchor="end">Communication</text>
+<line class="lg" x1="240" y1="92" x2="186.3" y2="61.0"/>
+<text class="lbl" x="174.2" y="57.0" text-anchor="end">Closure</text>
+<polygon class="ln" style="fill:none" points="240.0,30.0 293.7,61.0 293.7,123.0 240.0,154.0 186.3,123.0 186.3,61.0"/>
+<polygon class="acc" points="240.0,92.0 253.4,84.2 266.8,107.5 240.0,107.5 226.6,99.8 240.0,92.0"/>
+<text class="sm acct" x="10" y="16">Candidate A (accent)</text><text class="sm" x="10" y="27">Candidate B (black outline)</text><text class="sm" x="470" y="185" text-anchor="end">rings at scores 1 to 4</text></svg>
+<figcaption><b>Figure 11.1</b> The two transcripts scored on the six criteria. Candidate B's area is the whole hexagon; A's is a small sliver near the centre.</figcaption>
+</figure>
 :::
 
 ::: trap
@@ -115,7 +139,7 @@ The order mirrors the surgical safety checklist: the knife is used only after th
 <path class="acc" d="M438,172 L460,172 L460,100 L440,100" marker-end="url(#sc1)"/>
 <text class="sm acct" x="468" y="140" transform="rotate(90 468 140)" text-anchor="middle">hypothesis fails: back to A</text>
 </svg>
-<figcaption><b>Figure 11.1</b> The SCALPEL card. The accent loop is the rule to remember: when a hypothesis fails or explains only part of the evidence, return to Assess, not to a random command.</figcaption>
+<figcaption><b>Figure 11.2</b> The SCALPEL card. The accent loop is the rule to remember: when a hypothesis fails or explains only part of the evidence, return to Assess, not to a random command.</figcaption>
 </figure>
 
 | Step | Say aloud | Do not |
@@ -140,7 +164,7 @@ The time budget below suits a twenty-minute round. Most of the time belongs to t
 <rect class="fill" x="389.5" y="8" width="23.0" height="22"/><text class="lbl" x="401.0" y="23" text-anchor="middle">E</text><text class="sm" x="401.0" y="43" text-anchor="middle">1</text>
 <rect class="box" x="412.5" y="8" width="57.5" height="22"/><text class="lbl" x="441.2" y="23" text-anchor="middle">L</text><text class="sm" x="441.2" y="43" text-anchor="middle">2.5</text>
 <text class="sm" x="470" y="14" text-anchor="end"></text></svg>
-<figcaption><b>Figure 11.2</b> Time budget for a twenty-minute round, in minutes. The letters follow Figure 11.1.</figcaption>
+<figcaption><b>Figure 11.3</b> Time budget for a twenty-minute round, in minutes. The letters follow Figure 11.2.</figcaption>
 </figure>
 
 ::: example
@@ -161,7 +185,7 @@ The time budget below suits a twenty-minute round. Most of the time belongs to t
 **Recovering when a hypothesis fails.** The same Case 1 prompt, but the interviewer answers differently: the client's DNS server *is* correct.
 
 | Time | Step | Spoken |
-|---|---|---|
+|-------|-----|----------------------------------------------------------------------------------------|
 | 3:00 | L | "The client uses 192.168.50.53, which is right, so hypothesis one is ruled out. I return to Assess." |
 | 3:30 | A | "Next: the DNS server is down, or port 53 is filtered from VLAN 10. One test separates them: query the server from another VLAN." |
 | 4:30 | L | "It answers from VLAN 20, so the server is up. I now read the ACL hit counts for UDP 53 on the VLAN 10 interface." |
@@ -213,19 +237,19 @@ When the interviewer declines to answer, state an assumption instead and continu
 <line class="ln" x1="350" y1="30" x2="420" y2="30"/>
 <line class="ln" x1="420" y1="30" x2="465" y2="30"/>
 <rect class="box" x="15" y="20" width="30" height="20" rx="1"/><path class="ln" d="M22,44 L38,44"/><rect class="fill" x="19" y="24" width="22" height="11"/>
-<text class="lbl" x="30" y="54" text-anchor="middle">PC-A</text>
+<text class="lbl" x="30" y="56" text-anchor="middle">PC-A</text>
 <rect class="box" x="83" y="19" width="44" height="22" rx="2"/><path class="ln" d="M92,27 L118,27 M114,24 L118,27 L114,30 M118,34 L92,34 M96,31 L92,34 L96,37"/>
-<text class="lbl" x="105" y="51" text-anchor="middle">SW1</text>
+<text class="lbl" x="105" y="54" text-anchor="middle">SW1</text>
 <circle class="box" cx="185" cy="30" r="13"/><path class="ln" d="M178,30 L192,30 M185,23 L185,37 M180,25 L190,35 M180,35 L190,25"/>
-<text class="lbl" x="185" y="53" text-anchor="middle">R1</text>
+<text class="lbl" x="185" y="56" text-anchor="middle">R1</text>
 <path class="box" d="M242,41 C230,41 230,25 244,25 C244,11 268,7 276,19 C288,13 304,25 296,33 C308,35 304,41 294,41 Z"/>
-<text class="lbl" x="270" y="53" text-anchor="middle">WAN?</text>
+<text class="lbl" x="270" y="56" text-anchor="middle">WAN?</text>
 <circle class="box" cx="350" cy="30" r="13"/><path class="ln" d="M343,30 L357,30 M350,23 L350,37 M345,25 L355,35 M345,35 L355,25"/>
-<text class="lbl" x="350" y="53" text-anchor="middle">R2</text>
+<text class="lbl" x="350" y="56" text-anchor="middle">R2</text>
 <rect class="box" x="398" y="19" width="44" height="22" rx="2"/><path class="ln" d="M407,27 L433,27 M429,24 L433,27 L429,30 M433,34 L407,34 M411,31 L407,34 L411,37"/>
-<text class="lbl" x="420" y="51" text-anchor="middle">SW2</text>
+<text class="lbl" x="420" y="54" text-anchor="middle">SW2</text>
 <rect class="box" x="450" y="20" width="30" height="20" rx="1"/><path class="ln" d="M457,44 L473,44"/><rect class="fill" x="454" y="24" width="22" height="11"/>
-<text class="lbl" x="465" y="54" text-anchor="middle">PC-B</text>
+<text class="lbl" x="465" y="56" text-anchor="middle">PC-B</text>
 <text class="sm" x="240" y="88" text-anchor="middle">As given: no addresses, no VLANs, no protocol</text>
 </g>
 <g transform="translate(0,100)">
@@ -240,30 +264,30 @@ When the interviewer declines to answer, state an assumption instead and continu
 <text class="sm" x="309" y="26" text-anchor="middle">10.0.0.2/30</text>
 <text class="sm" x="379" y="26" text-anchor="middle">Gi0/1</text>
 <rect class="box" x="15" y="20" width="30" height="20" rx="1"/><path class="ln" d="M22,44 L38,44"/><rect class="fill" x="19" y="24" width="22" height="11"/>
-<text class="lbl" x="30" y="54" text-anchor="middle">PC-A</text>
-<text class="sm" x="30" y="63" text-anchor="middle">192.168.1.10</text>
+<text class="lbl" x="30" y="56" text-anchor="middle">PC-A</text>
+<text class="sm" x="30" y="65" text-anchor="middle">192.168.1.10</text>
 <rect class="box" x="83" y="19" width="44" height="22" rx="2"/><path class="ln" d="M92,27 L118,27 M114,24 L118,27 L114,30 M118,34 L92,34 M96,31 L92,34 L96,37"/>
-<text class="lbl" x="105" y="51" text-anchor="middle">SW1</text>
-<text class="sm" x="105" y="60" text-anchor="middle">VLAN 20</text>
+<text class="lbl" x="105" y="54" text-anchor="middle">SW1</text>
+<text class="sm" x="105" y="63" text-anchor="middle">VLAN 20</text>
 <circle class="box" cx="185" cy="30" r="13"/><path class="ln" d="M178,30 L192,30 M185,23 L185,37 M180,25 L190,35 M180,35 L190,25"/>
-<text class="lbl" x="185" y="53" text-anchor="middle">R1</text>
-<text class="sm" x="185" y="62" text-anchor="middle">.1 gateway</text>
+<text class="lbl" x="185" y="56" text-anchor="middle">R1</text>
+<text class="sm" x="185" y="65" text-anchor="middle">.1 gateway</text>
 <path class="box" d="M242,41 C230,41 230,25 244,25 C244,11 268,7 276,19 C288,13 304,25 296,33 C308,35 304,41 294,41 Z"/>
-<text class="lbl" x="270" y="53" text-anchor="middle">WAN</text>
-<text class="sm" x="270" y="62" text-anchor="middle">OSPF area 0</text>
+<text class="lbl" x="270" y="56" text-anchor="middle">WAN</text>
+<text class="sm" x="270" y="65" text-anchor="middle">OSPF area 0</text>
 <circle class="box" cx="350" cy="30" r="13"/><path class="ln" d="M343,30 L357,30 M350,23 L350,37 M345,25 L355,35 M345,35 L355,25"/>
-<text class="lbl" x="350" y="53" text-anchor="middle">R2</text>
-<text class="sm" x="350" y="62" text-anchor="middle">.1 on Gi0/1.60</text>
+<text class="lbl" x="350" y="56" text-anchor="middle">R2</text>
+<text class="sm" x="350" y="65" text-anchor="middle">.1 on Gi0/1.60</text>
 <rect class="box" x="398" y="19" width="44" height="22" rx="2"/><path class="ln" d="M407,27 L433,27 M429,24 L433,27 L429,30 M433,34 L407,34 M411,31 L407,34 L411,37"/>
-<text class="lbl" x="420" y="51" text-anchor="middle">SW2</text>
-<text class="sm" x="420" y="60" text-anchor="middle">VLAN 60</text>
+<text class="lbl" x="420" y="54" text-anchor="middle">SW2</text>
+<text class="sm" x="420" y="63" text-anchor="middle">VLAN 60</text>
 <rect class="box" x="450" y="20" width="30" height="20" rx="1"/><path class="ln" d="M457,44 L473,44"/><rect class="fill" x="454" y="24" width="22" height="11"/>
-<text class="lbl" x="465" y="54" text-anchor="middle">PC-B</text>
-<text class="sm" x="465" y="63" text-anchor="middle">192.168.60.20</text>
+<text class="lbl" x="465" y="56" text-anchor="middle">PC-B</text>
+<text class="sm" x="465" y="65" text-anchor="middle">192.168.60.20</text>
 <text class="sm acct" x="240" y="88" text-anchor="middle">After eight questions: addressed, routed, no firewall in path</text>
 </g>
 </svg>
-<figcaption><b>Figure 11.3</b> The vague diagram as given (top) and after eight questions (bottom). The addresses are as designed; what PC-B actually has is not yet known.</figcaption>
+<figcaption><b>Figure 11.4</b> The vague diagram as given (top) and after eight questions (bottom). The addresses are as designed; what PC-B actually has is not yet known.</figcaption>
 </figure>
 
 | Candidate asks | Interviewer answers |
@@ -329,7 +353,7 @@ The best starting point is the one that discards the largest part of the search 
 <line class="ln" x1="258" y1="175" x2="300" y2="175" marker-end="url(#st1)"/><text class="sm" x="279" y="171" text-anchor="middle">yes</text>
 <rect class="fill" x="302" y="158" width="170" height="34" rx="2"/><text class="lbl" x="387" y="179" text-anchor="middle">Divide and conquer from L3</text>
 <line class="ln" x1="133" y1="192" x2="133" y2="203"/><text class="sm" x="140" y="210">no: default is divide and conquer from L3</text></svg>
-<figcaption><b>Figure 11.4</b> Strategy chooser. The default is divide and conquer from Layer 3.</figcaption>
+<figcaption><b>Figure 11.5</b> Strategy chooser. The default is divide and conquer from Layer 3.</figcaption>
 </figure>
 
 ::: example
@@ -343,24 +367,24 @@ The best starting point is the one that discards the largest part of the search 
 <line class="acc" x1="280" y1="30" x2="360" y2="30"/>
 <line class="ln" x1="360" y1="30" x2="440" y2="30"/>
 <rect class="box" x="25" y="20" width="30" height="20" rx="1"/><path class="ln" d="M32,44 L48,44"/><rect class="fill" x="29" y="24" width="22" height="11"/>
-<text class="lbl" x="40" y="54" text-anchor="middle">PC</text>
+<text class="lbl" x="40" y="56" text-anchor="middle">PC</text>
 <rect class="box" x="98" y="19" width="44" height="22" rx="2"/><path class="ln" d="M107,27 L133,27 M129,24 L133,27 L129,30 M133,34 L107,34 M111,31 L107,34 L111,37"/>
-<text class="lbl" x="120" y="51" text-anchor="middle">SW1</text>
+<text class="lbl" x="120" y="54" text-anchor="middle">SW1</text>
 <circle class="box" cx="200" cy="30" r="13"/><path class="ln" d="M193,30 L207,30 M200,23 L200,37 M195,25 L205,35 M195,35 L205,25"/>
-<text class="lbl" x="200" y="53" text-anchor="middle">R1</text>
+<text class="lbl" x="200" y="56" text-anchor="middle">R1</text>
 <circle class="box" cx="280" cy="30" r="13"/><path class="ln" d="M273,30 L287,30 M280,23 L280,37 M275,25 L285,35 M275,35 L285,25"/>
-<text class="lbl" x="280" y="53" text-anchor="middle">R2</text>
+<text class="lbl" x="280" y="56" text-anchor="middle">R2</text>
 <circle class="box" cx="360" cy="30" r="13"/><path class="ln" d="M353,30 L367,30 M360,23 L360,37 M355,25 L365,35 M355,35 L365,25"/><circle class="acc" cx="360" cy="30" r="16"/>
-<text class="lbl" x="360" y="53" text-anchor="middle">R3</text>
+<text class="lbl" x="360" y="56" text-anchor="middle">R3</text>
 <rect class="box" x="426" y="15" width="28" height="30" rx="1"/><path class="ln" d="M426,25 L454,25 M426,35 L454,35"/><circle class="accf" cx="448" cy="20" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="440" y="55" text-anchor="middle">Server</text>
+<text class="lbl" x="440" y="58" text-anchor="middle">Server</text>
 <text class="sm" x="80" y="60" text-anchor="middle">1</text>
 <text class="sm" x="160" y="60" text-anchor="middle">2</text>
 <text class="sm" x="240" y="60" text-anchor="middle">3</text>
 <text class="sm" x="320" y="60" text-anchor="middle">4</text>
 <text class="sm" x="400" y="60" text-anchor="middle">5</text>
 <line class="ln" x1="40" y1="63" x2="280" y2="63"/><text class="sm" x="288" y="66">1. from PC ping R2: reply, so links 1 to 3 are healthy</text><line class="acc" x1="40" y1="81" x2="360" y2="81"/><text class="sm" x="368" y="84">2. from PC ping R3: timeout, so the fault is in link 4</text></svg>
-<figcaption><b>Figure 11.5</b> Binary search on the path. Two pings from the PC isolate link 4; one `show interface` on R2 then confirms the cause.</figcaption>
+<figcaption><b>Figure 11.6</b> Binary search on the path. Two pings from the PC isolate link 4; one `show interface` on R2 then confirms the cause.</figcaption>
 </figure>
 
 | Strategy | Sequence | Tests |

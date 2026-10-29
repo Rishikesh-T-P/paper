@@ -1,180 +1,5 @@
 ::: {.p1}
 
-## [1.8]{.sec}Trees and binary search trees [Must · ■■□]{.tag} {#s1-8}
-
-::: bigidea
-A binary search tree keeps its keys ordered so that each comparison discards a whole subtree, giving search in time proportional to the height, which is logarithmic only while the tree stays balanced.
-:::
-
-A *binary tree* is a node with at most two children; a *binary search tree* (BST) adds the rule that every key in the left subtree is smaller than the node and every key in the right subtree is larger. The *height* *h* is the number of edges on the longest root-to-leaf path. Search, insert and delete each follow one path, so they cost O(*h*). For *n* random keys *h* is about 2 log *n*, but inserting sorted keys produces a chain with *h* = *n*, and every operation degrades to O(*n*). Self-balancing trees (AVL, red-black) restore O(log *n*); C++ `std::map` and `std::set` are red-black trees.
-
-<figure>
-<svg viewBox="0 0 440 192" width="475">
-<line class="ln" x1="240" y1="28" x2="140" y2="70"/><line class="ln" x1="240" y1="28" x2="340" y2="70"/><line class="ln" x1="140" y1="70" x2="90" y2="112"/><line class="ln" x1="140" y1="70" x2="190" y2="112"/><line class="ln" x1="340" y1="70" x2="390" y2="112"/><line class="ln" x1="190" y1="112" x2="160" y2="154"/><line class="ln" x1="190" y1="112" x2="220" y2="154"/><line class="ln" x1="390" y1="112" x2="360" y2="154"/><circle class="box" cx="240" cy="28" r="12" style="fill:#FFF4C2"/><text class="lbl" x="240" y="31" text-anchor="middle">8</text><circle class="box" cx="140" cy="70" r="12" style="fill:#FFF4C2"/><text class="lbl" x="140" y="73" text-anchor="middle">3</text><circle class="box" cx="340" cy="70" r="12"/><text class="lbl" x="340" y="73" text-anchor="middle">10</text><circle class="box" cx="90" cy="112" r="12"/><text class="lbl" x="90" y="115" text-anchor="middle">1</text><circle class="box" cx="190" cy="112" r="12" style="fill:#FFF4C2"/><text class="lbl" x="190" y="115" text-anchor="middle">6</text><circle class="box" cx="390" cy="112" r="12"/><text class="lbl" x="390" y="115" text-anchor="middle">14</text><circle class="box" cx="160" cy="154" r="12" style="fill:#FFF4C2"/><text class="lbl" x="160" y="157" text-anchor="middle">4</text><circle class="box" cx="220" cy="154" r="12"/><text class="lbl" x="220" y="157" text-anchor="middle">7</text><circle class="box" cx="360" cy="154" r="12"/><text class="lbl" x="360" y="157" text-anchor="middle">13</text><text class="sm" x="20" y="180" text-anchor="start">search 4: left at 8, right at 3, left at 6, found.  In-order: 1 3 4 6 7 8 10 13 14</text>
-</svg>
-<figcaption><b>Figure 1.11</b> A binary search tree. Everything left of a node is smaller and everything right is larger; the highlighted path is the search for 4.</figcaption>
-</figure>
-
-### Traversals
-
-Depth-first traversals differ only in when the node is visited: *pre-order* (node, left, right), *in-order* (left, node, right) and *post-order* (left, right, node). The in-order traversal of a BST yields the keys in sorted order, which is the fact behind "k-th smallest" and "validate BST". Breadth-first traversal visits level by level with a queue. *Recognise:* "depth", "path", "subtree" (DFS, usually post-order, returning information to the parent); "level", "right side view", "shortest" (BFS); "sorted", "k-th", "validate" (in-order).
-
-```cpp
-struct TreeNode { int val; TreeNode *left = nullptr, *right = nullptr; };
-
-int height(TreeNode* t) {                  // nodes on the longest path
-    return t ? 1 + max(height(t->left), height(t->right)) : 0;
-}
-
-vector<int> inorderIter(TreeNode* root) {  // no recursion: explicit stack
-    vector<int> out; vector<TreeNode*> st; TreeNode* cur = root;
-    while (cur || !st.empty()) {
-        while (cur) { st.push_back(cur); cur = cur->left; }  // far left
-        cur = st.back(); st.pop_back();
-        out.push_back(cur->val);
-        cur = cur->right;
-    }
-    return out;
-}
-
-vector<vector<int>> levelOrder(TreeNode* root) {
-    vector<vector<int>> res; if (!root) return res;
-    queue<TreeNode*> q; q.push(root);
-    while (!q.empty()) {
-        int sz = q.size(); res.emplace_back();  // sz = nodes on this level
-        while (sz--) {
-            TreeNode* t = q.front(); q.pop();
-            res.back().push_back(t->val);
-            if (t->left) q.push(t->left);
-            if (t->right) q.push(t->right);
-        }
-    }
-    return res;
-}
-```
-
-All three run in O(*n*) time. Their space is O(*h*) for the explicit stack and O(*width*) for the queue. A skewed tree of 10^6 nodes also overflows the call stack of the recursive `height`, which is the reason for asking in an interview whether the tree may be skewed.
-
-### BST operations in C
-
-Insert and delete return the root of the (possibly changed) subtree, and the caller stores the result back into its link. Forgetting to return or store it is the standard delete bug.
-
-```c
-typedef struct T { int key; struct T *l, *r; } T;
-
-T *bst_insert(T *t, int k) {
-    if (!t) { t = calloc(1, sizeof *t); if (t) t->key = k; return t; }
-    if (k < t->key)      t->l = bst_insert(t->l, k);
-    else if (k > t->key) t->r = bst_insert(t->r, k);
-    return t;  /* duplicates are ignored */
-}
-const T *bst_search(const T *t, int k) {
-    while (t && t->key != k) t = k < t->key ? t->l : t->r;
-    return t;
-}
-static T *min_node(T *t) { while (t->l) t = t->l; return t; }
-
-T *bst_delete(T *t, int k) {
-    if (!t) return NULL;
-    if (k < t->key)      t->l = bst_delete(t->l, k);
-    else if (k > t->key) t->r = bst_delete(t->r, k);
-    else {
-        if (!t->l || !t->r) {  /* zero or one child */
-            T *child = t->l ? t->l : t->r;
-            free(t);
-            return child;  /* parent adopts the child */
-        }
-        T *s = min_node(t->r);  /* in-order successor */
-        t->key = s->key;
-        t->r = bst_delete(t->r, s->key);
-    }
-    return t;
-}
-```
-
-Deletion has three cases: a leaf is removed; a node with one child is replaced by that child; a node with two children takes the key of its in-order successor (the smallest key of the right subtree), and the successor, which has no left child, is then deleted by one of the first two cases.
-
-::: example
-**Delete 3 from the tree of Figure 1.11.**
-
-1. Search: 3 < 8, so go left and find the node 3.
-2. It has two children (1 and 6), so find the successor: the left-most node of the right subtree, `6 → 4`. The successor is 4.
-3. Copy 4 into the node, so the node now holds 4.
-4. Delete 4 from the right subtree. The node 4 is a leaf, so it is removed and the left link of 6 becomes `NULL`.
-5. The in-order sequence is now 1 4 6 7 8 10 13 14: still sorted, with 3 removed.
-
-[Result: the node 3 now holds 4, and the old leaf 4 is gone.]{.result}
-:::
-
-### Validating a BST
-
-Checking each node only against its parent is wrong, since a node deep in the right subtree may still be smaller than an ancestor. We pass down the open interval that each key must lie in.
-
-```cpp
-bool valid(TreeNode* t, long long lo, long long hi) {  // lo < key < hi
-    return !t || (lo < t->val && t->val < hi &&
-                  valid(t->left, lo, t->val) &&
-                  valid(t->right, t->val, hi));
-}
-// call: valid(root, LLONG_MIN, LLONG_MAX)
-```
-
-::: trap
-*Claim:* a tree is a BST if every node is greater than its left child and smaller than its right child. *Why it is wrong:* the tree 5 with left child 1 and right child 6, where 6 has left child 4, satisfies the local rule but 4 sits in the right subtree of 5. *Correct statement:* every key must lie between the bounds inherited from all its ancestors, or the in-order sequence must be strictly increasing.
-:::
-
-### Keeping a BST balanced
-
-An *AVL tree* stores in each node the height of its subtree and restores the rule that the heights of a node's two subtrees differ by at most one, after every insert or delete, using *rotations*. A rotation rearranges three pointers, lowers one side by a level and raises the other, and preserves the in-order sequence, so the search property survives.
-
-<figure>
-<svg viewBox="0 0 440 172" width="475"><defs><marker id="a11" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
-<text class="sm" x="80" y="14" text-anchor="middle">before: y is too deep on the left</text><text class="sm" x="340" y="14" text-anchor="middle">after rotate&#95;right(y)</text><line class="ln" x1="90" y1="40" x2="60" y2="80"/><line class="ln" x1="90" y1="40" x2="125" y2="90"/><line class="ln" x1="60" y1="80" x2="35" y2="115"/><line class="ln" x1="60" y1="80" x2="85" y2="115"/><circle class="box" cx="90" cy="40" r="12"/><text class="lbl" x="90" y="43" text-anchor="middle">y</text><circle class="box" cx="60" cy="80" r="12"/><text class="lbl" x="60" y="83" text-anchor="middle">x</text><path class="ln" style="fill:#F1F2F3" d="M125,90 l-14,28 l28,0 z"/><text class="lbl" x="125" y="112" text-anchor="middle">C</text><path class="ln" style="fill:#F1F2F3" d="M35,115 l-14,28 l28,0 z"/><text class="lbl" x="35" y="137" text-anchor="middle">A</text><path class="ln" style="fill:#F1F2F3" d="M85,115 l-14,28 l28,0 z"/><text class="lbl" x="85" y="137" text-anchor="middle">B</text><path class="acc" d="M170,70 L250,70" marker-end="url(#a11)"/><line class="ln" x1="340" y1="40" x2="305" y2="90"/><line class="ln" x1="340" y1="40" x2="375" y2="80"/><line class="ln" x1="375" y1="80" x2="350" y2="115"/><line class="ln" x1="375" y1="80" x2="400" y2="115"/><circle class="box" cx="340" cy="40" r="12"/><text class="lbl" x="340" y="43" text-anchor="middle">x</text><path class="ln" style="fill:#F1F2F3" d="M305,90 l-14,28 l28,0 z"/><text class="lbl" x="305" y="112" text-anchor="middle">A</text><circle class="box" cx="375" cy="80" r="12"/><text class="lbl" x="375" y="83" text-anchor="middle">y</text><path class="ln" style="fill:#F1F2F3" d="M350,115 l-14,28 l28,0 z"/><text class="lbl" x="350" y="137" text-anchor="middle">B</text><path class="ln" style="fill:#F1F2F3" d="M400,115 l-14,28 l28,0 z"/><text class="lbl" x="400" y="137" text-anchor="middle">C</text><text class="sm" x="10" y="160" text-anchor="start">x.right (subtree B) becomes y.left; y becomes x.right. In-order sequence A x B y C is unchanged.</text>
-</svg>
-<figcaption><b>Figure 1.12</b> A right rotation. Three pointer writes lower the left side by one level and raise the right, and the search order is preserved.</figcaption>
-</figure>
-
-```c
-T *rotate_right(T *y) {          /* y->l becomes the new subtree root */
-    T *x = y->l;
-    y->l = x->r;                 /* subtree B moves across */
-    x->r = y;
-    return x;                    /* caller stores x where y was */
-}
-T *rotate_left(T *x) {           /* mirror image */
-    T *y = x->r;
-    x->r = y->l;
-    y->l = x;
-    return y;
-}
-```
-
-After an insertion, the first unbalanced node on the path back to the root is repaired by one of four cases, chosen by where the new key went.
-
-| Imbalance | Where the key went | Repair |
-|---|---|---|
-| left-left | into the left subtree of the left child | rotate right at the node |
-| right-right | into the right subtree of the right child | rotate left at the node |
-| left-right | into the right subtree of the left child | rotate left at the child, then right at the node |
-| right-left | into the left subtree of the right child | rotate right at the child, then left at the node |
-
-Inserting 1, 2, 3 in order into an AVL tree leaves 1 → 2 → 3 as a chain after the third key; this is the right-right case, and one left rotation at 1 gives the balanced tree with 2 at the root. Height is then at most about 1.44 log₂ *n*, so every operation is O(log *n*). An interview rarely asks for the full AVL code; it asks why a plain BST degrades and what a rotation is, and expects `std::map` as the practical answer.
-
-| Structure | Ordering rule | Find | Typical use |
-|---|---|---|---|
-| binary search tree | left < node < right | O(*h*) | ordered set, range queries |
-| heap | parent ≤ children | O(*n*) | the minimum, the next event |
-| trie | path spells the key | O(*L*) | prefixes, longest-prefix match |
-| hash table | none | O(1) average | membership, counts |
-
-::: check
-1. What is the height of the BST built by inserting 1, 2, 3, 4, 5 in order? [^c1-16]
-2. Which traversal prints a BST in sorted order? [^c1-17]
-:::
-
-[^c1-16]: 4 edges (5 nodes): each key becomes the right child of the previous one, so operations cost O(*n*).
-[^c1-17]: In-order (left, node, right).
-
 ## [1.9]{.sec}Tries and longest-prefix match [Must · ■■■]{.tag} {#s1-9}
 
 ::: bigidea
@@ -191,7 +16,7 @@ A *trie* (prefix tree) stores a set of strings along the edges of a tree: the pa
 <svg viewBox="0 0 440 200" width="475">
 <line class="acc" x1="240" y1="24" x2="140" y2="64"/><text class="sm" x="182.0" y="42.0" text-anchor="middle">0</text><line class="ln" x1="240" y1="24" x2="340" y2="64"/><text class="sm" x="298.0" y="42.0" text-anchor="middle">1</text><line class="acc" x1="140" y1="64" x2="200" y2="104"/><text class="sm" x="178.0" y="82.0" text-anchor="middle">1</text><line class="acc" x1="200" y1="104" x2="260" y2="144"/><text class="sm" x="238.0" y="122.0" text-anchor="middle">1</text><line class="ln" x1="260" y1="144" x2="300" y2="184"/><text class="sm" x="272.0" y="162.0" text-anchor="middle">0</text><circle class="box" cx="240" cy="24" r="11" style="fill:#fff"/><circle class="box" cx="140" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="140" y="67" text-anchor="middle">A</text><circle class="box" cx="340" cy="64" r="11" style="fill:#FFF4C2"/><text class="lbl" x="340" y="67" text-anchor="middle">D</text><circle class="box" cx="200" cy="104" r="11" style="fill:#FFF4C2"/><text class="lbl" x="200" y="107" text-anchor="middle">B</text><circle class="box" cx="260" cy="144" r="11" style="fill:#fff"/><circle class="box" cx="300" cy="184" r="11" style="fill:#FFF4C2"/><text class="lbl" x="300" y="187" text-anchor="middle">C</text><text class="sm" x="10" y="60" text-anchor="start">Prefixes (4-bit toy):</text><text class="mono" x="10" y="74" text-anchor="start">0&#42;   → A</text><text class="mono" x="10" y="86" text-anchor="start">01&#42;  → B</text><text class="mono" x="10" y="98" text-anchor="start">0110 → C</text><text class="mono" x="10" y="110" text-anchor="start">1&#42;   → D</text><text class="sm" x="330" y="140" text-anchor="start">lookup 0111 (accent path):</text><text class="sm" x="330" y="153" text-anchor="start">marks seen: A, then B;</text><text class="sm" x="330" y="166" text-anchor="start">no edge 0 below 011,</text><text class="lbl" x="330" y="179" text-anchor="start">so the answer is B</text>
 </svg>
-<figcaption><b>Figure 1.13</b> A binary trie for four toy prefixes. A shaded node carries a next hop; a lookup walks the address bits and remembers the deepest shaded node it passed.</figcaption>
+<figcaption><b>Figure 1.14</b> A binary trie for four toy prefixes. A shaded node carries a next hop; a lookup walks the address bits and remembers the deepest shaded node it passed.</figcaption>
 </figure>
 
 ```c
@@ -233,13 +58,13 @@ int trie_lookup(const Node *root, uint32_t addr) {
 
 *Complexity.* Insert O(*p*), lookup O(32), independent of the table size *n*. The memory is at most 32 nodes per prefix in the worst case, and typically far fewer because prefixes share their upper bits. A linear scan of all prefixes costs O(*n*) per lookup, which is the baseline this structure replaces.
 
-**Multibit tries.** Reading eight bits per level (a *stride* of 8) needs only four steps for IPv4, at the cost of nodes with 256 children. Figure 1.14 draws such a trie for four prefixes. Real routers go further: they use compressed tries or TCAM hardware (the device internals are treated in Pillar 5, §5.2.8). The software alternative to a trie is one hash table per prefix length: probe the /32 table, then /31, and so on, down to /0, and keep the first hit; this costs up to 32 hash lookups but needs no pointer chasing.
+**Multibit tries.** Reading eight bits per level (a *stride* of 8) needs only four steps for IPv4, at the cost of nodes with 256 children. Figure 1.15 draws such a trie for four prefixes. Real routers go further: they use compressed tries or TCAM hardware (the device internals are treated in Pillar 5, §5.2.8). The software alternative to a trie is one hash table per prefix length: probe the /32 table, then /31, and so on, down to /0, and keep the first hit; this costs up to 32 hash lookups but needs no pointer chasing.
 
 <figure>
 <svg viewBox="0 0 440 222" width="475"><defs><marker id="a6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker><marker id="a6b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
 <rect class="box" x="20" y="60" width="50" height="26" rx="2"/><text class="lbl" x="45" y="77" text-anchor="middle">root</text><rect class="box" x="120" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="145" y="77" text-anchor="middle">10</text><text class="sm" x="145" y="100" text-anchor="middle">/8 → hopA</text><rect class="box" x="220" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="245" y="77" text-anchor="middle">1</text><text class="sm" x="245" y="100" text-anchor="middle">/16 → hopB</text><rect class="box" x="320" y="60" width="50" height="26" rx="2" style="fill:#FFF4C2"/><text class="mono" x="345" y="77" text-anchor="middle">2</text><text class="sm" x="345" y="100" text-anchor="middle">/24 → hopC</text><rect class="box" x="120" y="130" width="50" height="26" rx="2"/><text class="mono" x="145" y="147" text-anchor="middle">192</text><rect class="box" x="220" y="130" width="50" height="26" rx="2"/><text class="mono" x="245" y="147" text-anchor="middle">168</text><text class="sm" x="245" y="170" text-anchor="middle">/16 → hopD</text><line class="ln" x1="70" y1="73" x2="120" y2="73"/><line class="ln" x1="170" y1="73" x2="220" y2="73"/><line class="ln" x1="270" y1="73" x2="320" y2="73"/><line class="ln" x1="70" y1="80" x2="120" y2="143"/><line class="ln" x1="170" y1="143" x2="220" y2="143"/><path class="acc" d="M45,60 Q95,38 145,58 M170,58 Q205,40 245,58 M270,58 Q305,40 345,58" marker-end="url(#a6b)"/><text class="sm" x="20" y="195" text-anchor="start">10.1.2.77: octets 10, 1, 2 all exist; deepest mark /24 → hopC.</text><text class="sm" x="20" y="210" text-anchor="start">10.1.9.9: 9 is absent under 1; deepest mark /16 → hopB.  10.200.0.1: 200 absent under 10; /8 → hopA.</text>
 </svg>
-<figcaption><b>Figure 1.14</b> A stride-8 trie (one level per octet) for 10.0.0.0/8, 10.1.0.0/16, 10.1.2.0/24 and 192.168.0.0/16. The accent walk is the lookup of 10.1.2.77.</figcaption>
+<figcaption><b>Figure 1.15</b> A stride-8 trie (one level per octet) for 10.0.0.0/8, 10.1.0.0/16, 10.1.2.0/24 and 192.168.0.0/16. The accent walk is the lookup of 10.1.2.77.</figcaption>
 </figure>
 
 ::: example
@@ -374,7 +199,7 @@ A *binary min-heap* is a complete binary tree in which every parent is no larger
 <text class="mono" x="350.0" y="165.0" text-anchor="middle">4</text>
 <text class="sm" x="350.0" y="184" text-anchor="middle">6</text><text class="sm" x="20" y="166" text-anchor="start">array</text><text class="sm" x="20" y="205" text-anchor="start">parent(i) = (i-1)/2;  left(i) = 2i+1;  right(i) = 2i+2.  Index 1 (value 5) has children 3 and 4.</text>
 </svg>
-<figcaption><b>Figure 1.15</b> A min-heap as a tree and as the array that stores it. No pointers are needed because the shape is always a complete tree.</figcaption>
+<figcaption><b>Figure 1.16</b> A min-heap as a tree and as the array that stores it. No pointers are needed because the shape is always a complete tree.</figcaption>
 </figure>
 
 `push` appends at the end and swaps upward while smaller than the parent (sift-up); `pop` moves the last element to the root and swaps downward with the smaller child (sift-down). Each follows one root-to-leaf path, so both cost O(log *n*), and reading the minimum costs O(1). Building a heap from *n* elements by sifting down from the middle takes O(*n*), not O(*n* log *n*), because most nodes lie near the leaves.

@@ -68,10 +68,10 @@ vector<int> dfsOrder(const vector<vector<int>>& g, int s) {   // iterative
 ```
 
 <figure>
-<svg viewBox="0 0 400 196" width="432">
-<circle class="lg dash" cx="200" cy="95" r="45" style="fill:none"/><text class="sm" x="251" y="93" text-anchor="start">hop 1</text><circle class="lg dash" cx="200" cy="95" r="90" style="fill:none"/><text class="sm" x="296" y="93" text-anchor="start">hop 2</text><line class="ln" x1="200" y1="95" x2="155" y2="95"/><line class="ln" x1="200" y1="95" x2="230" y2="61"/><line class="ln" x1="200" y1="95" x2="230" y2="129"/><line class="ln" x1="155" y1="95" x2="110" y2="95"/><line class="ln" x1="155" y1="95" x2="140" y2="27"/><line class="ln" x1="230" y1="61" x2="290" y2="83"/><line class="ln" x1="230" y1="129" x2="260" y2="163"/><line class="ln" x1="230" y1="61" x2="230" y2="129"/><circle class="box" cx="200" cy="95" r="11" style="fill:#FFF4C2"/><text class="lbl" x="200" y="98" text-anchor="middle">S</text><circle class="box" cx="155" cy="95" r="11"/><text class="lbl" x="155" y="98" text-anchor="middle">A</text><circle class="box" cx="230" cy="61" r="11"/><text class="lbl" x="230" y="64" text-anchor="middle">B</text><circle class="box" cx="230" cy="129" r="11"/><text class="lbl" x="230" y="132" text-anchor="middle">C</text><circle class="box" cx="110" cy="95" r="11"/><text class="lbl" x="110" y="98" text-anchor="middle">D</text><circle class="box" cx="140" cy="27" r="11"/><text class="lbl" x="140" y="30" text-anchor="middle">E</text><circle class="box" cx="290" cy="83" r="11"/><text class="lbl" x="290" y="86" text-anchor="middle">F</text><circle class="box" cx="260" cy="163" r="11"/><text class="lbl" x="260" y="166" text-anchor="middle">G</text><text class="sm" x="10" y="188" text-anchor="start">queue order: S | A B C | D E F G. A vertex joins a ring when first reached.</text>
+<svg viewBox="0 0 400 220" width="432">
+<circle class="lg dash" cx="200" cy="95" r="45" style="fill:none"/><text class="sm" x="192" y="152" text-anchor="start">hop 1</text><circle class="lg dash" cx="200" cy="95" r="90" style="fill:none"/><text class="sm" x="192" y="196" text-anchor="start">hop 2</text><line class="ln" x1="200" y1="95" x2="155" y2="95"/><line class="ln" x1="200" y1="95" x2="230" y2="61"/><line class="ln" x1="200" y1="95" x2="230" y2="129"/><line class="ln" x1="155" y1="95" x2="110" y2="95"/><line class="ln" x1="155" y1="95" x2="140" y2="27"/><line class="ln" x1="230" y1="61" x2="290" y2="83"/><line class="ln" x1="230" y1="129" x2="260" y2="163"/><line class="ln" x1="230" y1="61" x2="230" y2="129"/><circle class="box" cx="200" cy="95" r="11" style="fill:#FFF4C2"/><text class="lbl" x="200" y="98" text-anchor="middle">S</text><circle class="box" cx="155" cy="95" r="11"/><text class="lbl" x="155" y="98" text-anchor="middle">A</text><circle class="box" cx="230" cy="61" r="11"/><text class="lbl" x="230" y="64" text-anchor="middle">B</text><circle class="box" cx="230" cy="129" r="11"/><text class="lbl" x="230" y="132" text-anchor="middle">C</text><circle class="box" cx="110" cy="95" r="11"/><text class="lbl" x="110" y="98" text-anchor="middle">D</text><circle class="box" cx="140" cy="27" r="11"/><text class="lbl" x="140" y="30" text-anchor="middle">E</text><circle class="box" cx="290" cy="83" r="11"/><text class="lbl" x="290" y="86" text-anchor="middle">F</text><circle class="box" cx="260" cy="163" r="11"/><text class="lbl" x="260" y="166" text-anchor="middle">G</text><text class="sm" x="10" y="212" text-anchor="start">queue order: S | A B C | D E F G. A vertex joins a ring when first reached.</text>
 </svg>
-<figcaption><b>Figure 1.16</b> Breadth-first search explores in rings of equal hop count, so the first time a vertex is reached is by a shortest path.</figcaption>
+<figcaption><b>Figure 1.17</b> Breadth-first search explores in rings of equal hop count, so the first time a vertex is reached is by a shortest path.</figcaption>
 </figure>
 
 ::: trap
@@ -88,7 +88,7 @@ A grid is a graph whose vertices are cells and whose neighbours are the four adj
 <svg viewBox="0 0 460 192" width="497">
 <line class="lg" x1="50" y1="90" x2="170" y2="40"/><line class="lg" x1="50" y1="90" x2="170" y2="140"/><line class="lg" x1="170" y1="140" x2="170" y2="40"/><line class="lg" x1="170" y1="40" x2="300" y2="90"/><line class="lg" x1="170" y1="140" x2="300" y2="90"/><line class="lg" x1="300" y1="90" x2="420" y2="90"/><path class="acc" d="M50,90 L170,140 L170,40 L300,90 L420,90" stroke-linejoin="round"/><rect x="103.0" y="58.0" width="14" height="13" fill="#fff"/><text class="lbl" x="110.0" y="68.0" text-anchor="middle">4</text><rect x="103.0" y="108.0" width="14" height="13" fill="#fff"/><text class="lbl" x="110.0" y="118.0" text-anchor="middle">1</text><rect x="173.0" y="83.0" width="14" height="13" fill="#fff"/><text class="lbl" x="180.0" y="93.0" text-anchor="middle">2</text><rect x="228.0" y="58.0" width="14" height="13" fill="#fff"/><text class="lbl" x="235.0" y="68.0" text-anchor="middle">5</text><rect x="228.0" y="108.0" width="14" height="13" fill="#fff"/><text class="lbl" x="235.0" y="118.0" text-anchor="middle">8</text><rect x="353.0" y="83.0" width="14" height="13" fill="#fff"/><text class="lbl" x="360.0" y="93.0" text-anchor="middle">3</text><circle class="box" cx="50" cy="90" r="13"/><text class="lbl" x="50" y="93" text-anchor="middle">A</text><circle class="box" cx="170" cy="40" r="13"/><text class="lbl" x="170" y="43" text-anchor="middle">B</text><circle class="box" cx="170" cy="140" r="13"/><text class="lbl" x="170" y="143" text-anchor="middle">C</text><circle class="box" cx="300" cy="90" r="13"/><text class="lbl" x="300" y="93" text-anchor="middle">D</text><circle class="box" cx="420" cy="90" r="13"/><text class="lbl" x="420" y="93" text-anchor="middle">E</text><text class="sm" x="20" y="180" text-anchor="start">shortest path tree from A: A-C-B-D-E, total cost 1+2+5+3 = 11</text>
 </svg>
-<figcaption><b>Figure 1.17</b> A weighted undirected graph (link costs). The accent path is the shortest route from A to E.</figcaption>
+<figcaption><b>Figure 1.18</b> A weighted undirected graph (link costs). The accent path is the shortest route from A to E.</figcaption>
 </figure>
 
 ```cpp
@@ -111,7 +111,7 @@ vector<long long> dijkstra(const Graph& g, int src) {
 ```
 
 ::: example
-**Shortest paths from A in Figure 1.17.** Edges: A–B 4, A–C 1, C–B 2, B–D 5, C–D 8, D–E 3.
+**Shortest paths from A in Figure 1.18.** Edges: A–B 4, A–C 1, C–B 2, B–D 5, C–D 8, D–E 3.
 
 | Pop (d, u) | Action | dist after (A B C D E) | Heap after |
 |---|---|---|---|
@@ -221,7 +221,7 @@ struct DSU {
 <svg viewBox="0 0 400 164" width="432"><defs><marker id="a13" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3D55A8"/></marker></defs>
 <text class="sm" x="80" y="14" text-anchor="middle">before find(3)</text><text class="sm" x="300" y="14" text-anchor="middle">after find(3) with path compression</text><circle class="box" cx="80" cy="36" r="12"/><text class="lbl" x="80" y="39" text-anchor="middle">0</text><circle class="box" cx="80" cy="72" r="12"/><text class="lbl" x="80" y="75" text-anchor="middle">1</text><line class="ln" x1="80" y1="60" x2="80" y2="48" marker-end="url(#a13)"/><circle class="box" cx="80" cy="108" r="12"/><text class="lbl" x="80" y="111" text-anchor="middle">2</text><line class="ln" x1="80" y1="96" x2="80" y2="84" marker-end="url(#a13)"/><circle class="box" cx="80" cy="144" r="12"/><text class="lbl" x="80" y="147" text-anchor="middle">3</text><line class="ln" x1="80" y1="132" x2="80" y2="120" marker-end="url(#a13)"/><circle class="box" cx="300" cy="36" r="12"/><text class="lbl" x="300" y="39" text-anchor="middle">0</text><circle class="box" cx="240" cy="100" r="12"/><text class="lbl" x="240" y="103" text-anchor="middle">1</text><line class="acc" x1="240" y1="88" x2="300" y2="48" marker-end="url(#a13)"/><circle class="box" cx="300" cy="100" r="12"/><text class="lbl" x="300" y="103" text-anchor="middle">2</text><line class="acc" x1="300" y1="88" x2="300" y2="48" marker-end="url(#a13)"/><circle class="box" cx="360" cy="100" r="12"/><text class="lbl" x="360" y="103" text-anchor="middle">3</text><line class="acc" x1="360" y1="88" x2="300" y2="48" marker-end="url(#a13)"/><text class="sm" x="300" y="140" text-anchor="middle">every node on the path now points</text><text class="sm" x="300" y="152" text-anchor="middle">straight at the representative</text>
 </svg>
-<figcaption><b>Figure 1.18</b> Path compression in union-find. Arrows are parent pointers; after one find, later finds on the same nodes take a single step.</figcaption>
+<figcaption><b>Figure 1.19</b> Path compression in union-find. Arrows are parent pointers; after one find, later finds on the same nodes take a single step.</figcaption>
 </figure>
 
 With both optimisations each operation is O(α(*n*)), where α is the inverse Ackermann function, below 5 for any input that fits in memory. Kruskal's minimum spanning tree sorts the edges by weight and adds each edge whose `unite` returns true. Floyd–Warshall computes all pairs with three nested loops, `for k, for i, for j: d[i][j] = min(d[i][j], d[i][k] + d[k][j])`, and the loop over *k* must be outermost.
@@ -264,7 +264,7 @@ Reported problems include the minimum dice throws of a snake-and-ladder board (B
 Backtracking builds an answer one choice at a time and undoes each choice after exploring it, so a single recursive function enumerates every candidate while the constraints prune the hopeless ones early.
 :::
 
-A recursive function needs a *base case* that stops the recursion and a *step* that moves towards it. Backtracking adds a *path* that is extended before the recursive call and restored after it: choose, explore, un-choose. *Recognise:* "all combinations, permutations or subsets", "generate all", "place so that no two conflict", and small limits (*n* ≤ 12 for permutations, *n* ≤ 20 for subsets). The cost is the size of the search tree: 2^*n* for subsets, *n*! for permutations.
+A recursive function needs a *base case* that stops the recursion and a *step* that moves towards it. Backtracking adds a *path* that is extended before the recursive call and restored after it: choose, explore, un-choose. *Recognise:* "all combinations, permutations or subsets", "generate all", "place so that no two conflict", and small limits (*n* ≤ 12 for permutations, *n* ≤ 20 for subsets). The cost is the size of the search tree: 2<sup>*n*</sup> for subsets, *n*! for permutations.
 
 ```cpp
 void subsets(const vector<int>& a, int i, vector<int>& path,
@@ -285,7 +285,7 @@ The two classic bugs are forgetting the un-choose step, which leaks choices into
 1. The search has four levels. At each level we choose the length of the next part, 1 to 3 digits.
 2. A part is rejected if it has a leading zero and length above one, or exceeds 255.
 3. After four parts, the answer is valid only if all digits have been consumed.
-4. Pruning by these rules leaves very few branches: at most 3^4 = 81 leaves are ever reached.
+4. Pruning by these rules leaves very few branches: at most 3<sup>4</sup> = 81 leaves are ever reached.
 
 ```cpp
 void restore(const string& s, int pos, int parts, string& cur,
@@ -337,10 +337,10 @@ int nQueens(int n) {
 }
 ```
 
-The counts are 2 for *n* = 4 and 92 for *n* = 8. Without pruning the search would examine 8^8 ≈ 1.7 × 10^7 placements; with it, only a few thousand partial boards are visited. The same shape (choose a candidate from a mask of the allowed ones, recurse, undo) solves Sudoku and word-search problems.
+The counts are 2 for *n* = 4 and 92 for *n* = 8. Without pruning the search would examine 8<sup>8</sup> ≈ 1.7 × 10<sup>7</sup> placements; with it, only a few thousand partial boards are visited. The same shape (choose a candidate from a mask of the allowed ones, recurse, undo) solves Sudoku and word-search problems.
 
 ::: trap
-*Claim:* Python's recursion handles a depth-first search of any size. *Why it is wrong:* CPython allows about 1000 nested calls by default, and a path graph of 10^5 vertices raises `RecursionError`; C overflows its stack in the same way. *Correct statement:* use an explicit stack for deep graphs, or raise the limit only when the depth is known and modest.
+*Claim:* Python's recursion handles a depth-first search of any size. *Why it is wrong:* CPython allows about 1000 nested calls by default, and a path graph of 10<sup>5</sup> vertices raises `RecursionError`; C overflows its stack in the same way. *Correct statement:* use an explicit stack for deep graphs, or raise the limit only when the depth is known and modest.
 :::
 
 ## [1.13]{.sec}Sorting, binary search and intervals [Must · ■■□]{.tag} {#s1-13}
@@ -410,7 +410,7 @@ int lowerBound(const vector<int>& a, int x) {   // first a[i] >= x, or n
 }
 ```
 
-The two classic bugs are the midpoint overflow in `(lo + hi) / 2` for ranges beyond 2^30, and an update such as `lo = mid`, which loops forever when `hi = lo + 1`. The loop runs ⌈log₂ *n*⌉ times.
+The two classic bugs are the midpoint overflow in `(lo + hi) / 2` for ranges beyond 2<sup>30</sup>, and an update such as `lo = mid`, which loops forever when `hi = lo + 1`. The loop runs ⌈log₂ *n*⌉ times.
 
 **Binary search on the answer.** When the answer is a number and a yes/no test "is *x* enough?" is monotone (false up to a threshold, true after it), the same loop searches the range of possible answers. *Recognise:* "minimise the maximum", "smallest capacity such that …", "at most *D* days".
 

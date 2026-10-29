@@ -84,7 +84,7 @@ Interviewers ask for a complete, compilable function, not pseudocode. A strong a
 ## [1.1]{.sec}Complexity and the problem-solving routine [Must · ■□□]{.tag} {#s1-1}
 
 ::: bigidea
-The input size in the problem statement tells us which algorithms can finish in time, because a judge performs about 10^8 simple operations per second.
+The input size in the problem statement tells us which algorithms can finish in time, because a judge performs about 10<sup>8</sup> simple operations per second.
 :::
 
 [**Big-O** — an upper bound on how the work grows with the input size *n*, ignoring constants and lower-order terms.]{.margin}We count growth, not seconds. An algorithm taking *c·n* steps and one taking *c′·n + 50* steps are both O(*n*), since for large *n* the constants do not change the shape of the curve. The three loops below show the three cases that cover most code.
@@ -98,9 +98,9 @@ while (n) n >>= 1;  /* O(log n): halves n      */
 
 Consider a switch. Flooding a frame to every port costs O(*p*) for *p* ports, whereas finding the egress port in the MAC table costs O(1) on average because the table is hashed. Thus, the data structure, not the hardware speed, sets the cost per frame.
 
-**Reading the constraints.** A test limits *n*, and the limit selects the algorithm. At *n* = 10^5 an O(*n*²) method needs 10^10 steps and fails, whereas O(*n* log *n*) needs about 1.7 × 10^6 and passes. The full table from *n* ≤ 12 up to *n* ≤ 10^9 is in [the Revision Spread](#rv1){.ref}; the two rules to remember are that 10^5 allows O(*n* log *n*) and 10^3–10^4 allows O(*n*²). Python is slower by a factor of 10 to 50, so one steps down a row.
+**Reading the constraints.** A test limits *n*, and the limit selects the algorithm. At *n* = 10<sup>5</sup> an O(*n*²) method needs 10<sup>10</sup> steps and fails, whereas O(*n* log *n*) needs about 1.7 × 10<sup>6</sup> and passes. The full table from *n* ≤ 12 up to *n* ≤ 10<sup>9</sup> is in [the Revision Spread](#rv1){.ref}; the two rules to remember are that 10<sup>5</sup> allows O(*n* log *n*) and 10<sup>3</sup>–10<sup>4</sup> allows O(*n*²). Python is slower by a factor of 10 to 50, so one steps down a row.
 
-**Space and the call stack.** A recursive call stores a frame holding its arguments, locals and return address. Hence, a recursion of depth *d* uses O(*d*) memory even when it allocates nothing, and a depth of 10^6 overflows a typical 8 MB stack. Space counts the extra memory only; the input and the required output are excluded, so "O(1) extra" permits a few variables.
+**Space and the call stack.** A recursive call stores a frame holding its arguments, locals and return address. Hence, a recursion of depth *d* uses O(*d*) memory even when it allocates nothing, and a depth of 10<sup>6</sup> overflows a typical 8 MB stack. Space counts the extra memory only; the input and the required output are excluded, so "O(1) extra" permits a few variables.
 
 **Amortised cost.** A dynamic array doubles its capacity when full. A push is normally one write, but a push into a full array copies every element. Sixteen pushes starting from capacity one copy 1 + 2 + 4 + 8 = 15 elements in total, fewer than the number of pushes. In general the copies sum to less than 2*n*, so the cost per push averages to O(1); we call this an *amortised* bound. It holds for the whole sequence, not for each push.
 
@@ -111,25 +111,25 @@ Consider a switch. Flooding a frame to every port costs O(*p*) for *p* ports, wh
 
 ### Counting operations in practice
 
-The table gives the number of steps for *n* = 10^5, and the time they take at 10^8 steps per second. It shows why the ladder of growth rates, and not the constant factors, decides whether a solution passes.
+The table gives the number of steps for *n* = 10<sup>5</sup>, and the time they take at 10<sup>8</sup> steps per second. It shows why the ladder of growth rates, and not the constant factors, decides whether a solution passes.
 
-| Growth | Steps for *n* = 10^5 | Time at 10^8 steps/s | Typical source |
+| Growth | Steps for *n* = 10<sup>5</sup> | Time at 10<sup>8</sup> steps/s | Typical source |
 |---|---|---|---|
 | O(1) | 1 | instant | array index, hash lookup |
 | O(log *n*) | 17 | instant | binary search, heap operation |
-| O(*n*) | 10^5 | 1 ms | one pass |
-| O(*n* log *n*) | 1.7 × 10^6 | 17 ms | sorting |
-| O(*n*²) | 10^10 | 100 s | all pairs |
-| O(2^*n*) | more than the atoms in the universe | never | all subsets |
+| O(*n*) | 10<sup>5</sup> | 1 ms | one pass |
+| O(*n* log *n*) | 1.7 × 10<sup>6</sup> | 17 ms | sorting |
+| O(*n*²) | 10<sup>10</sup> | 100 s | all pairs |
+| O(2<sup>*n*</sup>) | more than the atoms in the universe | never | all subsets |
 
 <figure>
 <svg viewBox="0 0 420 190" width="454">
-<text class="sm" x="10" y="14" text-anchor="start">steps for n = 10^5 (log scale, one tick per power of ten)</text><line class="lg" x1="90" y1="26" x2="90" y2="150"/><text class="sm" x="90" y="162" text-anchor="middle">0</text><line class="lg" x1="120" y1="26" x2="120" y2="150"/><text class="sm" x="120" y="162" text-anchor="middle"></text><line class="lg" x1="150" y1="26" x2="150" y2="150"/><text class="sm" x="150" y="162" text-anchor="middle">2</text><line class="lg" x1="180" y1="26" x2="180" y2="150"/><text class="sm" x="180" y="162" text-anchor="middle"></text><line class="lg" x1="210" y1="26" x2="210" y2="150"/><text class="sm" x="210" y="162" text-anchor="middle">4</text><line class="lg" x1="240" y1="26" x2="240" y2="150"/><text class="sm" x="240" y="162" text-anchor="middle"></text><line class="lg" x1="270" y1="26" x2="270" y2="150"/><text class="sm" x="270" y="162" text-anchor="middle">6</text><line class="lg" x1="300" y1="26" x2="300" y2="150"/><text class="sm" x="300" y="162" text-anchor="middle"></text><line class="lg" x1="330" y1="26" x2="330" y2="150"/><text class="sm" x="330" y="162" text-anchor="middle">8</text><line class="lg" x1="360" y1="26" x2="360" y2="150"/><text class="sm" x="360" y="162" text-anchor="middle"></text><line class="lg" x1="390" y1="26" x2="390" y2="150"/><text class="sm" x="390" y="162" text-anchor="middle">10</text><text class="lbl" x="10" y="41" text-anchor="start">O(1)</text><rect class="fill" x="90" y="30" width="2" height="14"/><text class="lbl" x="10" y="65" text-anchor="start">O(log n)</text><rect class="fill" x="90" y="54" width="36.9" height="14"/><text class="lbl" x="10" y="89" text-anchor="start">O(n)</text><rect class="fill" x="90" y="78" width="150" height="14"/><text class="lbl" x="10" y="113" text-anchor="start">O(n log n)</text><rect class="fill" x="90" y="102" width="186.9" height="14"/><text class="lbl" x="10" y="137" text-anchor="start">O(n^2)</text><rect class="fill" x="90" y="126" width="300" height="14"/><line class="acc dash" x1="330" y1="22" x2="330" y2="150"/><text class="acct" x="334" y="22" text-anchor="start">1 s of work: 10^8</text><text class="sm" x="210" y="176" text-anchor="middle">exponent of 10</text>
+<text class="sm" x="10" y="12" text-anchor="start">steps for n = 10^5 (log scale, one tick per power of ten)</text><line class="lg" x1="90" y1="26" x2="90" y2="150"/><text class="sm" x="90" y="162" text-anchor="middle">0</text><line class="lg" x1="120" y1="26" x2="120" y2="150"/><text class="sm" x="120" y="162" text-anchor="middle"></text><line class="lg" x1="150" y1="26" x2="150" y2="150"/><text class="sm" x="150" y="162" text-anchor="middle">2</text><line class="lg" x1="180" y1="26" x2="180" y2="150"/><text class="sm" x="180" y="162" text-anchor="middle"></text><line class="lg" x1="210" y1="26" x2="210" y2="150"/><text class="sm" x="210" y="162" text-anchor="middle">4</text><line class="lg" x1="240" y1="26" x2="240" y2="150"/><text class="sm" x="240" y="162" text-anchor="middle"></text><line class="lg" x1="270" y1="26" x2="270" y2="150"/><text class="sm" x="270" y="162" text-anchor="middle">6</text><line class="lg" x1="300" y1="26" x2="300" y2="150"/><text class="sm" x="300" y="162" text-anchor="middle"></text><line class="lg" x1="330" y1="26" x2="330" y2="150"/><text class="sm" x="330" y="162" text-anchor="middle">8</text><line class="lg" x1="360" y1="26" x2="360" y2="150"/><text class="sm" x="360" y="162" text-anchor="middle"></text><line class="lg" x1="390" y1="26" x2="390" y2="150"/><text class="sm" x="390" y="162" text-anchor="middle">10</text><text class="lbl" x="10" y="41" text-anchor="start">O(1)</text><rect class="fill" x="90" y="30" width="2" height="14"/><text class="lbl" x="10" y="65" text-anchor="start">O(log n)</text><rect class="fill" x="90" y="54" width="36.9" height="14"/><text class="lbl" x="10" y="89" text-anchor="start">O(n)</text><rect class="fill" x="90" y="78" width="150" height="14"/><text class="lbl" x="10" y="113" text-anchor="start">O(n log n)</text><rect class="fill" x="90" y="102" width="186.9" height="14"/><text class="lbl" x="10" y="137" text-anchor="start">O(n^2)</text><rect class="fill" x="90" y="126" width="300" height="14"/><line class="acc dash" x1="330" y1="22" x2="330" y2="150"/><text class="sm acct" x="326" y="36" text-anchor="end">budget: 10^8 steps in 1 s</text><text class="sm" x="210" y="176" text-anchor="middle">exponent of 10</text>
 </svg>
 <figcaption><b>Figure 1.1</b> Growth rates at n = 10^5. The accent line is the budget of about 10^8 simple steps per second; quadratic work lies two decades beyond it.</figcaption>
 </figure>
 
-**Recursion.** To find the cost of a recursive function, write the recurrence and solve it. A function that makes two calls on halves and does a linear amount of work, `T(n) = 2T(n/2) + O(n)`, as in merge sort, costs O(*n* log *n*): there are log *n* levels and each level does O(*n*) work in total. A function that halves and does constant work, `T(n) = T(n/2) + O(1)`, as in binary search, costs O(log *n*). A function that makes two calls on `n - 1`, `T(n) = 2T(n-1) + O(1)`, costs O(2^*n*), which is why the naive Fibonacci function is unusable beyond *n* ≈ 40. Remembering the results of earlier calls, termed *memoisation*, removes the repeated work and reduces it to O(*n*):
+**Recursion.** To find the cost of a recursive function, write the recurrence and solve it. A function that makes two calls on halves and does a linear amount of work, `T(n) = 2T(n/2) + O(n)`, as in merge sort, costs O(*n* log *n*): there are log *n* levels and each level does O(*n*) work in total. A function that halves and does constant work, `T(n) = T(n/2) + O(1)`, as in binary search, costs O(log *n*). A function that makes two calls on `n - 1`, `T(n) = 2T(n-1) + O(1)`, costs O(2<sup>*n*</sup>), which is why the naive Fibonacci function is unusable beyond *n* ≈ 40. Remembering the results of earlier calls, termed *memoisation*, removes the repeated work and reduces it to O(*n*):
 
 ```cpp
 long long fib(int n, vector<long long>& memo) {   // memo sized n + 1, zeros
@@ -422,110 +422,5 @@ For `[1, 2, 3, -2, 2]` and *k* = 3, the prefixes are 1, 3, 6, 4, 6. At prefix 3 
 
 [^c1-4]: Every window sum may be negative, and 0 would then be returned wrongly.
 [^c1-5]: The window sum is not monotone in its length when negatives exist, so shrinking cannot restore validity reliably; prefix sums are used instead.
-
-## [1.3]{.sec}Hashing: maps and sets [Must · ■□□]{.tag} {#s1-3}
-
-::: bigidea
-A hash table turns "have I seen this?" from a scan into a single computed lookup, which is why so many O(*n*²) solutions collapse to O(*n*).
-:::
-
-[**Hash function** — a function mapping a key to an integer; equal keys must give equal values, and different keys should rarely collide.]{.margin}A hash table stores each key in a bucket chosen by `hash(key) mod m`. Two keys sharing a bucket collide, and the usual remedy, *chaining*, keeps a short list in each bucket. With a good hash and a load factor (entries per bucket) kept below about one, a lookup inspects a constant expected number of entries. Thus, insert, find and erase are O(1) on average, but O(*n*) in the worst case when many keys collide. The ordered `map` in C++ is a balanced tree instead: O(log *n*) per operation, but it keeps keys sorted.
-
-| Need | Structure | Cost |
-|---|---|---|
-| membership, no order | `unordered_set` | O(1) average |
-| key → value, no order | `unordered_map` | O(1) average |
-| sorted iteration, nearest key | `set`, `map` | O(log *n*) |
-| counts of small integers or letters | array indexed by value | O(1), smallest constant |
-
-A switch's MAC table and a router's flow table are the networking forms of this structure: the key is the destination MAC or the 5-tuple, and the value is the egress port or the action. Further, when values are bounded by a small range, a plain array replaces the hash and is faster.
-
-*Recognise:* "have we seen", "count occurrences", "pair that …", "group by", "first non-repeating", "duplicate". *Typical templates:* a set for membership, a map for counts, and a sorted or canonical form of an item as the key (for anagrams, the sorted letters).
-
-<figure>
-<svg viewBox="0 0 440 185" width="475"><defs><marker id="a10" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1A1D23"/></marker></defs>
-<text class="sm" x="10" y="12" text-anchor="start">bucket = key mod 6</text><rect class="box" x="10" y="22" width="30" height="22"/><text class="mono" x="25" y="37" text-anchor="middle">0</text><line class="ln" x1="40" y1="33" x2="70" y2="33" marker-end="url(#a10)"/><rect class="box" x="70" y="22" width="44" height="22"/><text class="mono" x="92" y="37" text-anchor="middle">12</text><line class="ln" x1="114" y1="33" x2="140" y2="33" marker-end="url(#a10)"/><rect class="box" x="140" y="22" width="44" height="22"/><text class="mono" x="162" y="37" text-anchor="middle">18</text><rect class="box" x="10" y="48" width="30" height="22"/><text class="mono" x="25" y="63" text-anchor="middle">1</text><text class="sm" x="60" y="63" text-anchor="start">empty</text><rect class="box" x="10" y="74" width="30" height="22"/><text class="mono" x="25" y="89" text-anchor="middle">2</text><line class="ln" x1="40" y1="85" x2="70" y2="85" marker-end="url(#a10)"/><rect class="box" x="70" y="74" width="44" height="22"/><text class="mono" x="92" y="89" text-anchor="middle">8</text><rect class="box" x="10" y="100" width="30" height="22"/><text class="mono" x="25" y="115" text-anchor="middle">3</text><line class="ln" x1="40" y1="111" x2="70" y2="111" marker-end="url(#a10)"/><rect class="box" x="70" y="100" width="44" height="22"/><text class="mono" x="92" y="115" text-anchor="middle">21</text><line class="ln" x1="114" y1="111" x2="140" y2="111" marker-end="url(#a10)"/><rect class="box" x="140" y="100" width="44" height="22"/><text class="mono" x="162" y="115" text-anchor="middle">9</text><line class="ln" x1="184" y1="111" x2="210" y2="111" marker-end="url(#a10)"/><rect class="box" x="210" y="100" width="44" height="22"/><text class="mono" x="232" y="115" text-anchor="middle">15</text><rect class="box" x="10" y="126" width="30" height="22"/><text class="mono" x="25" y="141" text-anchor="middle">4</text><text class="sm" x="60" y="141" text-anchor="start">empty</text><rect class="box" x="10" y="152" width="30" height="22"/><text class="mono" x="25" y="167" text-anchor="middle">5</text><line class="ln" x1="40" y1="163" x2="70" y2="163" marker-end="url(#a10)"/><rect class="box" x="70" y="152" width="44" height="22"/><text class="mono" x="92" y="167" text-anchor="middle">23</text><text class="sm" x="300" y="60" text-anchor="start">load factor = entries / buckets = 7 / 6</text><text class="sm" x="300" y="74" text-anchor="start">lookup(15): bucket 3, then walk</text><text class="sm" x="300" y="88" text-anchor="start">the chain 21, 9, 15</text><text class="sm" x="300" y="110" text-anchor="start">when the load factor passes 1:</text><text class="sm" x="300" y="124" text-anchor="start">double the buckets and re-insert</text>
-</svg>
-<figcaption><b>Figure 1.5</b> A hash table with chaining. Keys that collide share a bucket's list; the expected chain length equals the load factor.</figcaption>
-</figure>
-
-Two collision strategies exist. *Chaining* keeps a list per bucket, as drawn; deletion is easy and the table degrades gracefully when full. *Open addressing* stores entries in the array itself and probes to the next free cell (linear probing) after a collision; it is more compact and faster to scan, but it needs a load factor well below one, and deletion needs a tombstone marker. When the load factor passes a threshold the table doubles its bucket count and re-inserts every entry, an O(*n*) step that is amortised over the insertions exactly as for the dynamic array of [§1.1](#s1-1){.ref}.
-
-::: example
-**Longest consecutive sequence.** Given an unsorted array, find the length of the longest run of consecutive integers (for example 1, 2, 3, 4), in O(*n*) time.
-
-1. Sorting gives O(*n* log *n*); the target forbids it.
-2. Put all values in a set. A value *x* starts a run exactly when *x* − 1 is absent.
-3. For each start, extend with `x+1, x+2, …` while present. Each element is visited once as a start-check and at most once inside a run, so the total is O(*n*).
-
-```cpp
-int longestConsecutive(const vector<int>& a) {
-    unordered_set<int> s(a.begin(), a.end());
-    int best = 0;
-    for (int x : s) {
-        if (s.count(x - 1)) continue;          // not the start of a run
-        int y = x;
-        while (y < INT_MAX && s.count(y + 1)) ++y;
-        best = max(best, y - x + 1);               // run length
-    }
-    return best;
-}
-```
-
-| x | x − 1 present? | run extended | length |
-|---|---|---|---|
-| 100 | no | 100 | 1 |
-| 4 | yes | skipped | – |
-| 200 | no | 200 | 1 |
-| 1 | no | 1, 2, 3, 4 | 4 |
-
-[Result for `[100, 4, 200, 1, 3, 2]`: 4. Time O(*n*), space O(*n*).]{.result}
-:::
-
-::: trap
-*Claim:* `m[key]` is a harmless way to test whether a key exists. *Why it is wrong:* in C++ the subscript operator inserts a default value when the key is absent, which changes the map and its size during the test. *Correct statement:* use `find` or `count` to test, and `[]` only when inserting or incrementing is intended.
-:::
-
-### Hashing network keys: a flow table
-
-A router or firewall keeps per-flow state in a hash table whose key is the 5-tuple (source address, destination address, source port, destination port, protocol). Two points make this a favourite question. First, one must hash the *fields*, not the bytes of the struct, because a C struct may contain padding bytes whose values are unspecified; two equal keys could then hash differently. Secondly, equality must compare the same fields.
-
-```c
-#include <stdint.h>
-#include <stdbool.h>
-
-typedef struct {
-    uint32_t src, dst;
-    uint16_t sport, dport;
-    uint8_t  proto;
-} FlowKey;
-
-static uint32_t fnv_byte(uint32_t h, uint8_t b) {
-    return (h ^ b) * 16777619u;
-}
-
-uint32_t flow_hash(const FlowKey *k) {  /* FNV-1a over the fields */
-    uint32_t h = 2166136261u;
-    uint32_t w[3] = { k->src, k->dst, (uint32_t)k->sport << 16 | k->dport };
-    for (int i = 0; i < 3; i++)
-        for (int b = 0; b < 32; b += 8)
-            h = fnv_byte(h, (uint8_t)(w[i] >> b));
-    return fnv_byte(h, k->proto);
-}
-bool flow_eq(const FlowKey *a, const FlowKey *b) {
-    return a->src == b->src && a->dst == b->dst && a->sport == b->sport
-        && a->dport == b->dport && a->proto == b->proto;
-}
-```
-
-The bucket is `flow_hash(k) % nbuckets`. *Follow-ups.* To make the two directions of a connection land in the same entry, order the two (address, port) pairs before hashing. Equal-cost multipath forwarding applies the same idea in hardware: a hash of the 5-tuple selects the path, so all packets of a flow take one path and arrive in order, while different flows spread over the paths.
-
-::: check
-1. Which is faster for counting lowercase letters: `unordered_map<char,int>` or `int cnt[26]`? [^c1-6]
-2. What is the worst-case lookup in a chained hash table, and when does it occur? [^c1-7]
-:::
-
-[^c1-6]: The array, since it has no hashing or allocation; both are O(*n*) overall.
-[^c1-7]: O(*n*), when every key lands in one bucket, for example with a poor hash or adversarial input.
 
 :::

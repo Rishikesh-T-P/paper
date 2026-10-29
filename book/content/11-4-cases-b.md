@@ -12,14 +12,14 @@
 <text class="sm" x="179" y="36" text-anchor="middle">Gi0/0 10.0.34.1</text>
 <text class="sm" x="315" y="36" text-anchor="middle">Gi0/0 .2</text>
 <circle class="box" cx="130" cy="40" r="13"/><path class="ln" d="M123,40 L137,40 M130,33 L130,47 M125,35 L135,45 M125,45 L135,35"/>
-<text class="lbl" x="130" y="63" text-anchor="middle">R3</text>
-<text class="sm" x="130" y="72" text-anchor="middle">area 0, MD5</text>
+<text class="lbl" x="130" y="66" text-anchor="middle">R3</text>
+<text class="sm" x="130" y="75" text-anchor="middle">area 0, MD5</text>
 <circle class="box" cx="350" cy="40" r="13"/><path class="ln" d="M343,40 L357,40 M350,33 L350,47 M345,35 L355,45 M345,45 L355,35"/><circle class="acc" cx="350" cy="40" r="16"/>
-<text class="lbl" x="350" y="63" text-anchor="middle">R4</text>
-<text class="sm" x="350" y="72" text-anchor="middle">area 1, passive</text>
+<text class="lbl" x="350" y="66" text-anchor="middle">R4</text>
+<text class="sm" x="350" y="75" text-anchor="middle">area 1, passive</text>
 <text class="sm" x="240" y="98" text-anchor="middle">pingable, but no neighbour state at all</text>
 </svg>
-<figcaption><b>Figure 11.14</b> Case 7. Three independent mismatches are stacked on one link.</figcaption>
+<figcaption><b>Figure 11.15</b> Case 7. Three independent mismatches are stacked on one link.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -48,8 +48,6 @@ The exact wording of these messages varies a little between releases; the patter
 
 **Prevent.** Generate both ends of every link from one source of truth.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | Which parameters need not match? | Process ID, priority, cost and interface names. |
@@ -70,16 +68,16 @@ The exact wording of these messages varies a little between releases; the patter
 <text class="sm" x="157" y="36" text-anchor="middle">192.0.2.2</text>
 <text class="sm" x="323" y="36" text-anchor="middle">192.0.2.1</text>
 <circle class="box" cx="120" cy="40" r="13"/><path class="ln" d="M113,40 L127,40 M120,33 L120,47 M115,35 L125,45 M115,45 L125,35"/><circle class="acc" cx="120" cy="40" r="16"/>
-<text class="lbl" x="120" y="63" text-anchor="middle">BR1</text>
-<text class="sm" x="120" y="72" text-anchor="middle">Lo0 172.16.255.1</text>
+<text class="lbl" x="120" y="66" text-anchor="middle">BR1</text>
+<text class="sm" x="120" y="75" text-anchor="middle">Lo0 172.16.255.1</text>
 <circle class="box" cx="360" cy="40" r="13"/><path class="ln" d="M353,40 L367,40 M360,33 L360,47 M355,35 L365,45 M355,45 L365,35"/>
-<text class="lbl" x="360" y="63" text-anchor="middle">ISP-A PE</text>
-<text class="sm" x="360" y="72" text-anchor="middle">AS 100</text>
+<text class="lbl" x="360" y="66" text-anchor="middle">ISP-A PE</text>
+<text class="sm" x="360" y="75" text-anchor="middle">AS 100</text>
 <text class="sm acct" x="120" y="100" text-anchor="middle">neighbor 192.0.2.1 update-source Lo0</text>
 <text class="sm acct" x="120" y="111" text-anchor="middle">EDGE-IN: permit icmp, permit tcp established</text>
 <text class="sm" x="360" y="100" text-anchor="middle">expects peer 192.0.2.2</text>
 </svg>
-<figcaption><b>Figure 11.15</b> Case 8. BR1 sources the session from its loopback while the provider expects the WAN address, and an edge ACL blocks inbound SYNs.</figcaption>
+<figcaption><b>Figure 11.16</b> Case 8. BR1 sources the session from its loopback while the provider expects the WAN address, and an edge ACL blocks inbound SYNs.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -108,8 +106,6 @@ The exact wording of these messages varies a little between releases; the patter
 
 **Prevent.** An edge-ACL template with a BGP peer object group, and a pre-turn-up checklist.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | Name the BGP states. | Idle, Connect, Active, OpenSent, OpenConfirm, Established. |
@@ -117,6 +113,12 @@ The exact wording of these messages varies a little between releases; the patter
 | What does eBGP to a loopback need? | TTL above 1 (`ebgp-multihop 2` or `disable-connected-check`) and a route to both loopbacks. |
 
 **Variant.** The state flaps between Active and Idle with "bad AS" in the log: a `remote-as` mismatch, shown as a NOTIFICATION.
+
+::: lens
+[AMAZON · GOOGLE · JUNIPER]{.co}
+
+Candidates report BGP state definitions being probed directly. Answer Active precisely (connect failing), then give the three checks: address, filter, TTL. Expect: "what would you see if the AS number were wrong?"
+:::
 
 ### Case 9 · BGP up, but a prefix is not advertised or installed [Must · ■■□]{.tag} {#c11-9}
 
@@ -131,18 +133,18 @@ The exact wording of these messages varies a little between releases; the patter
 <text class="sm" x="287" y="36" text-anchor="middle">192.0.2.2</text>
 <text class="sm" x="373" y="36" text-anchor="middle">192.0.2.1</text>
 <circle class="box" cx="90" cy="40" r="13"/><path class="ln" d="M83,40 L97,40 M90,33 L90,47 M85,35 L95,45 M85,45 L95,35"/>
-<text class="lbl" x="90" y="63" text-anchor="middle">R5</text>
-<text class="sm" x="90" y="72" text-anchor="middle">iBGP</text>
+<text class="lbl" x="90" y="66" text-anchor="middle">R5</text>
+<text class="sm" x="90" y="75" text-anchor="middle">iBGP</text>
 <circle class="box" cx="250" cy="40" r="13"/><path class="ln" d="M243,40 L257,40 M250,33 L250,47 M245,35 L255,45 M245,45 L255,35"/><circle class="acc" cx="250" cy="40" r="16"/>
-<text class="lbl" x="250" y="63" text-anchor="middle">BR1</text>
-<text class="sm" x="250" y="72" text-anchor="middle">AS 65000</text>
+<text class="lbl" x="250" y="66" text-anchor="middle">BR1</text>
+<text class="sm" x="250" y="75" text-anchor="middle">AS 65000</text>
 <circle class="box" cx="410" cy="40" r="13"/><path class="ln" d="M403,40 L417,40 M410,33 L410,47 M405,35 L415,45 M405,45 L415,35"/>
-<text class="lbl" x="410" y="63" text-anchor="middle">ISP-A PE</text>
-<text class="sm" x="410" y="72" text-anchor="middle">AS 100</text>
+<text class="lbl" x="410" y="66" text-anchor="middle">ISP-A PE</text>
+<text class="sm" x="410" y="75" text-anchor="middle">AS 100</text>
 <text class="sm acct" x="250" y="98" text-anchor="middle">RIB holds 198.51.100.0/25 and /26, no /24</text>
-<text class="sm" x="90" y="76" text-anchor="middle">next hop 192.0.2.1 unknown</text>
+<text class="sm" x="90" y="98" text-anchor="middle">next hop 192.0.2.1 unknown</text>
 </svg>
-<figcaption><b>Figure 11.16</b> Case 9. BR1 owns only two subnets of the /24, and R5 cannot reach the eBGP next hop.</figcaption>
+<figcaption><b>Figure 11.17</b> Case 9. BR1 owns only two subnets of the /24, and R5 cannot reach the eBGP next hop.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -169,8 +171,6 @@ The exact wording of these messages varies a little between releases; the patter
 
 **Prevent.** An origination checklist, and a registered RPKI route origin authorisation for the /24.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | What is the best-path order? | Weight, local preference, locally originated, AS-path length, origin, MED, eBGP over iBGP, IGP metric to the next hop, then tie-breakers ([§4.7](#s4-7){.ref}). |
@@ -193,19 +193,19 @@ The exact wording of these messages varies a little between releases; the patter
 <text class="sm" x="284" y="28" text-anchor="middle">Gi1/0/12</text>
 <text class="sm" x="284" y="85" text-anchor="middle">Gi1/0/33</text>
 <rect class="box" x="30" y="45" width="30" height="20" rx="1"/><path class="ln" d="M37,69 L53,69"/><rect class="fill" x="34" y="49" width="22" height="11"/>
-<text class="lbl" x="45" y="79" text-anchor="middle">Clients</text>
+<text class="lbl" x="45" y="81" text-anchor="middle">Clients</text>
 <rect class="box" x="148" y="44" width="44" height="22" rx="2"/><path class="ln" d="M157,52 L183,52 M179,49 L183,52 L179,55 M183,59 L157,59 M161,56 L157,59 L161,62"/>
-<text class="lbl" x="170" y="76" text-anchor="middle">SW1</text>
+<text class="lbl" x="170" y="79" text-anchor="middle">SW1</text>
 <rect class="box" x="306" y="10" width="28" height="30" rx="1"/><path class="ln" d="M306,20 L334,20 M306,30 L334,30"/><circle class="accf" cx="328" cy="15" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="320" y="50" text-anchor="middle">Finance server</text>
-<text class="sm" x="320" y="59" text-anchor="middle">10.1.50.20</text>
+<text class="lbl" x="320" y="53" text-anchor="middle">Finance server</text>
+<text class="sm" x="320" y="62" text-anchor="middle">10.1.50.20</text>
 <rect class="box" x="305" y="90" width="30" height="20" rx="1"/><path class="ln" d="M312,114 L328,114"/><rect class="fill" x="309" y="94" width="22" height="11"/><rect class="acc" x="302" y="87" width="36" height="26" rx="3"/>
-<text class="lbl" x="320" y="124" text-anchor="middle">Lab VM</text>
-<text class="sm" x="320" y="133" text-anchor="middle">10.1.50.20 static</text>
+<text class="lbl" x="320" y="126" text-anchor="middle">Lab VM</text>
+<text class="sm" x="320" y="135" text-anchor="middle">10.1.50.20 static</text>
 <text class="sm" x="430" y="60" text-anchor="middle">VLAN 50</text>
 <text class="sm" x="430" y="70" text-anchor="middle">10.1.50.0/24</text>
 </svg>
-<figcaption><b>Figure 11.17</b> Case 10. A lab VM was given the finance server's static address.</figcaption>
+<figcaption><b>Figure 11.18</b> Case 10. A lab VM was given the finance server's static address.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -233,8 +233,6 @@ The exact wording of these messages varies a little between releases; the patter
 
 **Prevent.** IPAM, DHCP snooping with IP source guard, dynamic ARP inspection, and gratuitous-ARP conflict detection on servers.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | How does a MAC flap differ from an ARP flap? | A MAC flap is one MAC seen on two ports (loop, mis-teamed NIC); an ARP flap is one IP resolving to two MACs (duplicate). |
@@ -250,23 +248,23 @@ The exact wording of these messages varies a little between releases; the patter
 **Prompt.** "At 11:05 the entire third floor lost network; the switch CPUs are at 100 per cent and the LEDs flash wildly."
 
 <figure>
-<svg viewBox="0 0 480 150" width="480">
-<line class="ln" x1="240" y1="25" x2="130" y2="100"/>
-<line class="ln" x1="240" y1="25" x2="40" y2="100"/>
-<rect class="box" x="218" y="14" width="44" height="22" rx="2"/><path class="ln" d="M227,22 L253,22 M249,19 L253,22 L249,25 M253,29 L227,29 M231,26 L227,29 L231,32"/><text class="sm" x="261" y="12" text-anchor="end">L3</text>
-<text class="lbl" x="240" y="46" text-anchor="middle">Distribution</text>
+<svg viewBox="0 0 480 168" width="480">
+<line class="ln" x1="240" y1="32" x2="130" y2="100"/>
+<line class="ln" x1="240" y1="32" x2="40" y2="100"/>
+<rect class="box" x="218" y="21" width="44" height="22" rx="2"/><path class="ln" d="M227,29 L253,29 M249,26 L253,29 L249,32 M253,36 L227,36 M231,33 L227,36 L231,39"/>
+<text class="lbl" x="240" y="13" text-anchor="middle">Distribution</text>
 <rect class="box" x="108" y="89" width="44" height="22" rx="2"/><path class="ln" d="M117,97 L143,97 M139,94 L143,97 L139,100 M143,104 L117,104 M121,101 L117,104 L121,107"/>
-<text class="lbl" x="130" y="121" text-anchor="middle">SW3A</text>
-<text class="sm" x="130" y="130" text-anchor="middle">Rapid PVST+</text>
+<text class="lbl" x="130" y="124" text-anchor="middle">SW3A</text>
+<text class="sm" x="130" y="133" text-anchor="middle">Rapid PVST+</text>
 <rect class="box" x="18" y="89" width="44" height="22" rx="2"/><path class="ln" d="M27,97 L53,97 M49,94 L53,97 L49,100 M53,104 L27,104 M31,101 L27,104 L31,107"/>
-<text class="lbl" x="40" y="121" text-anchor="middle">SW3B</text>
+<text class="lbl" x="40" y="124" text-anchor="middle">SW3B</text>
 <rect class="box" x="328" y="89" width="44" height="22" rx="2"/><path class="ln" d="M337,97 L363,97 M359,94 L363,97 L359,100 M363,104 L337,104 M341,101 L337,104 L341,107"/><rect class="acc" x="325" y="86" width="50" height="28" rx="3"/>
-<text class="lbl" x="350" y="121" text-anchor="middle">Cheap switch</text>
-<text class="sm" x="350" y="130" text-anchor="middle">unmanaged</text>
-<text class="sm acct" x="240" y="138" text-anchor="middle">both cable ends in SW3A wall ports; BPDU filter on</text>
+<text class="lbl" x="350" y="124" text-anchor="middle">Cheap switch</text>
+<text class="sm" x="350" y="133" text-anchor="middle">unmanaged</text>
+<text class="sm acct" x="240" y="160" text-anchor="middle">both cable ends in SW3A wall ports; BPDU filter on</text>
 <line class="acc" x1="152" y1="95" x2="328" y2="95"/><line class="acc" x1="152" y1="106" x2="328" y2="106"/><text class="sm" x="240" y="90" text-anchor="middle">Gi1/0/14</text><text class="sm" x="240" y="118" text-anchor="middle">Gi1/0/15</text>
 </svg>
-<figcaption><b>Figure 11.18</b> Case 11. A cheap switch has a cable looped between two wall ports of SW3A; BPDU filter makes spanning tree blind.</figcaption>
+<figcaption><b>Figure 11.19</b> Case 11. A cheap switch has a cable looped between two wall ports of SW3A; BPDU filter makes spanning tree blind.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -280,7 +278,7 @@ The exact wording of these messages varies a little between releases; the patter
 
 | Layer | Command | Decisive output | Inference |
 |----|-----------------|----------------------------|--------------------------|
-| L2 | `show interfaces Gi1/0/14 \| include rate` | `5 minute input rate 912345000 bits/sec` | A storm on these ports |
+| L2 | `show interfaces Gi1/0/14`, rate lines | `5 minute input rate 912345000 bits/sec` | A storm on these ports |
 | L2 | switch log | `%SW_MATM-4-MACFLAP_NOTIF: Host 0050.7966.6801 in vlan 10 is flapping between port Gi1/0/14 and port Gi1/0/15` | The same MACs appear on both ports: a loop |
 | L2 | `show spanning-tree interface Gi1/0/14 detail` | `Bpdu filter is enabled`; `BPDU: sent 0, received 0` | Spanning tree is blind on these ports |
 | L1 | `show processes cpu sorted` | `CPU utilization for five seconds: 99%` | The control plane is saturated |
@@ -296,8 +294,6 @@ The exact wording of these messages varies a little between releases; the patter
 
 **Prevent.** An access-port template with BPDU Guard and storm control, broadcast-rate alerts, physical security of wall ports, 802.1X. The post-mortem for this case is in [§11.7](#s11-7){.ref}.
 
-**Follow-ups.**
-
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|
 | Why do Ethernet frames loop for ever? | The Ethernet header has no TTL, so nothing removes a frame from a loop. |
@@ -305,6 +301,12 @@ The exact wording of these messages varies a little between releases; the patter
 | How does RSTP converge? | A proposal and agreement handshake on point-to-point links, in under a second. |
 
 **Variant.** The *global* `spanning-tree portfast bpdufilter default` is safer than the per-port form, because ports lose the filter when a BPDU arrives.
+
+::: lens
+[CISCO · JUNIPER · ARISTA]{.co}
+
+A mitigation test: the interviewer waits to see whether the candidate shuts the port before explaining the theory. Say the mitigation first, then the cause, then the template change. Expect: "why did spanning tree not stop it?"
+:::
 
 ### Case 12 · New VLAN's clients get 169.254 addresses [Must · ■□□]{.tag} {#c11-12}
 
@@ -319,20 +321,20 @@ The exact wording of these messages varies a little between releases; the patter
 <line class="ln" x1="270" y1="45" x2="410" y2="45"/>
 <text class="sm" x="226" y="41" text-anchor="middle">Gi1/0/48</text>
 <rect class="box" x="25" y="35" width="30" height="20" rx="1"/><path class="ln" d="M32,59 L48,59"/><rect class="fill" x="29" y="39" width="22" height="11"/>
-<text class="lbl" x="40" y="69" text-anchor="middle">Laptop</text>
-<text class="sm" x="40" y="78" text-anchor="middle">VLAN 60</text>
+<text class="lbl" x="40" y="71" text-anchor="middle">Laptop</text>
+<text class="sm" x="40" y="80" text-anchor="middle">VLAN 60</text>
 <rect class="box" x="118" y="34" width="44" height="22" rx="2"/><path class="ln" d="M127,42 L153,42 M149,39 L153,42 L149,45 M153,49 L127,49 M131,46 L127,49 L131,52"/>
-<text class="lbl" x="140" y="66" text-anchor="middle">ASW</text>
-<text class="sm" x="140" y="75" text-anchor="middle">DHCP snooping</text>
-<rect class="box" x="248" y="34" width="44" height="22" rx="2"/><path class="ln" d="M257,42 L283,42 M279,39 L283,42 L279,45 M283,49 L257,49 M261,46 L257,49 L261,52"/><text class="sm" x="291" y="32" text-anchor="end">L3</text><rect class="acc" x="245" y="31" width="50" height="28" rx="3"/>
-<text class="lbl" x="270" y="66" text-anchor="middle">Core</text>
-<text class="sm" x="270" y="75" text-anchor="middle">Vlan60 10.1.60.1</text>
+<text class="lbl" x="140" y="69" text-anchor="middle">ASW</text>
+<text class="sm" x="140" y="78" text-anchor="middle">DHCP snooping</text>
+<rect class="box" x="248" y="34" width="44" height="22" rx="2"/><path class="ln" d="M257,42 L283,42 M279,39 L283,42 L279,45 M283,49 L257,49 M261,46 L257,49 L261,52"/><rect class="acc" x="245" y="31" width="50" height="28" rx="3"/>
+<text class="lbl" x="270" y="69" text-anchor="middle">Core</text>
+<text class="sm" x="270" y="78" text-anchor="middle">Vlan60 10.1.60.1</text>
 <rect class="box" x="396" y="30" width="28" height="30" rx="1"/><path class="ln" d="M396,40 L424,40 M396,50 L424,50"/><circle class="accf" cx="418" cy="35" r="1.2" style="fill:#1A1D23"/>
-<text class="lbl" x="410" y="70" text-anchor="middle">DHCP server</text>
-<text class="sm" x="410" y="79" text-anchor="middle">10.1.99.10</text>
+<text class="lbl" x="410" y="73" text-anchor="middle">DHCP server</text>
+<text class="sm" x="410" y="82" text-anchor="middle">10.1.99.10</text>
 <text class="sm acct" x="270" y="108" text-anchor="middle">no ip helper-address; uplink untrusted</text>
 </svg>
-<figcaption><b>Figure 11.19</b> Case 12. The SVI has no relay, and the access switch distrusts the uplink on which offers return.</figcaption>
+<figcaption><b>Figure 11.20</b> Case 12. The SVI has no relay, and the access switch distrusts the uplink on which offers return.</figcaption>
 </figure>
 
 | We ask | The interviewer answers |
@@ -360,8 +362,6 @@ The exact wording of these messages varies a little between releases; the patter
 **Verify.** The four steps of DHCP (Discover, Offer, Request, Acknowledge) appear in a capture, the client holds a lease, and `show ip dhcp snooping binding` lists it.
 
 **Prevent.** The VLAN provisioning playbook includes the relay and ends with a check that a test client obtains a lease.
-
-**Follow-ups.**
 
 | The interviewer asks | A strong answer |
 |-------------------|--------------------------------------|

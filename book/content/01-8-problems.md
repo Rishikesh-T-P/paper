@@ -647,7 +647,7 @@ int divide(int a, int b) {
 
 [30-second answer: repeatedly take the largest block that is aligned at the current address and no bigger than what remains.]{.short}
 
-**Approach.** A block of size 2^*k* must start at a multiple of 2^*k*, so the largest allowed size at address `a` is its lowest set bit, `a & -a` (the whole space when `a` is zero). Shrink the size by halves until it fits in `n`, emit the block with prefix length 32 − *k*, and advance.
+**Approach.** A block of size 2<sup>*k*</sup> must start at a multiple of 2<sup>*k*</sup>, so the largest allowed size at address `a` is its lowest set bit, `a & -a` (the whole space when `a` is zero). Shrink the size by halves until it fits in `n`, emit the block with prefix length 32 − *k*, and advance.
 
 ```cpp
 vector<pair<uint32_t,int>> rangeToCidr(

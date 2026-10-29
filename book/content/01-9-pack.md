@@ -4,7 +4,7 @@
 
 ::: revision
 ::: top
-**Ten facts.** (1) Read the constraints first: *n* ≤ 10^5 means O(*n* log *n*), *n* ≤ 10^3–10^4 means O(*n*²). (2) Say the six steps aloud: understand, examples, brute force, optimise, code, test. (3) Sorted input suggests two pointers or binary search; "contiguous" suggests a window or prefix sums. (4) Mask for prefix *p*: `p ? ~0u << (32-p) : 0`; network is `ip & mask`, broadcast is `net | ~mask`. (5) Delete from a list with `Node **pp`; test `fast` before `fast->next`. (6) A trie reads one bit per level; longest-prefix match keeps the deepest marked node and costs O(32). (7) BFS marks on push; Dijkstra skips stale entries and needs non-negative weights. (8) LRU is a hash map to doubly-linked-list nodes; every list change is mirrored in the map. (9) Token bucket: `tokens = min(B, tokens + r·Δt)`, pass if `tokens ≥ size`; integers and a monotonic clock. (10) Binary search: half-open `[lo, hi)`, `mid = lo + (hi-lo)/2`, never `lo = mid`.
+**Ten facts.** (1) Read the constraints first: *n* ≤ 10<sup>5</sup> means O(*n* log *n*), *n* ≤ 10<sup>3</sup>–10<sup>4</sup> means O(*n*²). (2) Say the six steps aloud: understand, examples, brute force, optimise, code, test. (3) Sorted input suggests two pointers or binary search; "contiguous" suggests a window or prefix sums. (4) Mask for prefix *p*: `p ? ~0u << (32-p) : 0`; network is `ip & mask`, broadcast is `net | ~mask`. (5) Delete from a list with `Node **pp`; test `fast` before `fast->next`. (6) A trie reads one bit per level; longest-prefix match keeps the deepest marked node and costs O(32). (7) BFS marks on push; Dijkstra skips stale entries and needs non-negative weights. (8) LRU is a hash map to doubly-linked-list nodes; every list change is mirrored in the map. (9) Token bucket: `tokens = min(B, tokens + r·Δt)`, pass if `tokens ≥ size`; integers and a monotonic clock. (10) Binary search: half-open `[lo, hi)`, `mid = lo + (hi-lo)/2`, never `lo = mid`.
 
 **Three pictures to redraw.** The binary trie with a walk that remembers the deepest mark ([§1.9](#s1-9){.ref}); the pointer-to-pointer delete and the reversal rewiring ([§1.6](#s1-6){.ref}); the LRU map-plus-list diagram ([§1.15](#s1-15){.ref}).
 :::
@@ -14,15 +14,15 @@
 | Largest *n* | Aim for | Typical tools |
 |---|---|---|
 | 10–12 | O(*n*!) | permutations, backtracking |
-| 20–25 | O(2^*n*) | subsets, bitmask |
+| 20–25 | O(2<sup>*n*</sup>) | subsets, bitmask |
 | 100 | O(*n*⁴) | small DP |
 | 500 | O(*n*³) | Floyd–Warshall |
 | 2000–5000 | O(*n*²) | 2-D DP, all pairs |
-| 10^5–2×10^5 | O(*n* log *n*) | sort, heap, binary search |
-| 10^6 | O(*n*) | windows, prefix sums, hashing |
-| 10^9 and up | O(log *n*) or O(1) | binary search on the answer, formula |
+| 10<sup>5</sup>–2×10<sup>5</sup> | O(*n* log *n*) | sort, heap, binary search |
+| 10<sup>6</sup> | O(*n*) | windows, prefix sums, hashing |
+| 10<sup>9</sup> and up | O(log *n*) or O(1) | binary search on the answer, formula |
 
-A judge performs about 10^8 simple operations per second; in Python step down one row. Values up to 10^9 mean no array indexed by value, and sums of 10^5 such values need 64 bits.
+A judge performs about 10<sup>8</sup> simple operations per second; in Python step down one row. Values up to 10<sup>9</sup> mean no array indexed by value, and sums of 10<sup>5</sup> such values need 64 bits.
 
 ### Keyword to pattern
 
@@ -63,10 +63,10 @@ A judge performs about 10^8 simple operations per second; in Python step down on
 | Structure | Access | Search | Insert | Delete |
 |---|---|---|---|---|
 | array | O(1) | O(*n*) | O(*n*) | O(*n*) |
-| dynamic array | O(1) | O(*n*) | O(1) amortised at end | O(*n*) |
-| singly linked list | O(*n*) | O(*n*) | O(1) after a known node | O(1) after the predecessor |
+| dynamic array | O(1) | O(*n*) | O(1) amort. at end | O(*n*) |
+| singly linked list | O(*n*) | O(*n*) | O(1) after a node | O(1) after predecessor |
 | stack, queue, deque, ring | end only | O(*n*) | O(1) | O(1) |
-| hash table | – | O(1) avg, O(*n*) worst | O(1) avg | O(1) avg |
+| hash table | – | O(1) avg | O(1) avg | O(1) avg |
 | BST balanced / skewed | – | O(log *n*) / O(*n*) | same | same |
 | binary heap | min: O(1) | O(*n*) | O(log *n*) | O(log *n*) |
 | trie, key length *L* | – | O(*L*) | O(*L*) | O(*L*) |
@@ -90,7 +90,7 @@ C++ `std::sort` is introsort (not stable); `stable_sort` is a merge sort; Python
 | Floyd–Warshall | O(*V*³) |
 | Kruskal; Prim with a heap | O(*E* log *E*); O(*E* log *V*) |
 
-Recurrences: *T*(*n*) = 2*T*(*n*/2) + O(*n*) gives O(*n* log *n*); *T*(*n*) = *T*(*n*/2) + O(1) gives O(log *n*); *T*(*n*) = 2*T*(*n* − 1) + O(1) gives O(2^*n*). Landmarks: log₂ 10^6 ≈ 20, log₂ 10^9 ≈ 30, 2^10 ≈ 10^3, `INT_MAX` ≈ 2.1×10^9, `LLONG_MAX` ≈ 9.2×10^18.
+Recurrences: *T*(*n*) = 2*T*(*n*/2) + O(*n*) gives O(*n* log *n*); *T*(*n*) = *T*(*n*/2) + O(1) gives O(log *n*); *T*(*n*) = 2*T*(*n* − 1) + O(1) gives O(2<sup>*n*</sup>). Landmarks: log₂ 10<sup>6</sup> ≈ 20, log₂ 10<sup>9</sup> ≈ 30, 2<sup>10</sup> ≈ 10<sup>3</sup>, `INT_MAX` ≈ 2.1×10<sup>9</sup>, `LLONG_MAX` ≈ 9.2×10<sup>18</sup>.
 
 ### Edge-case checklist
 
@@ -130,7 +130,7 @@ Recurrences: *T*(*n*) = 2*T*(*n*/2) + O(*n*) gives O(*n* log *n*); *T*(*n*) = *T
 | Why is `m[key]` unsafe for lookup in C++? [§1.3](#s1-3){.ref} | It inserts a default value |
 | Why reject `01.2.3.4`? [§1.4](#s1-4){.ref} | Leading zeros are ambiguous (octal) |
 | Is `strncpy` safe? [§1.4](#s1-4){.ref} | No: it does not terminate when truncating |
-| Hosts in a /27? [§1.5](#s1-5){.ref} | 2^5 − 2 = 30 |
+| Hosts in a /27? [§1.5](#s1-5){.ref} | 2<sup>5</sup> − 2 = 30 |
 | Why does `x & 1 == 0` fail? [§1.5](#s1-5){.ref} | `==` binds tighter; write `(x & 1) == 0` |
 | Why special-case /0 in a mask? | Shifting a 32-bit value by 32 is undefined |
 | Popcount by loop? [§1.5](#s1-5){.ref} | `x &= x - 1` until zero |
@@ -165,6 +165,9 @@ Recurrences: *T*(*n*) = 2*T*(*n*/2) + O(*n*) gives O(*n* log *n*); *T*(*n*) = *T
 | Token-bucket refill formula? | `tokens = min(B, tokens + r·Δt)` |
 | Fixed-window flaw? | Up to twice the limit across a window boundary |
 | Table-driven FSM benefit? [§1.16](#s1-16){.ref} | Transitions are data, reviewable and testable |
+
 :::
 :::
+:::
+
 :::

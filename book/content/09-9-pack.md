@@ -12,53 +12,49 @@
 
 ### Attack, defence and command
 
-| Attack | Defence | IOS or Linux command |
-|---|---|---|
-| ARP spoofing | Dynamic ARP Inspection | `ip arp inspection vlan 10,20`; uplink `ip arp inspection trust` |
-| Rogue DHCP, starvation | DHCP snooping | `ip dhcp snooping vlan 10,20`; uplink `ip dhcp snooping trust`; `limit rate 15` |
-| MAC flooding | port security | `switchport port-security maximum 2`, `violation restrict`, `mac-address sticky` |
-| Switch spoofing | disable DTP | `switchport mode access`, `switchport nonegotiate` |
-| Double tagging | unused native VLAN | `switchport trunk native vlan 999` |
-| STP root takeover | BPDU Guard, Root Guard | `spanning-tree bpduguard enable`; `spanning-tree guard root` |
-| Source spoofing (edge) | uRPF, BCP 38 | `ip verify unicast source reachable-via rx` (or `any`) |
-| Source spoofing (access) | IP Source Guard | `ip verify source` |
-| SYN flood | SYN cookies | `sysctl -w net.ipv4.tcp_syncookies=1` |
-| Amplification | BCP 38, closed resolvers, scrubbing, RTBH | upstream; Flowspec |
-| BGP hijack | RPKI ROV, prefix filters, max-prefix | `bgp rpki server tcp ...`; `neighbor ... maximum-prefix` |
-| DNS poisoning | port randomisation, 0x20, DNSSEC | validating resolver; `dig +dnssec` |
-| Telnet, clear passwords | SSH 2, secret type 8 or 9 | `transport input ssh`; `algorithm-type scrypt secret` |
-| Weak SNMP | SNMPv3 with privacy | `snmp-server group MON v3 priv` |
-| Rogue device on a port | 802.1X | `authentication port-control auto` |
-| Lateral movement | segmentation, zero trust | firewall zones, identity-aware proxy |
+| Attack and defence | Command |
+|---|---|
+| ARP spoofing: Dynamic ARP Inspection | `ip arp inspection vlan 10,20`; uplink `ip arp inspection trust` |
+| Rogue DHCP, starvation: DHCP snooping | `ip dhcp snooping vlan 10,20`; uplink `ip dhcp snooping trust`; `limit rate 15` |
+| MAC flooding: port security | `switchport port-security maximum 2`; `violation restrict`; `mac-address sticky` |
+| Switch spoofing: no DTP | `switchport mode access`; `switchport nonegotiate` |
+| Double tagging: unused native VLAN | `switchport trunk native vlan 999` |
+| STP root takeover: BPDU Guard, Root Guard | `spanning-tree bpduguard enable`; `spanning-tree guard root` |
+| Spoofed sources: uRPF, BCP 38, IP Source Guard | `ip verify unicast source reachable-via rx` (or `any`); `ip verify source` |
+| SYN flood: SYN cookies | `sysctl -w net.ipv4.tcp_syncookies=1` |
+| Amplification: BCP 38, closed resolvers, scrubbing, RTBH | upstream; Flowspec |
+| BGP hijack: RPKI ROV, prefix filters, max-prefix | `neighbor ... maximum-prefix`; validating RPKI session |
+| DNS poisoning: port randomisation, 0x20, DNSSEC | validating resolver; `dig +dnssec` |
+| Telnet, clear passwords: SSH 2, secret type 8 or 9 | `transport input ssh`; `algorithm-type scrypt secret` |
+| Weak SNMP: SNMPv3 with privacy | `snmp-server group MON v3 priv` |
+| Rogue device on a port: 802.1X | `authentication port-control auto` |
+| Lateral movement: segmentation, zero trust | firewall zones; identity-aware proxy |
 
 ### Ports and protocols for security services
 
-| Service | Port or protocol | Note |
-|---|---|---|
-| SSH, Telnet | TCP 22, TCP 23 | Telnet is clear text |
-| DNS, DoT, DoH | 53, TCP 853, TCP 443 | DNSSEC uses DNS itself |
-| HTTPS (TLS), QUIC | TCP 443, UDP 443 | TLS 1.3 inside QUIC |
-| IKE, NAT-T | UDP 500, UDP 4500 | ESP is IP protocol 50, AH 51 |
-| WireGuard | UDP 51820 (default) | any port may be set |
-| RADIUS | UDP 1812 and 1813 | older 1645 and 1646 |
-| TACACS+ | TCP 49 | |
-| Syslog, SNMP | UDP 514; UDP 161 and 162 | SNMPv3 for security |
-| NTP | UDP 123 | authenticate it |
-| LDAP, LDAPS | 389, 636 | |
-| Kerberos | 88 | |
-| DHCP | UDP 67 and 68 | snooping watches these |
+| Service | Port or protocol |
+|---|---|
+| SSH · Telnet (clear) | TCP 22 · TCP 23 |
+| DNS · DoT · DoH | 53 · TCP 853 · TCP 443 |
+| HTTPS · QUIC | TCP 443 · UDP 443 |
+| IKE · NAT-T | UDP 500 · UDP 4500; ESP is IP protocol 50, AH 51 |
+| WireGuard | UDP 51820 (default) |
+| RADIUS · TACACS+ | UDP 1812 and 1813 · TCP 49 |
+| Syslog · SNMP · NTP | UDP 514 · UDP 161 and 162 · UDP 123 |
+| LDAP · LDAPS · Kerberos | 389 · 636 · 88 |
+| DHCP (watched by snooping) | UDP 67 and 68 |
 
 ### Cryptography at a glance
 
-| Primitive | Gives | Examples | Pitfall |
-|---|---|---|---|
-| Symmetric AEAD | confidentiality and integrity | AES-GCM, ChaCha20-Poly1305 | nonce reuse; ECB leaks patterns |
-| Hash | fingerprint | SHA-256 | not authentication; fast hashes for passwords |
-| HMAC | keyed integrity | HMAC-SHA256 | short or reused key |
-| Signature | origin, non-repudiation | ECDSA, Ed25519, RSA-PSS | not "encrypt with the private key" |
-| (EC)DH | shared secret | X25519, P-256 | no authentication alone |
-| RSA key transport | secret to a public key | RSA-OAEP | no forward secrecy; gone from TLS 1.3 |
-| Key sizes | equal strength | 256-bit EC, 3072-bit RSA, 128-bit AES | RSA-2048 is about 112 bits |
+| Primitive | Gives, and the pitfall |
+|---|---|
+| Symmetric AEAD (AES-GCM, ChaCha20) | confidentiality and integrity; nonce reuse, ECB |
+| Hash (SHA-256) | fingerprint; not authentication, not for passwords |
+| HMAC | keyed integrity; short or reused key |
+| Signature (ECDSA, Ed25519, RSA-PSS) | origin, non-repudiation; not "encrypt with the private key" |
+| (EC)DH (X25519, P-256) | shared secret; no authentication alone |
+| RSA key transport | secret to a public key; no forward secrecy, gone from TLS 1.3 |
+| Equal strength | 256-bit EC, 3072-bit RSA, 128-bit AES (RSA-2048 is about 112 bits) |
 
 ### TLS, IKE, ACL, VPN quick facts
 
@@ -70,7 +66,7 @@
 | IPsec mismatch checklist | encryption, hash or PRF, DH group, authentication and PSK, lifetime, selectors (proxy-IDs), PFS, NAT exemption, routing |
 | ESP tunnel overhead (IPv4, GCM) | 54 to 57 bytes, plus 8 for NAT-T; MSS about 1395 on a 1500 link, commonly 1360 |
 | ACL placement | extended near the source, standard near the destination; inbound drops before routing |
-| Wildcard quick table | /8 0.255.255.255 · /16 0.0.255.255 · /20 0.0.15.255 · /22 0.0.3.255 · /24 0.0.0.255 · /25 0.0.0.127 · /26 0.0.0.63 · /27 0.0.0.31 · /28 0.0.0.15 · /29 0.0.0.7 · /30 0.0.0.3 · host 0.0.0.0 |
+| Wildcard masks | /8 0.255.255.255 · /16 0.0.255.255 · /20 0.0.15.255 · /22 0.0.3.255 · /24 0.0.0.255 · /25 0.0.0.127 · /26 0.0.0.63 · /27 0.0.0.31 · /28 0.0.0.15 · /29 0.0.0.7 · /30 0.0.0.3 · host 0.0.0.0 |
 | VPN choice | site link: IPsec or WireGuard; managed laptops: IKEv2 or TLS; hostile networks: TLS on 443 |
 | DDoS classes | volumetric (scrubbing, RTBH), protocol (cookies, proxies), application (CDN, WAF) |
 

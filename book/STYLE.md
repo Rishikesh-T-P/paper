@@ -133,3 +133,9 @@ Short notes as dense bullets, key tables, then a flashcard table (| Q | A |).
 ```
 
 Meta tag: companies · round (OA / TECH-1 / TECH-2 / HM) · difficulty · S (specific question reported by candidates) or T (topic reported; our wording). Omit empty solution fields. Code solutions: C for systems/networking-company problems, C++ for general DSA, Python for scripting; one language only.
+
+## 7. Splitting long chapters and previewing
+
+A pillar may be split into several files: `content/03-1-networks.md`, `content/03-2-...md`, `content/03-9-pack.md`. Only the first file has `.chapter` and the opener; every later file wraps its content in `::: {.p3}` … `:::` (same pillar class, no `.chapter`). Keep each file under about 6,000 words.
+
+Preview only your pillar with `python3 build.py --only 03` (writes `dist/preview-03.pdf`). Never run the full build; never edit files outside your own `content/NN-*` files. To inspect pages: `pdftoppm -r 45 -png -f 1 -l 8 dist/preview-03.pdf /tmp/pv` and look at the PNGs.

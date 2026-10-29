@@ -3,7 +3,10 @@
 import re, subprocess, pathlib, html, datetime
 
 ROOT = pathlib.Path(__file__).resolve().parent
-CONTENT = sorted((ROOT / "content").glob("*.md"))
+import sys
+ONLY = sys.argv[sys.argv.index("--only")+1] if "--only" in sys.argv else None
+CONTENT = sorted((ROOT / "content").glob((ONLY + "*") if ONLY else "*.md"))
+OUT = ("preview-" + ONLY) if ONLY else "Network-Engineer-Placements-2027"
 DIST = ROOT / "dist"; DIST.mkdir(exist_ok=True)
 
 def pandoc(md: str) -> str:
@@ -30,8 +33,8 @@ toc_html = '<section class="p0"><div class="part-label">Contents</div><h1>Conten
     for n, t, i in toc) + "</ol></div></section>"
 
 page = f"""<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Network Engineer Placements 2027</title>
-<link rel="stylesheet" href="../css/book.css"><script>window.PagedConfig={{auto:true}};</script>
+<style>{(ROOT/"css/book.css").read_text()}</style><script>window.PagedConfig={{auto:true}};</script>
 <script src="../vendor/paged.polyfill.min.js"></script></head><body>{cover}{toc_html}{''.join(body)}</body></html>"""
-(DIST / "book.html").write_text(page)
-subprocess.run(["node", str(ROOT / "render.mjs")], check=True, cwd=ROOT)
-print("built", DIST / "Network-Engineer-Placements-2027.pdf")
+(DIST / f"{OUT}.html").write_text(page)
+subprocess.run(["node", str(ROOT / "render.mjs"), OUT], check=True, cwd=ROOT)
+print("built", DIST / f"{OUT}.pdf")
